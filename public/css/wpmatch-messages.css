@@ -1,0 +1,496 @@
+/**
+ * Messages interface styles for WPMatch plugin
+ *
+ * @package WPMatch
+ */
+
+/* Messages Container */
+.wpmatch-messages-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    height: 600px;
+    max-height: 80vh;
+}
+
+.wpmatch-messages-layout {
+    display: flex;
+    height: 100%;
+}
+
+/* Conversations Sidebar */
+.wpmatch-conversations-sidebar {
+    width: 320px;
+    border-right: 1px solid #e1e5e9;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.wpmatch-conversations-header {
+    padding: 20px;
+    border-bottom: 1px solid #e1e5e9;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wpmatch-conversations-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wpmatch-unread-badge {
+    background: #fd297b;
+    color: #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.wpmatch-conversations-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.wpmatch-no-conversations {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.wpmatch-no-conversations p {
+    margin-bottom: 15px;
+}
+
+/* Conversation Items */
+.wpmatch-conversation-item {
+    border-bottom: 1px solid #e1e5e9;
+    transition: background-color 0.2s;
+}
+
+.wpmatch-conversation-item:hover {
+    background: #fff;
+}
+
+.wpmatch-conversation-item.active {
+    background: #fff;
+    border-right: 3px solid #fd297b;
+}
+
+.wpmatch-conversation-item.unread {
+    background: #fff;
+    font-weight: 600;
+}
+
+.wpmatch-conversation-link {
+    display: flex;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: inherit;
+    align-items: center;
+    gap: 12px;
+}
+
+.wpmatch-conversation-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.wpmatch-conversation-avatar {
+    flex-shrink: 0;
+}
+
+.wpmatch-conversation-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.wpmatch-conversation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.wpmatch-conversation-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.wpmatch-conversation-meta h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wpmatch-unread-count {
+    background: #fd297b;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.wpmatch-last-message p {
+    margin: 0;
+    font-size: 14px;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wpmatch-message-time {
+    font-size: 12px;
+    color: #adb5bd;
+    margin-top: 2px;
+    display: block;
+}
+
+.wpmatch-no-messages {
+    font-style: italic;
+}
+
+/* Message Thread */
+.wpmatch-message-thread {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.wpmatch-no-conversation-selected {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wpmatch-empty-state {
+    text-align: center;
+    color: #6c757d;
+}
+
+.wpmatch-empty-state .dashicons {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #dee2e6;
+}
+
+.wpmatch-empty-state h3 {
+    margin: 0 0 10px 0;
+    color: #495057;
+}
+
+/* Message Header */
+.wpmatch-message-header {
+    padding: 20px;
+    border-bottom: 1px solid #e1e5e9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+}
+
+.wpmatch-conversation-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wpmatch-conversation-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.wpmatch-conversation-user h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Messages List */
+.wpmatch-messages-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #f8f9fa;
+}
+
+.wpmatch-no-messages {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 40px;
+}
+
+/* Individual Messages */
+.wpmatch-message {
+    display: flex;
+    max-width: 70%;
+    position: relative;
+}
+
+.wpmatch-message.sent {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.wpmatch-message.received {
+    align-self: flex-start;
+}
+
+.wpmatch-message-content {
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.wpmatch-message.sent .wpmatch-message-content {
+    background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+    color: #fff;
+}
+
+.wpmatch-message-content p {
+    margin: 0;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.wpmatch-message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 5px;
+    display: block;
+}
+
+.wpmatch-read-indicator {
+    color: #28a745;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.wpmatch-message-actions {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.wpmatch-message:hover .wpmatch-message-actions {
+    opacity: 1;
+}
+
+.wpmatch-delete-message {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.wpmatch-delete-message:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Message Input */
+.wpmatch-message-input-container {
+    padding: 20px;
+    border-top: 1px solid #e1e5e9;
+    background: #fff;
+}
+
+.wpmatch-send-message-form {
+    display: flex;
+}
+
+.wpmatch-message-input-group {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    background: #f8f9fa;
+    border-radius: 25px;
+    padding: 8px 8px 8px 20px;
+    border: 1px solid #e1e5e9;
+    transition: border-color 0.2s;
+}
+
+.wpmatch-message-input-group:focus-within {
+    border-color: #fd297b;
+    box-shadow: 0 0 0 3px rgba(253, 41, 123, 0.1);
+}
+
+#wpmatch-message-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    resize: none;
+    outline: none;
+    padding: 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+    max-height: 120px;
+    font-family: inherit;
+}
+
+#wpmatch-message-input::placeholder {
+    color: #adb5bd;
+}
+
+.wpmatch-send-button {
+    background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: transform 0.2s;
+    margin-left: 8px;
+}
+
+.wpmatch-send-button:hover {
+    transform: scale(1.05);
+}
+
+.wpmatch-send-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.wpmatch-send-button .dashicons {
+    font-size: 18px;
+}
+
+/* Spinner */
+.wpmatch-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #fd297b;
+    border-radius: 50%;
+    animation: wpmatch-spin 1s linear infinite;
+}
+
+@keyframes wpmatch-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error Messages */
+.wpmatch-message-error {
+    padding: 40px;
+    text-align: center;
+    color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wpmatch-messages-container {
+        height: 70vh;
+    }
+
+    .wpmatch-conversations-sidebar {
+        width: 100%;
+        display: none;
+    }
+
+    .wpmatch-conversations-sidebar.show {
+        display: flex;
+    }
+
+    .wpmatch-message-thread {
+        width: 100%;
+    }
+
+    .wpmatch-message {
+        max-width: 85%;
+    }
+
+    .wpmatch-message-input-group {
+        padding: 6px 6px 6px 15px;
+    }
+
+    .wpmatch-send-button {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .wpmatch-messages-container {
+        border-radius: 0;
+        height: calc(100vh - 100px);
+    }
+
+    .wpmatch-conversations-header {
+        padding: 15px;
+    }
+
+    .wpmatch-conversation-link {
+        padding: 12px 15px;
+    }
+
+    .wpmatch-message-header {
+        padding: 15px;
+    }
+
+    .wpmatch-messages-list {
+        padding: 15px;
+    }
+
+    .wpmatch-message-input-container {
+        padding: 15px;
+    }
+
+    .wpmatch-message {
+        max-width: 90%;
+    }
+
+    .wpmatch-message-content {
+        padding: 10px 14px;
+    }
+}
