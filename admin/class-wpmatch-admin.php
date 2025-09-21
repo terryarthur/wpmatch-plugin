@@ -116,6 +116,16 @@ class WPMatch_Admin {
 			array( $this, 'display_settings_page' )
 		);
 
+		// Membership Setup submenu.
+		add_submenu_page(
+			'wpmatch',
+			__( 'Membership Setup', 'wpmatch' ),
+			__( 'Memberships', 'wpmatch' ),
+			'manage_options',
+			'wpmatch-membership-setup',
+			array( $this, 'display_membership_setup_page' )
+		);
+
 		// Reports submenu.
 		add_submenu_page(
 			'wpmatch',
@@ -156,6 +166,19 @@ class WPMatch_Admin {
 	 */
 	public function display_settings_page() {
 		require_once WPMATCH_PLUGIN_DIR . 'admin/partials/wpmatch-admin-settings.php';
+	}
+
+	/**
+	 * Display the membership setup page.
+	 */
+	public function display_membership_setup_page() {
+		// Process form submission if present.
+		if ( class_exists( 'WPMatch_Membership_Setup' ) ) {
+			WPMatch_Membership_Setup::process_setup_form();
+		}
+
+		// Display the page.
+		require_once WPMATCH_PLUGIN_DIR . 'admin/partials/wpmatch-membership-setup.php';
 	}
 
 	/**
