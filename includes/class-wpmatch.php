@@ -237,6 +237,9 @@ class WPMatch {
 		$this->loader->add_action( 'wp_ajax_wpmatch_generate_sample_data', $plugin_admin, 'generate_sample_data' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_create_demo_pages', $plugin_admin, 'create_demo_pages' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_cleanup_demo_data', $plugin_admin, 'cleanup_demo_data' );
+
+		// User management AJAX handlers
+		$plugin_admin->register_ajax_handlers();
 	}
 
 	/**
@@ -256,6 +259,15 @@ class WPMatch {
 
 		// Shortcodes.
 		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
+
+		// Registration AJAX handlers.
+		$this->loader->add_action( 'init', $plugin_public, 'init_registration_ajax' );
+
+		// Messaging AJAX handlers.
+		$this->loader->add_action( 'init', $plugin_public, 'init_messaging_ajax' );
+
+		// Dashboard AJAX handlers.
+		$this->loader->add_action( 'init', $plugin_public, 'init_dashboard_ajax' );
 
 		// User registration hooks.
 		$this->loader->add_action( 'user_register', $plugin_public, 'handle_user_registration' );

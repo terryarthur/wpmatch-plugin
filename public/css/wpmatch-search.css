@@ -1,0 +1,571 @@
+.wpmatch-search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.wpmatch-search-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.wpmatch-search-header h2 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.wpmatch-search-subtitle {
+    color: #666;
+    font-size: 16px;
+}
+
+.wpmatch-search-interface {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.wpmatch-search-filters {
+    padding: 30px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.wpmatch-filter-section {
+    margin-bottom: 25px;
+}
+
+.wpmatch-filter-section:last-child {
+    margin-bottom: 0;
+}
+
+.wpmatch-filter-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.wpmatch-filter-title:before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #e91e63;
+    margin-right: 10px;
+    border-radius: 2px;
+}
+
+.wpmatch-filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.wpmatch-filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.wpmatch-filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.wpmatch-filter-input,
+.wpmatch-filter-select {
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.wpmatch-filter-input:focus,
+.wpmatch-filter-select:focus {
+    outline: none;
+    border-color: #e91e63;
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+}
+
+.wpmatch-range-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wpmatch-range-input input {
+    flex: 1;
+}
+
+.wpmatch-range-separator {
+    color: #666;
+    font-weight: 500;
+}
+
+.wpmatch-distance-slider {
+    margin-top: 10px;
+}
+
+.wpmatch-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.wpmatch-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e91e63;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(233, 30, 99, 0.3);
+}
+
+.wpmatch-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e91e63;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(233, 30, 99, 0.3);
+}
+
+.wpmatch-distance-value {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.wpmatch-interests-filter {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.wpmatch-interest-category {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.wpmatch-interest-category h4 {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #e91e63;
+    padding-bottom: 5px;
+}
+
+.wpmatch-interest-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wpmatch-interest-checkbox {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.wpmatch-interest-checkbox input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #e91e63;
+    width: 16px;
+    height: 16px;
+}
+
+.wpmatch-search-actions {
+    padding: 20px 30px;
+    background: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wpmatch-filter-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.wpmatch-search-btn {
+    background: linear-gradient(135deg, #e91e63, #f06292);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wpmatch-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+}
+
+.wpmatch-clear-btn {
+    background: white;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wpmatch-clear-btn:hover {
+    border-color: #999;
+    color: #333;
+}
+
+.wpmatch-save-search-btn {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wpmatch-save-search-btn:hover {
+    background: #1976d2;
+}
+
+.wpmatch-search-results {
+    margin-top: 30px;
+}
+
+.wpmatch-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.wpmatch-results-count {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wpmatch-results-sort {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wpmatch-sort-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.wpmatch-sort-select {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+}
+
+.wpmatch-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.wpmatch-result-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.wpmatch-result-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.wpmatch-result-photo {
+    width: 100%;
+    height: 280px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.wpmatch-result-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(233, 30, 99, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.wpmatch-online-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #4caf50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.wpmatch-result-info {
+    padding: 20px;
+}
+
+.wpmatch-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.wpmatch-result-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.wpmatch-result-age {
+    font-size: 16px;
+    color: #666;
+}
+
+.wpmatch-result-location {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.wpmatch-result-location:before {
+    content: "📍";
+    margin-right: 5px;
+}
+
+.wpmatch-result-compatibility {
+    margin-bottom: 15px;
+}
+
+.wpmatch-compatibility-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.wpmatch-compatibility-bar {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.wpmatch-compatibility-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e91e63, #f06292);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.wpmatch-result-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.wpmatch-interest-tag {
+    background: #f0f0f0;
+    color: #666;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.wpmatch-result-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.wpmatch-action-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.wpmatch-like-btn {
+    background: #4caf50;
+    color: white;
+}
+
+.wpmatch-like-btn:hover {
+    background: #388e3c;
+}
+
+.wpmatch-message-btn {
+    background: #e91e63;
+    color: white;
+}
+
+.wpmatch-message-btn:hover {
+    background: #c2185b;
+}
+
+.wpmatch-no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.wpmatch-no-results h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.wpmatch-no-results p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.wpmatch-adjust-filters {
+    background: #e91e63;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wpmatch-adjust-filters:hover {
+    background: #c2185b;
+    transform: translateY(-2px);
+}
+
+.wpmatch-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.wpmatch-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #e91e63;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .wpmatch-search-container {
+        padding: 10px;
+    }
+
+    .wpmatch-search-filters {
+        padding: 20px;
+    }
+
+    .wpmatch-filter-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .wpmatch-range-input {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .wpmatch-interests-filter {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .wpmatch-search-actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .wpmatch-filter-actions {
+        justify-content: center;
+    }
+
+    .wpmatch-results-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .wpmatch-results-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .wpmatch-result-actions {
+        flex-direction: column;
+    }
+}
