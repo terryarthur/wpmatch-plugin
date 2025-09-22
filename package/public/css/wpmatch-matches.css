@@ -1,0 +1,396 @@
+/**
+ * WPMatch Matches Styles
+ *
+ * Styles for the matches display page
+ * @package WPMatch
+ */
+
+.wpmatch-matches-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.wpmatch-matches-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.wpmatch-matches-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--wpmatch-dark, #2d3436);
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.wpmatch-matches-header p {
+    font-size: 18px;
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* No Matches State */
+.wpmatch-no-matches {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.wpmatch-empty-state {
+    text-align: center;
+    max-width: 400px;
+}
+
+.wpmatch-empty-state .dashicons {
+    font-size: 80px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.wpmatch-empty-state h3 {
+    font-size: 24px;
+    color: var(--wpmatch-dark, #2d3436);
+    margin-bottom: 16px;
+}
+
+.wpmatch-empty-state p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+/* Matches Grid */
+.wpmatch-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+/* Match Card */
+.wpmatch-match-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.wpmatch-match-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15);
+}
+
+/* Match Card Image */
+.match-card-image {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+}
+
+.match-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.wpmatch-match-card:hover .match-avatar {
+    transform: scale(1.05);
+}
+
+.match-status-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(10px);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28a745;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* Match Card Content */
+.match-card-content {
+    padding: 20px;
+}
+
+.match-basic-info {
+    margin-bottom: 12px;
+}
+
+.match-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--wpmatch-dark, #2d3436);
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+}
+
+.match-age {
+    font-weight: 400;
+    color: #666;
+}
+
+.match-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.match-location .dashicons {
+    font-size: 16px;
+    color: var(--wpmatch-primary, #667eea);
+}
+
+.match-bio {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+    margin: 12px 0 16px 0;
+    padding: 12px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--wpmatch-primary, #667eea);
+}
+
+/* Match Meta */
+.match-meta {
+    margin: 16px 0;
+    padding: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.match-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.match-time .dashicons {
+    font-size: 16px;
+    color: #e91e63;
+}
+
+/* Match Actions */
+.match-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.match-actions .wpmatch-button {
+    flex: 1;
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.match-actions .wpmatch-button.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.match-actions .wpmatch-button.primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.match-actions .wpmatch-button.secondary {
+    background: #fff;
+    color: var(--wpmatch-primary, #667eea);
+    border: 2px solid var(--wpmatch-primary, #667eea);
+}
+
+.match-actions .wpmatch-button.secondary:hover {
+    background: var(--wpmatch-primary, #667eea);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.match-actions .dashicons {
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wpmatch-matches-container {
+        padding: 16px;
+    }
+
+    .wpmatch-matches-header h2 {
+        font-size: 28px;
+    }
+
+    .wpmatch-matches-header p {
+        font-size: 16px;
+    }
+
+    .wpmatch-matches-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .match-card-image {
+        height: 240px;
+    }
+
+    .match-card-content {
+        padding: 16px;
+    }
+
+    .match-name {
+        font-size: 20px;
+    }
+
+    .match-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .match-actions .wpmatch-button {
+        padding: 14px 16px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .wpmatch-matches-container {
+        padding: 12px;
+    }
+
+    .wpmatch-matches-header {
+        margin-bottom: 30px;
+    }
+
+    .wpmatch-matches-header h2 {
+        font-size: 24px;
+    }
+
+    .match-card-image {
+        height: 200px;
+    }
+
+    .wpmatch-empty-state .dashicons {
+        font-size: 60px;
+    }
+
+    .wpmatch-empty-state h3 {
+        font-size: 20px;
+    }
+}
+
+/* Animation for new matches */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wpmatch-match-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+/* Stagger animation for multiple cards */
+.wpmatch-match-card:nth-child(1) { animation-delay: 0.1s; }
+.wpmatch-match-card:nth-child(2) { animation-delay: 0.2s; }
+.wpmatch-match-card:nth-child(3) { animation-delay: 0.3s; }
+.wpmatch-match-card:nth-child(4) { animation-delay: 0.4s; }
+.wpmatch-match-card:nth-child(5) { animation-delay: 0.5s; }
+.wpmatch-match-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Match card hover effects */
+.wpmatch-match-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.wpmatch-match-card:hover::before {
+    opacity: 1;
+}
+
+/* Special styling for premium members */
+.wpmatch-match-card.premium {
+    border: 2px solid #ffd700;
+    position: relative;
+}
+
+.wpmatch-match-card.premium::after {
+    content: '⭐';
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ffd700;
+    color: #2d3436;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}

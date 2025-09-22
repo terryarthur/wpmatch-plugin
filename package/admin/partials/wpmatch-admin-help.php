@@ -63,44 +63,81 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<h2><?php esc_html_e( '🚀 Quick Start Guide', 'wpmatch' ); ?></h2>
 				<p><?php esc_html_e( 'Get your dating site up and running in 5 minutes:', 'wpmatch' ); ?></p>
 
-				<div class="wpmatch-setup-steps">
-					<div class="wpmatch-step">
-						<span class="step-number">1</span>
-						<div class="step-content">
-							<h3><?php esc_html_e( 'Configure Basic Settings', 'wpmatch' ); ?></h3>
-							<p><?php esc_html_e( 'Go to Settings and configure your basic preferences like age limits, distance, and photo requirements.', 'wpmatch' ); ?></p>
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=wpmatch-settings' ) ); ?>" class="wpmatch-button secondary"><?php esc_html_e( 'Open Settings', 'wpmatch' ); ?></a>
+				<div class="wpmatch-setup-steps-horizontal">
+					<div class="steps-progress">
+						<div class="step-item">
+							<div class="step-circle">
+								<span class="step-number">1</span>
+							</div>
+							<div class="step-line"></div>
+						</div>
+						<div class="step-item">
+							<div class="step-circle">
+								<span class="step-number">2</span>
+							</div>
+							<div class="step-line"></div>
+						</div>
+						<div class="step-item">
+							<div class="step-circle">
+								<span class="step-number">3</span>
+							</div>
+							<div class="step-line"></div>
+						</div>
+						<div class="step-item">
+							<div class="step-circle">
+								<span class="step-number">4</span>
+							</div>
 						</div>
 					</div>
 
-					<div class="wpmatch-step">
-						<span class="step-number">2</span>
-						<div class="step-content">
-							<h3><?php esc_html_e( 'Create Essential Pages', 'wpmatch' ); ?></h3>
-							<p><?php esc_html_e( 'Create these essential pages using our shortcodes:', 'wpmatch' ); ?></p>
-							<ul>
-								<li><strong><?php esc_html_e( 'Dating Profile Page:', 'wpmatch' ); ?></strong> <code>[wpmatch_profile_form]</code></li>
-								<li><strong><?php esc_html_e( 'Browse/Swipe Page:', 'wpmatch' ); ?></strong> <code>[wpmatch_swipe]</code></li>
-								<li><strong><?php esc_html_e( 'My Matches Page:', 'wpmatch' ); ?></strong> <code>[wpmatch_matches]</code></li>
-							</ul>
+					<div class="steps-content">
+						<div class="step-content-item">
+							<div class="step-icon">
+								<span class="dashicons dashicons-admin-settings"></span>
+							</div>
+							<h3><?php esc_html_e( 'Configure Settings', 'wpmatch' ); ?></h3>
+							<p><?php esc_html_e( 'Set up age limits, distance preferences, and photo requirements for your dating site.', 'wpmatch' ); ?></p>
+							<div class="step-action">
+								<a href="<?php echo esc_url( admin_url( 'admin.php?page=wpmatch-settings' ) ); ?>" class="wpmatch-button secondary"><?php esc_html_e( 'Open Settings', 'wpmatch' ); ?></a>
+							</div>
 						</div>
-					</div>
 
-					<div class="wpmatch-step">
-						<span class="step-number">3</span>
-						<div class="step-content">
-							<h3><?php esc_html_e( 'Enable User Registration', 'wpmatch' ); ?></h3>
-							<p><?php esc_html_e( 'Make sure WordPress user registration is enabled in Settings → General → "Anyone can register"', 'wpmatch' ); ?></p>
-							<a href="<?php echo esc_url( admin_url( 'options-general.php' ) ); ?>" class="wpmatch-button secondary"><?php esc_html_e( 'WordPress Settings', 'wpmatch' ); ?></a>
+						<div class="step-content-item">
+							<div class="step-icon">
+								<span class="dashicons dashicons-admin-page"></span>
+							</div>
+							<h3><?php esc_html_e( 'Create Pages', 'wpmatch' ); ?></h3>
+							<p><?php esc_html_e( 'Add essential dating pages with shortcodes for browsing, profiles, and matches.', 'wpmatch' ); ?></p>
+							<div class="step-shortcodes">
+								<code>[wpmatch_profile_form]</code>
+								<code>[wpmatch_swipe]</code>
+								<code>[wpmatch_matches]</code>
+							</div>
+							<div class="step-action">
+								<button type="button" class="wpmatch-button secondary" id="create-demo-pages"><?php esc_html_e( 'Auto-Create Pages', 'wpmatch' ); ?></button>
+							</div>
 						</div>
-					</div>
 
-					<div class="wpmatch-step">
-						<span class="step-number">4</span>
-						<div class="step-content">
-							<h3><?php esc_html_e( 'Add Sample Data (Optional)', 'wpmatch' ); ?></h3>
-							<p><?php esc_html_e( 'For testing purposes, you can generate sample user profiles to see how the system works.', 'wpmatch' ); ?></p>
-							<button type="button" class="wpmatch-button secondary" id="generate-sample-data"><?php esc_html_e( 'Generate Sample Data', 'wpmatch' ); ?></button>
+						<div class="step-content-item">
+							<div class="step-icon">
+								<span class="dashicons dashicons-admin-users"></span>
+							</div>
+							<h3><?php esc_html_e( 'Enable Registration', 'wpmatch' ); ?></h3>
+							<p><?php esc_html_e( 'Allow new users to join by enabling WordPress user registration.', 'wpmatch' ); ?></p>
+							<div class="step-action">
+								<a href="<?php echo esc_url( admin_url( 'options-general.php' ) ); ?>" class="wpmatch-button secondary"><?php esc_html_e( 'WordPress Settings', 'wpmatch' ); ?></a>
+							</div>
+						</div>
+
+						<div class="step-content-item">
+							<div class="step-icon">
+								<span class="dashicons dashicons-groups"></span>
+							</div>
+							<h3><?php esc_html_e( 'Add Sample Data', 'wpmatch' ); ?></h3>
+							<p><?php esc_html_e( 'Generate test user profiles to demonstrate how your dating site works.', 'wpmatch' ); ?></p>
+							<div class="step-action">
+								<button type="button" class="wpmatch-button secondary" id="generate-sample-data"><?php esc_html_e( 'Generate Sample Data', 'wpmatch' ); ?></button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -219,9 +256,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</div>
 
 				<div class="wpmatch-auto-setup">
-					<h3><?php esc_html_e( '⚡ Quick Setup', 'wpmatch' ); ?></h3>
-					<p><?php esc_html_e( 'Want us to create these pages automatically?', 'wpmatch' ); ?></p>
-					<button type="button" class="wpmatch-button primary" id="create-demo-pages"><?php esc_html_e( 'Create Demo Pages', 'wpmatch' ); ?></button>
+					<h3><?php esc_html_e( '💡 Pro Tip', 'wpmatch' ); ?></h3>
+					<p><?php esc_html_e( 'You can automatically create these pages using the "Auto-Create Pages" button in the Quick Start section above.', 'wpmatch' ); ?></p>
 				</div>
 			</div>
 		</div>

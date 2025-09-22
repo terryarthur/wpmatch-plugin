@@ -1,0 +1,532 @@
+/**
+ * WPMatch Membership Dashboard Styles
+ *
+ * @package WPMatch
+ * @since 1.1.0
+ */
+
+.wpmatch-membership-dashboard {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Dashboard Header */
+.wpmatch-dashboard-header {
+	text-align: center;
+	margin-bottom: 40px;
+	padding-bottom: 20px;
+	border-bottom: 2px solid #f0f0f0;
+}
+
+.wpmatch-dashboard-header h2 {
+	font-size: 2.5em;
+	color: #2c3e50;
+	margin: 0 0 10px 0;
+	font-weight: 600;
+}
+
+.dashboard-subtitle {
+	font-size: 1.1em;
+	color: #7f8c8d;
+	margin: 0;
+}
+
+/* Dashboard Content */
+.wpmatch-dashboard-content {
+	display: grid;
+	gap: 30px;
+}
+
+/* Card Styles */
+.membership-status-card,
+.membership-features-card,
+.subscription-management-card,
+.usage-stats-card,
+.membership-history-card,
+.upgrade-prompt-card {
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.membership-status-card:hover,
+.membership-features-card:hover,
+.subscription-management-card:hover,
+.usage-stats-card:hover,
+.membership-history-card:hover,
+.upgrade-prompt-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Headers */
+.card-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 20px 25px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-header h3 {
+	margin: 0;
+	font-size: 1.4em;
+	font-weight: 600;
+}
+
+.card-subtitle {
+	font-size: 0.9em;
+	opacity: 0.8;
+	margin: 5px 0 0 0;
+}
+
+/* Membership Badge */
+.membership-badge {
+	background: rgba(255, 255, 255, 0.2);
+	padding: 6px 15px;
+	border-radius: 20px;
+	font-size: 0.9em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.membership-badge.membership-free {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.membership-badge.membership-basic {
+	background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.membership-badge.membership-gold {
+	background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.membership-badge.membership-platinum {
+	background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+	color: #333;
+}
+
+/* Card Content */
+.card-content {
+	padding: 25px;
+}
+
+/* Membership Info */
+.membership-info {
+	text-align: center;
+}
+
+.membership-details {
+	display: grid;
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+.detail-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 20px;
+	background: #f8f9fa;
+	border-radius: 8px;
+}
+
+.detail-item .label {
+	font-weight: 600;
+	color: #495057;
+}
+
+.detail-item .value {
+	color: #212529;
+	font-weight: 500;
+}
+
+.status-active {
+	color: #28a745;
+	font-weight: 600;
+}
+
+.status-suspended {
+	color: #ffc107;
+	font-weight: 600;
+}
+
+.status-inactive,
+.status-expired {
+	color: #dc3545;
+	font-weight: 600;
+}
+
+/* Features Grid */
+.features-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 20px;
+}
+
+.feature-item {
+	display: flex;
+	align-items: center;
+	padding: 20px;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border-radius: 10px;
+	transition: background 0.3s ease;
+}
+
+.feature-item:hover {
+	background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.feature-icon {
+	font-size: 2em;
+	margin-right: 15px;
+}
+
+.feature-details h4 {
+	margin: 0 0 5px 0;
+	font-size: 1.1em;
+	color: #2c3e50;
+}
+
+.feature-value {
+	margin: 0;
+	color: #7f8c8d;
+	font-weight: 500;
+}
+
+/* Subscription Management */
+.subscription-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+	background: #f8f9fa;
+	border-radius: 10px;
+	margin-bottom: 15px;
+}
+
+.subscription-item:last-child {
+	margin-bottom: 0;
+}
+
+.subscription-details h4 {
+	margin: 0 0 10px 0;
+	color: #2c3e50;
+}
+
+.subscription-meta,
+.subscription-status {
+	margin: 5px 0;
+	font-size: 0.9em;
+	color: #6c757d;
+}
+
+.status-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 15px;
+	font-size: 0.8em;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.status-badge.status-active {
+	background: #d4edda;
+	color: #155724;
+}
+
+.status-badge.status-on-hold {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.status-badge.status-pending-cancel {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+/* Subscription Actions */
+.subscription-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.subscription-action-form {
+	display: inline-block;
+}
+
+.cancel-subscription-btn {
+	background: #dc3545;
+	color: white;
+	border: none;
+	padding: 8px 15px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 0.9em;
+	transition: background 0.3s ease;
+}
+
+.cancel-subscription-btn:hover {
+	background: #c82333;
+}
+
+.reactivate-subscription-btn {
+	background: #28a745;
+	color: white;
+	border: none;
+	padding: 8px 15px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 0.9em;
+	transition: background 0.3s ease;
+}
+
+.reactivate-subscription-btn:hover {
+	background: #218838;
+}
+
+.view-subscription-btn {
+	background: #007bff;
+	color: white;
+	text-decoration: none;
+	padding: 8px 15px;
+	border-radius: 6px;
+	font-size: 0.9em;
+	transition: background 0.3s ease;
+}
+
+.view-subscription-btn:hover {
+	background: #0056b3;
+	text-decoration: none;
+	color: white;
+}
+
+/* Usage Stats */
+.stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 20px;
+}
+
+.stat-item {
+	text-align: center;
+	padding: 20px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border-radius: 10px;
+}
+
+.stat-number {
+	font-size: 2.5em;
+	font-weight: 700;
+	margin-bottom: 5px;
+}
+
+.stat-label {
+	font-size: 0.9em;
+	opacity: 0.9;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Timeline */
+.history-timeline {
+	position: relative;
+	padding-left: 30px;
+}
+
+.history-timeline::before {
+	content: '';
+	position: absolute;
+	left: 10px;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: linear-gradient(to bottom, #667eea, #764ba2);
+}
+
+.timeline-item {
+	position: relative;
+	margin-bottom: 25px;
+	padding-left: 30px;
+}
+
+.timeline-item::before {
+	content: '';
+	position: absolute;
+	left: -35px;
+	top: 5px;
+	width: 12px;
+	height: 12px;
+	background: #667eea;
+	border-radius: 50%;
+	border: 3px solid white;
+	box-shadow: 0 0 0 3px #667eea;
+}
+
+.timeline-date {
+	font-size: 0.8em;
+	color: #6c757d;
+	margin-bottom: 5px;
+}
+
+.timeline-title {
+	margin: 0 0 5px 0;
+	font-size: 1.1em;
+	color: #2c3e50;
+}
+
+.timeline-description {
+	margin: 0;
+	color: #7f8c8d;
+	font-size: 0.9em;
+}
+
+/* Upgrade Prompt */
+.upgrade-prompt-card .card-header {
+	background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.upgrade-benefits {
+	text-align: center;
+}
+
+.benefits-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 30px 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 15px;
+}
+
+.benefits-list li {
+	padding: 15px 20px;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border-radius: 8px;
+	font-size: 1.1em;
+	font-weight: 500;
+	color: #2c3e50;
+}
+
+/* Buttons */
+.upgrade-button,
+.upgrade-button-large {
+	display: inline-block;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	text-decoration: none;
+	padding: 12px 25px;
+	border-radius: 25px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.upgrade-button-large {
+	font-size: 1.1em;
+	padding: 15px 35px;
+}
+
+.upgrade-button:hover,
+.upgrade-button-large:hover {
+	text-decoration: none;
+	color: white;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Notices */
+.wpmatch-notice {
+	margin: 20px 0;
+	padding: 15px 20px;
+	border-radius: 8px;
+	font-weight: 500;
+}
+
+.notice-success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.notice-error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.wpmatch-membership-dashboard {
+		padding: 15px;
+	}
+
+	.wpmatch-dashboard-header h2 {
+		font-size: 2em;
+	}
+
+	.card-header {
+		padding: 15px 20px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.card-content {
+		padding: 20px;
+	}
+
+	.features-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.subscription-item {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+	}
+
+	.subscription-actions {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.stats-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.benefits-list {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 480px) {
+	.detail-item {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 5px;
+	}
+
+	.stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.subscription-actions {
+		flex-direction: column;
+	}
+
+	.subscription-actions > * {
+		width: 100%;
+		text-align: center;
+	}
+}

@@ -191,6 +191,9 @@ class WPMatch_Matching_Algorithm {
 			);
 		}
 
+		// Apply advanced matching enhancements to queue entries.
+		$queue_entries = apply_filters( 'wpmatch_user_matches', $queue_entries, $user_id );
+
 		// Sort by priority and compatibility score.
 		usort(
 			$queue_entries,
@@ -424,7 +427,12 @@ class WPMatch_Matching_Algorithm {
 			$total_weight += $weight;
 		}
 
-		return $total_weight > 0 ? $total_score / $total_weight : 0.5;
+		$base_score = $total_weight > 0 ? $total_score / $total_weight : 0.5;
+
+		// Apply advanced matching enhancements.
+		$enhanced_score = apply_filters( 'wpmatch_compatibility_score', $base_score, $user1_id, $user2_id );
+
+		return $enhanced_score;
 	}
 
 	/**

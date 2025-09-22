@@ -63,19 +63,16 @@ function wpmatch_check_requirements() {
 
 	// Display errors if any.
 	if ( ! empty( $errors ) ) {
-		add_action(
-			'admin_notices',
-			function () use ( $errors ) {
-				?>
+		add_action( 'admin_notices', function() use ( $errors ) {
+			?>
 			<div class="notice notice-error">
 				<p><strong><?php esc_html_e( 'WPMatch Plugin Error', 'wpmatch' ); ?></strong></p>
 				<?php foreach ( $errors as $error ) : ?>
 					<p><?php echo esc_html( $error ); ?></p>
 				<?php endforeach; ?>
 			</div>
-				<?php
-			}
-		);
+			<?php
+		} );
 		return false;
 	}
 
@@ -95,40 +92,20 @@ WPMatch_Autoloader::init();
 require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-activator.php';
 require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-deactivator.php';
 
-/**
- * Activate the plugin.
- *
- * Creates database tables and sets up plugin defaults.
- *
- * @since 1.0.0
- */
+// Register activation hook.
+register_activation_hook( __FILE__, 'wpmatch_activate' );
 function wpmatch_activate() {
 	WPMatch_Activator::activate();
 }
 
-/**
- * Deactivate the plugin.
- *
- * Cleans up temporary data and flushes rewrite rules.
- *
- * @since 1.0.0
- */
+// Register deactivation hook.
+register_deactivation_hook( __FILE__, 'wpmatch_deactivate' );
 function wpmatch_deactivate() {
 	WPMatch_Deactivator::deactivate();
 }
 
-// Register activation hook.
-register_activation_hook( __FILE__, 'wpmatch_activate' );
-
-// Register deactivation hook.
-register_deactivation_hook( __FILE__, 'wpmatch_deactivate' );
-
-/**
- * Uninstall handling.
- *
- * Uninstall process is handled via uninstall.php file.
- * This ensures proper cleanup when plugin is deleted.
- */
+// Register uninstall hook (defined in uninstall.php).
+// This is handled via uninstall.php file.
 
 /**
  * Initialize the plugin.
@@ -155,16 +132,9 @@ function wpmatch() {
 	return WPMatch::get_instance();
 }
 
-/**
- * Testing function for uninstall process.
- *
- * This function is for testing purposes only.
- * Actual uninstall handling is done via uninstall.php.
- *
- * @since 1.0.0
- */
+// For testing purposes - function for uninstall.
 function wpmatch_uninstall() {
-	// This would normally be in uninstall.php.
+	// This would normally be in uninstall.php
 	if ( class_exists( 'WPMatch_Uninstaller' ) ) {
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-uninstaller.php';
 		WPMatch_Uninstaller::uninstall();

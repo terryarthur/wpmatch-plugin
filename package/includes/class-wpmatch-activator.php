@@ -205,6 +205,81 @@ class WPMatch_Activator {
 			UNIQUE KEY unique_users (user1_id, user2_id)
 		) $charset_collate;";
 
+		// Job queue table.
+		$table_job_queue = $wpdb->prefix . 'wpmatch_job_queue';
+		$sql_job_queue = "CREATE TABLE IF NOT EXISTS $table_job_queue (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			job_type varchar(100) NOT NULL,
+			job_data longtext,
+			priority int(11) NOT NULL DEFAULT 5,
+			status varchar(20) NOT NULL DEFAULT 'pending',
+			run_at datetime NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			started_at datetime NULL,
+			completed_at datetime NULL,
+			failed_at datetime NULL,
+			attempts int(11) NOT NULL DEFAULT 0,
+			max_attempts int(11) NOT NULL DEFAULT 3,
+			result longtext,
+			error_message text,
+			PRIMARY KEY (id),
+			KEY status (status),
+			KEY run_at (run_at),
+			KEY priority (priority),
+			KEY job_type (job_type)
+		) $charset_collate;";
+
+		// Job logs table.
+		$table_job_logs = $wpdb->prefix . 'wpmatch_job_logs';
+		$sql_job_logs = "CREATE TABLE IF NOT EXISTS $table_job_logs (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			job_id bigint(20) NOT NULL,
+			event varchar(50) NOT NULL,
+			message text,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY job_id (job_id),
+			KEY event (event),
+			FOREIGN KEY (job_id) REFERENCES $table_job_queue(id) ON DELETE CASCADE
+		) $charset_collate;";
+
+		// Interest categories table.
+		$table_interest_categories = $wpdb->prefix . 'wpmatch_interest_categories';
+		$sql_interest_categories = "CREATE TABLE IF NOT EXISTS $table_interest_categories (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			category_key varchar(100) NOT NULL,
+			category_name varchar(255) NOT NULL,
+			category_description text DEFAULT NULL,
+			is_active tinyint(1) DEFAULT 1,
+			sort_order int(11) DEFAULT 0,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY category_key (category_key),
+			KEY idx_active_sort (is_active, sort_order)
+		) $charset_collate;";
+
+		// Predefined interests table.
+		$table_predefined_interests = $wpdb->prefix . 'wpmatch_predefined_interests';
+		$sql_predefined_interests = "CREATE TABLE IF NOT EXISTS $table_predefined_interests (
+			id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			category_id bigint(20) UNSIGNED NOT NULL,
+			interest_name varchar(255) NOT NULL,
+			interest_slug varchar(255) NOT NULL,
+			interest_description text DEFAULT NULL,
+			is_active tinyint(1) DEFAULT 1,
+			sort_order int(11) DEFAULT 0,
+			usage_count int(11) DEFAULT 0,
+			created_at datetime DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY idx_category (category_id),
+			KEY idx_active_sort (is_active, sort_order),
+			KEY idx_slug (interest_slug),
+			UNIQUE KEY unique_category_interest (category_id, interest_slug),
+			FOREIGN KEY (category_id) REFERENCES $table_interest_categories(id) ON DELETE CASCADE
+		) $charset_collate;";
+
 		// Execute table creation.
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql_profiles );
@@ -214,6 +289,10 @@ class WPMatch_Activator {
 		dbDelta( $sql_verifications );
 		dbDelta( $sql_messages );
 		dbDelta( $sql_conversations );
+		dbDelta( $sql_job_queue );
+		dbDelta( $sql_job_logs );
+		dbDelta( $sql_interest_categories );
+		dbDelta( $sql_predefined_interests );
 
 		// Store database version for future updates.
 		update_option( 'wpmatch_db_version', '1.0.0' );

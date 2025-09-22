@@ -32,7 +32,7 @@ class WPMatch_Public {
 	 */
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 	}
 
 	/**
@@ -52,6 +52,72 @@ class WPMatch_Public {
 			wp_enqueue_style(
 				$this->plugin_name . '-messages',
 				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-messages.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue additional styles for membership dashboard
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_membership_dashboard' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-membership-dashboard',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-membership-dashboard.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue styles for gamification dashboard
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_gamification' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-gamification',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-gamification.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue styles for events dashboard
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_events' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-events',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-events.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue styles for voice notes
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_voice_notes' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-voice-notes',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-voice-notes.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue styles for location dashboard
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_location' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-location',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-location.css',
+				array( $this->plugin_name ),
+				$this->version,
+				'all'
+			);
+		}
+
+		// Enqueue styles for matches
+		if ( is_page() && has_shortcode( get_post()->post_content, 'wpmatch_matches' ) ) {
+			wp_enqueue_style(
+				$this->plugin_name . '-matches',
+				WPMATCH_PLUGIN_URL . 'public/css/wpmatch-matches.css',
 				array( $this->plugin_name ),
 				$this->version,
 				'all'
@@ -101,15 +167,15 @@ class WPMatch_Public {
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
 						'nonce'    => wp_create_nonce( 'wpmatch_public_nonce' ),
 						'strings'  => array(
-							'uploading'        => __( 'Uploading...', 'wpmatch' ),
-							'upload_error'     => __( 'Upload failed. Please try again.', 'wpmatch' ),
-							'delete_error'     => __( 'Failed to delete photo. Please try again.', 'wpmatch' ),
-							'primary_error'    => __( 'Failed to set primary photo. Please try again.', 'wpmatch' ),
-							'confirm_delete'   => __( 'Are you sure you want to delete this photo?', 'wpmatch' ),
+							'uploading'         => __( 'Uploading...', 'wpmatch' ),
+							'upload_error'      => __( 'Upload failed. Please try again.', 'wpmatch' ),
+							'delete_error'      => __( 'Failed to delete photo. Please try again.', 'wpmatch' ),
+							'primary_error'     => __( 'Failed to set primary photo. Please try again.', 'wpmatch' ),
+							'confirm_delete'    => __( 'Are you sure you want to delete this photo?', 'wpmatch' ),
 							'invalid_file_type' => __( 'Invalid file type. Please upload JPG, PNG, or GIF.', 'wpmatch' ),
-							'file_too_large'   => __( 'File too large. Maximum size is 5MB.', 'wpmatch' ),
-							'add_main_photo'   => __( 'Add main photo', 'wpmatch' ),
-							'add_photo'        => __( 'Add photo', 'wpmatch' ),
+							'file_too_large'    => __( 'File too large. Maximum size is 5MB.', 'wpmatch' ),
+							'add_main_photo'    => __( 'Add main photo', 'wpmatch' ),
+							'add_photo'         => __( 'Add photo', 'wpmatch' ),
 						),
 					)
 				);
@@ -130,10 +196,10 @@ class WPMatch_Public {
 					'wpmatch-messages',
 					'wpmatch_messages',
 					array(
-						'ajax_url' => admin_url( 'admin-ajax.php' ),
-						'nonce'    => wp_create_nonce( 'wpmatch_public_nonce' ),
+						'ajax_url'        => admin_url( 'admin-ajax.php' ),
+						'nonce'           => wp_create_nonce( 'wpmatch_public_nonce' ),
 						'current_user_id' => get_current_user_id(),
-						'strings'  => array(
+						'strings'         => array(
 							'sending'        => __( 'Sending...', 'wpmatch' ),
 							'send_error'     => __( 'Failed to send message.', 'wpmatch' ),
 							'delete_confirm' => __( 'Delete this message?', 'wpmatch' ),
@@ -158,16 +224,60 @@ class WPMatch_Public {
 					'wpmatch-search',
 					'wpmatch_search',
 					array(
-						'ajax_url' => admin_url( 'admin-ajax.php' ),
-						'nonce'    => wp_create_nonce( 'wpmatch_public_nonce' ),
-						'profile_url' => home_url( '/profile/' ),
+						'ajax_url'     => admin_url( 'admin-ajax.php' ),
+						'nonce'        => wp_create_nonce( 'wpmatch_public_nonce' ),
+						'profile_url'  => home_url( '/profile/' ),
 						'messages_url' => home_url( '/messages/' ),
-						'strings'  => array(
-							'loading'            => __( 'Searching...', 'wpmatch' ),
-							'no_suggestions'     => __( 'No suggestions found', 'wpmatch' ),
-							'preferences_saved'  => __( 'Search preferences saved!', 'wpmatch' ),
+						'strings'      => array(
+							'loading'           => __( 'Searching...', 'wpmatch' ),
+							'no_suggestions'    => __( 'No suggestions found', 'wpmatch' ),
+							'preferences_saved' => __( 'Search preferences saved!', 'wpmatch' ),
 						),
 					)
+				);
+			}
+
+			// Enqueue gamification script on gamification page
+			if ( $post && has_shortcode( $post->post_content, 'wpmatch_gamification' ) ) {
+				wp_enqueue_script(
+					'wpmatch-gamification',
+					WPMATCH_PLUGIN_URL . 'public/js/wpmatch-gamification.js',
+					array( 'jquery' ),
+					$this->version,
+					true
+				);
+			}
+
+			// Enqueue events script on events page
+			if ( $post && has_shortcode( $post->post_content, 'wpmatch_events' ) ) {
+				wp_enqueue_script(
+					'wpmatch-events',
+					WPMATCH_PLUGIN_URL . 'public/js/wpmatch-events.js',
+					array( 'jquery' ),
+					$this->version,
+					true
+				);
+			}
+
+			// Enqueue voice notes script on voice notes page
+			if ( $post && has_shortcode( $post->post_content, 'wpmatch_voice_notes' ) ) {
+				wp_enqueue_script(
+					'wpmatch-voice-notes',
+					WPMATCH_PLUGIN_URL . 'public/js/wpmatch-voice-notes.js',
+					array( 'jquery' ),
+					$this->version,
+					true
+				);
+			}
+
+			// Enqueue location script on location page
+			if ( $post && has_shortcode( $post->post_content, 'wpmatch_location' ) ) {
+				wp_enqueue_script(
+					'wpmatch-location',
+					WPMATCH_PLUGIN_URL . 'public/js/wpmatch-location.js',
+					array( 'jquery' ),
+					$this->version,
+					true
 				);
 			}
 		}
@@ -186,6 +296,11 @@ class WPMatch_Public {
 		add_shortcode( 'wpmatch_messages', array( $this, 'messages_shortcode' ) );
 		add_shortcode( 'wpmatch_premium_shop', array( $this, 'premium_shop_shortcode' ) );
 		add_shortcode( 'wpmatch_user_guide', array( $this, 'user_guide_shortcode' ) );
+		add_shortcode( 'wpmatch_membership_dashboard', array( $this, 'membership_dashboard_shortcode' ) );
+		add_shortcode( 'wpmatch_gamification', array( $this, 'gamification_shortcode' ) );
+		add_shortcode( 'wpmatch_events', array( $this, 'events_shortcode' ) );
+		add_shortcode( 'wpmatch_voice_notes', array( $this, 'voice_notes_shortcode' ) );
+		add_shortcode( 'wpmatch_location', array( $this, 'location_shortcode' ) );
 	}
 
 	/**
@@ -276,7 +391,12 @@ class WPMatch_Public {
 		);
 
 		ob_start();
-		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-matches.php';
+		$template_path = WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-matches.php';
+		if ( file_exists( $template_path ) ) {
+			require $template_path;
+		} else {
+			echo '<p>Error: Matches template not found at: ' . esc_html( $template_path ) . '</p>';
+		}
 		return ob_get_clean();
 	}
 
@@ -322,6 +442,9 @@ class WPMatch_Public {
 		);
 
 		// Load swipe interface.
+		if ( ! class_exists( 'WPMatch_Swipe_Interface' ) ) {
+			require_once WPMATCH_PLUGIN_DIR . 'public/class-wpmatch-swipe-interface.php';
+		}
 		$swipe_interface = new WPMatch_Swipe_Interface();
 		return $swipe_interface->render_shortcode( $atts );
 	}
@@ -377,6 +500,28 @@ class WPMatch_Public {
 
 		ob_start();
 		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-messages.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Membership dashboard shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Shortcode output.
+	 */
+	public function membership_dashboard_shortcode( $atts ) {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Please log in to view your membership dashboard.', 'wpmatch' ) . '</p>';
+		}
+
+		$atts = shortcode_atts(
+			array(),
+			$atts,
+			'wpmatch_membership_dashboard'
+		);
+
+		ob_start();
+		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-membership-dashboard.php';
 		return ob_get_clean();
 	}
 
@@ -488,6 +633,12 @@ class WPMatch_Public {
 			case 'save_search_preferences':
 				$this->save_search_preferences();
 				break;
+			case 'cancel_subscription':
+				$this->cancel_subscription();
+				break;
+			case 'reactivate_subscription':
+				$this->reactivate_subscription();
+				break;
 			default:
 				wp_die( esc_html__( 'Invalid action', 'wpmatch' ) );
 		}
@@ -574,7 +725,7 @@ class WPMatch_Public {
 				$user_id
 			)
 		);
-		$is_primary = ( 0 === (int) $photo_count ) ? 1 : 0;
+		$is_primary  = ( 0 === (int) $photo_count ) ? 1 : 0;
 
 		$result = $wpdb->insert(
 			$table_name,
@@ -598,12 +749,14 @@ class WPMatch_Public {
 
 		$photo_id = $wpdb->insert_id;
 
-		wp_send_json_success( array(
-			'message'    => __( 'Photo uploaded successfully', 'wpmatch' ),
-			'photo_id'   => $photo_id,
-			'photo_url'  => $upload['url'],
-			'is_primary' => $is_primary,
-		) );
+		wp_send_json_success(
+			array(
+				'message'    => __( 'Photo uploaded successfully', 'wpmatch' ),
+				'photo_id'   => $photo_id,
+				'photo_url'  => $upload['url'],
+				'is_primary' => $is_primary,
+			)
+		);
 	}
 
 	/**
@@ -614,7 +767,7 @@ class WPMatch_Public {
 			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
 		}
 
-		$user_id = get_current_user_id();
+		$user_id  = get_current_user_id();
 		$photo_id = isset( $_POST['photo_id'] ) ? absint( $_POST['photo_id'] ) : 0;
 
 		if ( ! $photo_id ) {
@@ -646,7 +799,10 @@ class WPMatch_Public {
 		// Delete from database
 		$result = $wpdb->delete(
 			$table_name,
-			array( 'media_id' => $photo_id, 'user_id' => $user_id ),
+			array(
+				'media_id' => $photo_id,
+				'user_id'  => $user_id,
+			),
 			array( '%d', '%d' )
 		);
 
@@ -685,7 +841,7 @@ class WPMatch_Public {
 			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
 		}
 
-		$user_id = get_current_user_id();
+		$user_id  = get_current_user_id();
 		$photo_id = isset( $_POST['photo_id'] ) ? absint( $_POST['photo_id'] ) : 0;
 
 		if ( ! $photo_id ) {
@@ -712,7 +868,10 @@ class WPMatch_Public {
 		$wpdb->update(
 			$table_name,
 			array( 'is_primary' => 0 ),
-			array( 'user_id' => $user_id, 'media_type' => 'photo' ),
+			array(
+				'user_id'    => $user_id,
+				'media_type' => 'photo',
+			),
 			array( '%d' ),
 			array( '%d', '%s' )
 		);
@@ -739,7 +898,7 @@ class WPMatch_Public {
 	 * @param int $user_id User ID.
 	 */
 	private function send_welcome_email( $user_id ) {
-		$user = get_userdata( $user_id );
+		$user    = get_userdata( $user_id );
 		$subject = __( 'Welcome to WPMatch Dating!', 'wpmatch' );
 		$message = sprintf(
 			__( 'Hi %s,\n\nWelcome to our dating community! Your account has been created successfully.\n\nPlease complete your profile to start matching with other members.\n\nBest regards,\nThe WPMatch Team', 'wpmatch' ),
@@ -764,9 +923,9 @@ class WPMatch_Public {
 			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
 		}
 
-		$sender_id = get_current_user_id();
+		$sender_id    = get_current_user_id();
 		$recipient_id = isset( $_POST['recipient_id'] ) ? absint( $_POST['recipient_id'] ) : 0;
-		$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+		$message      = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
 		if ( ! $recipient_id || empty( $message ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid message data.', 'wpmatch' ) ) );
@@ -775,11 +934,13 @@ class WPMatch_Public {
 		$result = WPMatch_Message_Manager::send_message( $sender_id, $recipient_id, $message );
 
 		if ( $result['success'] ) {
-			wp_send_json_success( array(
-				'message'    => $result['message'],
-				'message_id' => $result['message_id'],
-				'created_at' => current_time( 'mysql' ),
-			) );
+			wp_send_json_success(
+				array(
+					'message'    => $result['message'],
+					'message_id' => $result['message_id'],
+					'created_at' => current_time( 'mysql' ),
+				)
+			);
 		} else {
 			wp_send_json_error( array( 'message' => $result['message'] ) );
 		}
@@ -794,7 +955,7 @@ class WPMatch_Public {
 		}
 
 		$message_id = isset( $_POST['message_id'] ) ? absint( $_POST['message_id'] ) : 0;
-		$user_id = get_current_user_id();
+		$user_id    = get_current_user_id();
 
 		if ( ! $message_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid message ID.', 'wpmatch' ) ) );
@@ -818,7 +979,7 @@ class WPMatch_Public {
 		}
 
 		$conversation_id = isset( $_POST['conversation_id'] ) ? sanitize_text_field( wp_unslash( $_POST['conversation_id'] ) ) : '';
-		$user_id = get_current_user_id();
+		$user_id         = get_current_user_id();
 
 		if ( empty( $conversation_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid conversation ID.', 'wpmatch' ) ) );
@@ -841,7 +1002,7 @@ class WPMatch_Public {
 			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
 		}
 
-		$user_id = get_current_user_id();
+		$user_id       = get_current_user_id();
 		$other_user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
 
 		if ( ! $other_user_id ) {
@@ -912,7 +1073,7 @@ class WPMatch_Public {
 			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
 		}
 
-		$user_id = get_current_user_id();
+		$user_id     = get_current_user_id();
 		$preferences = isset( $_POST['preferences'] ) ? $_POST['preferences'] : array();
 
 		// Sanitize preferences.
@@ -930,5 +1091,148 @@ class WPMatch_Public {
 		} else {
 			wp_send_json_error( array( 'message' => __( 'Failed to save search preferences.', 'wpmatch' ) ) );
 		}
+	}
+
+	/**
+	 * Cancel subscription via AJAX.
+	 */
+	private function cancel_subscription() {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
+		}
+
+		$user_id         = get_current_user_id();
+		$subscription_id = isset( $_POST['subscription_id'] ) ? absint( $_POST['subscription_id'] ) : 0;
+
+		if ( ! $subscription_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid subscription ID.', 'wpmatch' ) ) );
+		}
+
+		$result = WPMatch_Subscription_Manager::cancel_subscription( $subscription_id, $user_id );
+
+		if ( $result ) {
+			wp_send_json_success( array( 'message' => __( 'Subscription cancelled successfully.', 'wpmatch' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to cancel subscription.', 'wpmatch' ) ) );
+		}
+	}
+
+	/**
+	 * Reactivate subscription via AJAX.
+	 */
+	private function reactivate_subscription() {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => __( 'Not logged in', 'wpmatch' ) ) );
+		}
+
+		$user_id         = get_current_user_id();
+		$subscription_id = isset( $_POST['subscription_id'] ) ? absint( $_POST['subscription_id'] ) : 0;
+
+		if ( ! $subscription_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid subscription ID.', 'wpmatch' ) ) );
+		}
+
+		$result = WPMatch_Subscription_Manager::reactivate_subscription( $subscription_id, $user_id );
+
+		if ( $result ) {
+			wp_send_json_success( array( 'message' => __( 'Subscription reactivated successfully.', 'wpmatch' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to reactivate subscription.', 'wpmatch' ) ) );
+		}
+	}
+
+	/**
+	 * Gamification dashboard shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Shortcode output.
+	 */
+	public function gamification_shortcode( $atts ) {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Please log in to view your gamification progress.', 'wpmatch' ) . '</p>';
+		}
+
+		$atts = shortcode_atts(
+			array(),
+			$atts,
+			'wpmatch_gamification'
+		);
+
+		ob_start();
+		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-gamification-dashboard.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Events dashboard shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Shortcode output.
+	 */
+	public function events_shortcode( $atts ) {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Please log in to view events.', 'wpmatch' ) . '</p>';
+		}
+
+		$atts = shortcode_atts(
+			array(
+				'type' => 'all',
+			),
+			$atts,
+			'wpmatch_events'
+		);
+
+		ob_start();
+		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-events-dashboard.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Voice notes shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Shortcode output.
+	 */
+	public function voice_notes_shortcode( $atts ) {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Please log in to use voice notes.', 'wpmatch' ) . '</p>';
+		}
+
+		$atts = shortcode_atts(
+			array(
+				'recipient_id' => 0,
+			),
+			$atts,
+			'wpmatch_voice_notes'
+		);
+
+		ob_start();
+		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-voice-notes.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Location dashboard shortcode.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string Shortcode output.
+	 */
+	public function location_shortcode( $atts ) {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Please log in to use location features.', 'wpmatch' ) . '</p>';
+		}
+
+		$atts = shortcode_atts(
+			array(
+				'radius' => 25,
+				'show_map' => true,
+			),
+			$atts,
+			'wpmatch_location'
+		);
+
+		ob_start();
+		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-location-dashboard.php';
+		return ob_get_clean();
 	}
 }

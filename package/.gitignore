@@ -1,0 +1,164 @@
+# ==============================================
+# WPMatch Plugin .gitignore
+# Only production-required files in repository
+# ==============================================
+
+# Development and Testing Files
+# -----------------------------
+*.js
+!admin/js/*.js
+!public/js/*.js
+test-*.php
+test-*.js
+test-*.md
+*test*.js
+*test*.php
+*test*.md
+debug-*.js
+manual-*.js
+visual-*.js
+comprehensive-*.js
+simple-*.js
+final-*.js
+
+# Test Reports and Results
+# -----------------------
+test-results/
+test-report.md
+tests/
+playwright-report/
+*Test-Report.md
+*-test-report.md
+
+# Screenshots and Images (development)
+# ----------------------------------
+*.png
+!assets/**/*.png
+!admin/images/*.png
+!public/images/*.png
+error-screenshot.png
+screenshot*.png
+
+# Node.js and Package Management
+# -----------------------------
+node_modules/
+package.json
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Playwright Testing
+# -----------------
+playwright.config.js
+.playwright-mcp/
+playwright-state.json
+cookies.txt
+
+# Development Documentation
+# ------------------------
+*.md
+!README.md
+CLAUDE.md
+wordpress_dating_plugin_prd.md
+
+# Claude Code / AI Development
+# ---------------------------
+.claude/
+.agent-os/
+
+# IDE and Editor Files
+# -------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and Temporary Files
+# -----------------------
+*.log
+*.tmp
+*.temp
+*.cache
+logs/
+tmp/
+temp/
+
+# Backup Files
+# -----------
+*.bak
+*.backup
+*~
+
+# OS Generated Files
+# -----------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# WordPress Specific
+# -----------------
+wp-config.php
+.htaccess
+uploads/
+upgrade/
+
+# Database and Sensitive Data
+# --------------------------
+*.sql
+*.sqlite
+*.db
+wp-config-local.php
+local-config.php
+
+# Environment and Config
+# ---------------------
+.env
+.env.local
+.env.production
+.env.staging
+config.local.php
+local-config.php
+
+# Build and Distribution
+# ---------------------
+dist/
+build/
+*.zip
+*.tar.gz
+*.rar
+
+# Version Control
+# --------------
+.git/
+.gitmodules
+.gitattributes
+
+# Package Management (Composer if used)
+# ------------------------------------
+vendor/
+composer.lock
+composer.phar
+
+# PHP Development
+# --------------
+.phpunit.result.cache
+phpunit.xml
+phpcs.xml
+.php_cs.cache
+
+# Only keep essential plugin files:
+# - Core PHP files (wpmatch.php, uninstall.php)
+# - includes/ directory with all PHP classes
+# - admin/ directory with necessary files
+# - public/ directory with necessary files
+# - languages/ directory for translations
+# - assets/ directory for required images/fonts
+# - README.md for documentation

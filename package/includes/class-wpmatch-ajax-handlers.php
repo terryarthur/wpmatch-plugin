@@ -33,6 +33,13 @@ class WPMatch_AJAX_Handlers {
 		add_action( 'wp_ajax_wpmatch_load_more_cards', array( __CLASS__, 'load_more_cards' ) );
 		add_action( 'wp_ajax_wpmatch_get_match_queue', array( __CLASS__, 'get_match_queue' ) );
 		add_action( 'wp_ajax_wpmatch_mark_notification_read', array( __CLASS__, 'mark_notification_read' ) );
+
+		// Admin actions.
+		add_action( 'wp_ajax_wpmatch_get_user_profile', array( __CLASS__, 'get_user_profile' ) );
+		add_action( 'wp_ajax_wpmatch_update_user_status', array( __CLASS__, 'update_user_status' ) );
+		add_action( 'wp_ajax_wpmatch_verify_user', array( __CLASS__, 'verify_user' ) );
+		add_action( 'wp_ajax_wpmatch_bulk_user_action', array( __CLASS__, 'bulk_user_action' ) );
+		add_action( 'wp_ajax_wpmatch_update_user_profile', array( __CLASS__, 'update_user_profile' ) );
 	}
 
 	/**
@@ -483,5 +490,380 @@ class WPMatch_AJAX_Handlers {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get user profile data for admin modal.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function get_user_profile() {
+		// Check nonce.
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
+		}
+
+		// Check admin capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wpmatch' ) ) );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid user ID.', 'wpmatch' ) ) );
+		}
+
+		global $wpdb;
+		$profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
+		$media_table   = $wpdb->prefix . 'wpmatch_user_media';
+
+		// Get user and profile data.
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			wp_send_json_error( array( 'message' => __( 'User not found.', 'wpmatch' ) ) );
+		}
+
+		$profile = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$profile_table} WHERE user_id = %d",
+				$user_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $profile ) {
+			wp_send_json_error( array( 'message' => __( 'Profile not found.', 'wpmatch' ) ) );
+		}
+
+		// Get user photos.
+		$photos = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT file_path, is_primary FROM {$media_table}
+				WHERE user_id = %d AND media_type = 'photo'
+				ORDER BY is_primary DESC, display_order ASC",
+				$user_id
+			)
+		);
+
+		// Get match statistics.
+		$matches_table = $wpdb->prefix . 'wpmatch_matches';
+		$swipes_table  = $wpdb->prefix . 'wpmatch_swipes';
+
+		$match_count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$matches_table}
+				WHERE user1_id = %d OR user2_id = %d",
+				$user_id,
+				$user_id
+			)
+		);
+
+		$swipe_stats = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT
+					COUNT(*) as total_swipes,
+					SUM(CASE WHEN swipe_type = 'like' THEN 1 ELSE 0 END) as likes_given,
+					SUM(CASE WHEN swipe_type = 'pass' THEN 1 ELSE 0 END) as passes_given
+				FROM {$swipes_table}
+				WHERE user_id = %d",
+				$user_id
+			)
+		);
+
+		$received_likes = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$swipes_table}
+				WHERE target_user_id = %d AND swipe_type = 'like'",
+				$user_id
+			)
+		);
+
+		$profile_data = array(
+			'user'         => array(
+				'ID'           => $user->ID,
+				'display_name' => $user->display_name,
+				'user_email'   => $user->user_email,
+				'user_login'   => $user->user_login,
+				'user_registered' => $user->user_registered,
+			),
+			'profile'      => $profile,
+			'photos'       => $photos,
+			'statistics'   => array(
+				'matches'        => absint( $match_count ),
+				'total_swipes'   => absint( $swipe_stats->total_swipes ?? 0 ),
+				'likes_given'    => absint( $swipe_stats->likes_given ?? 0 ),
+				'passes_given'   => absint( $swipe_stats->passes_given ?? 0 ),
+				'received_likes' => absint( $received_likes ),
+			),
+		);
+
+		wp_send_json_success( $profile_data );
+	}
+
+	/**
+	 * Update user status.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function update_user_status() {
+		// Check nonce.
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
+		}
+
+		// Check admin capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wpmatch' ) ) );
+		}
+
+		$user_id    = absint( $_POST['user_id'] );
+		$new_status = sanitize_text_field( $_POST['status'] );
+
+		if ( ! $user_id || ! in_array( $new_status, array( 'active', 'pending', 'blocked', 'inactive' ), true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'wpmatch' ) ) );
+		}
+
+		global $wpdb;
+		$profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
+
+		$result = $wpdb->update(
+			$profile_table,
+			array( 'status' => $new_status ),
+			array( 'user_id' => $user_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to update user status.', 'wpmatch' ) ) );
+		}
+
+		wp_send_json_success(
+			array(
+				'message'    => __( 'User status updated successfully.', 'wpmatch' ),
+				'new_status' => $new_status,
+			)
+		);
+	}
+
+	/**
+	 * Verify user.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function verify_user() {
+		// Check nonce.
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
+		}
+
+		// Check admin capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wpmatch' ) ) );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid user ID.', 'wpmatch' ) ) );
+		}
+
+		global $wpdb;
+		$profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
+
+		$result = $wpdb->update(
+			$profile_table,
+			array(
+				'is_verified' => 1,
+				'verified_at' => current_time( 'mysql' ),
+			),
+			array( 'user_id' => $user_id ),
+			array( '%d', '%s' ),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to verify user.', 'wpmatch' ) ) );
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'User verified successfully.', 'wpmatch' ),
+			)
+		);
+	}
+
+	/**
+	 * Handle bulk user actions.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function bulk_user_action() {
+		// Check nonce.
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
+		}
+
+		// Check admin capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wpmatch' ) ) );
+		}
+
+		$user_ids = array_map( 'absint', $_POST['user_ids'] );
+		$action   = sanitize_text_field( $_POST['bulk_action'] );
+
+		if ( empty( $user_ids ) || ! $action ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'wpmatch' ) ) );
+		}
+
+		global $wpdb;
+		$profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
+		$processed     = 0;
+
+		foreach ( $user_ids as $user_id ) {
+			$result = false;
+
+			switch ( $action ) {
+				case 'activate':
+					$result = $wpdb->update(
+						$profile_table,
+						array( 'status' => 'active' ),
+						array( 'user_id' => $user_id ),
+						array( '%s' ),
+						array( '%d' )
+					);
+					break;
+
+				case 'block':
+					$result = $wpdb->update(
+						$profile_table,
+						array( 'status' => 'blocked' ),
+						array( 'user_id' => $user_id ),
+						array( '%s' ),
+						array( '%d' )
+					);
+					break;
+
+				case 'verify':
+					$result = $wpdb->update(
+						$profile_table,
+						array(
+							'is_verified' => 1,
+							'verified_at' => current_time( 'mysql' ),
+						),
+						array( 'user_id' => $user_id ),
+						array( '%d', '%s' ),
+						array( '%d' )
+					);
+					break;
+
+				case 'delete':
+					// Only allow deleting if user has no matches.
+					$matches_table = $wpdb->prefix . 'wpmatch_matches';
+					$match_count   = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT COUNT(*) FROM {$matches_table}
+							WHERE user1_id = %d OR user2_id = %d",
+							$user_id,
+							$user_id
+						)
+					);
+
+					if ( 0 === absint( $match_count ) ) {
+						$result = wp_delete_user( $user_id );
+					}
+					break;
+			}
+
+			if ( $result ) {
+				$processed++;
+			}
+		}
+
+		wp_send_json_success(
+			array(
+				'message'   => sprintf(
+					/* translators: %1$d: processed count, %2$d: total count */
+					__( 'Processed %1$d of %2$d users.', 'wpmatch' ),
+					$processed,
+					count( $user_ids )
+				),
+				'processed' => $processed,
+				'total'     => count( $user_ids ),
+			)
+		);
+	}
+
+	/**
+	 * Update user profile data.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function update_user_profile() {
+		// Check nonce.
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
+		}
+
+		// Check admin capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'wpmatch' ) ) );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid user ID.', 'wpmatch' ) ) );
+		}
+
+		global $wpdb;
+		$profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
+
+		// Sanitize profile data.
+		$profile_data = array();
+
+		if ( isset( $_POST['age'] ) ) {
+			$profile_data['age'] = absint( $_POST['age'] );
+		}
+
+		if ( isset( $_POST['gender'] ) ) {
+			$profile_data['gender'] = sanitize_text_field( $_POST['gender'] );
+		}
+
+		if ( isset( $_POST['orientation'] ) ) {
+			$profile_data['orientation'] = sanitize_text_field( $_POST['orientation'] );
+		}
+
+		if ( isset( $_POST['location'] ) ) {
+			$profile_data['location'] = sanitize_text_field( $_POST['location'] );
+		}
+
+		if ( isset( $_POST['about_me'] ) ) {
+			$profile_data['about_me'] = sanitize_textarea_field( $_POST['about_me'] );
+		}
+
+		if ( isset( $_POST['looking_for'] ) ) {
+			$profile_data['looking_for'] = sanitize_textarea_field( $_POST['looking_for'] );
+		}
+
+		if ( empty( $profile_data ) ) {
+			wp_send_json_error( array( 'message' => __( 'No valid data to update.', 'wpmatch' ) ) );
+		}
+
+		$result = $wpdb->update(
+			$profile_table,
+			$profile_data,
+			array( 'user_id' => $user_id ),
+			'%s',
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to update profile.', 'wpmatch' ) ) );
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'Profile updated successfully.', 'wpmatch' ),
+			)
+		);
 	}
 }

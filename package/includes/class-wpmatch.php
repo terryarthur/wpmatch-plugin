@@ -58,7 +58,19 @@ class WPMatch {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->define_api_hooks();
+		$this->define_ajax_hooks();
 		$this->define_woocommerce_hooks();
+		$this->define_advanced_matching_hooks();
+		$this->define_messaging_hooks();
+		$this->define_photo_verification_hooks();
+		$this->define_mobile_api_hooks();
+		$this->define_social_integrations_hooks();
+		$this->define_video_chat_hooks();
+		$this->define_ai_chatbot_hooks();
+		$this->define_gamification_hooks();
+		$this->define_events_hooks();
+		$this->define_voice_notes_hooks();
+		$this->define_location_hooks();
 	}
 
 	/**
@@ -116,11 +128,47 @@ class WPMatch {
 		// Load API classes.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-api.php';
 
+		// Load AJAX handlers.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-ajax-handlers.php';
+
 		// Load profile management.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-profile-manager.php';
 
 		// Load matching algorithm.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-matching-algorithm.php';
+
+		// Load advanced matching.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-advanced-matching.php';
+
+		// Load real-time messaging.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-realtime-messaging.php';
+
+		// Load photo verification.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-photo-verification.php';
+
+		// Load mobile API.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-mobile-api.php';
+
+		// Load social integrations.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-social-integrations.php';
+
+		// Load video chat.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-video-chat.php';
+
+		// Load AI chatbot.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-ai-chatbot.php';
+
+		// Load gamification.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-gamification.php';
+
+		// Load events system.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-events.php';
+
+		// Load voice notes system.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-voice-notes.php';
+
+		// Load location-based features.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-location.php';
 
 		// Load message manager.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-message-manager.php';
@@ -131,6 +179,7 @@ class WPMatch {
 		// Load WooCommerce integration.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-woocommerce-integration.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-membership-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-subscription-manager.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-order-processing.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-feature-restrictions.php';
 
@@ -183,6 +232,7 @@ class WPMatch {
 		$this->loader->add_action( 'wp_ajax_wpmatch_admin_action', $plugin_admin, 'handle_admin_ajax' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_generate_sample_data', $plugin_admin, 'generate_sample_data' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_create_demo_pages', $plugin_admin, 'create_demo_pages' );
+		$this->loader->add_action( 'wp_ajax_wpmatch_cleanup_demo_data', $plugin_admin, 'cleanup_demo_data' );
 	}
 
 	/**
@@ -233,17 +283,149 @@ class WPMatch {
 	}
 
 	/**
+	 * Register all of the hooks related to AJAX functionality.
+	 */
+	private function define_ajax_hooks() {
+		// Initialize AJAX handlers.
+		WPMatch_AJAX_Handlers::init();
+	}
+
+	/**
 	 * Register all of the hooks related to WooCommerce integration.
 	 */
 	private function define_woocommerce_hooks() {
 		// Initialize WooCommerce integration.
 		WPMatch_WooCommerce_Integration::init();
 
+		// Initialize subscription management.
+		WPMatch_Subscription_Manager::init();
+
 		// Initialize order processing.
 		WPMatch_Order_Processing::init();
 
 		// Initialize feature restrictions.
 		WPMatch_Feature_Restrictions::init();
+	}
+
+	/**
+	 * Register all of the hooks related to advanced matching functionality.
+	 */
+	private function define_advanced_matching_hooks() {
+		// Initialize advanced matching system.
+		WPMatch_Advanced_Matching::init();
+
+		// Note: Advanced matching hooks are registered directly in WPMatch_Advanced_Matching::init()
+		// since they use static methods that don't work with the WPMatch_Loader pattern.
+	}
+
+	/**
+	 * Register all of the hooks related to real-time messaging functionality.
+	 */
+	private function define_messaging_hooks() {
+		// Initialize real-time messaging system.
+		WPMatch_Realtime_Messaging::init();
+
+		// Note: Messaging hooks are registered directly in WPMatch_Realtime_Messaging::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to photo verification functionality.
+	 */
+	private function define_photo_verification_hooks() {
+		// Initialize photo verification system.
+		WPMatch_Photo_Verification::init();
+
+		// Note: Photo verification hooks are registered directly in WPMatch_Photo_Verification::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to mobile API functionality.
+	 */
+	private function define_mobile_api_hooks() {
+		// Initialize mobile API system.
+		WPMatch_Mobile_API::init();
+
+		// Note: Mobile API hooks are registered directly in WPMatch_Mobile_API::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to social integrations functionality.
+	 */
+	private function define_social_integrations_hooks() {
+		// Initialize social integrations system.
+		WPMatch_Social_Integrations::init();
+
+		// Note: Social integration hooks are registered directly in WPMatch_Social_Integrations::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to video chat functionality.
+	 */
+	private function define_video_chat_hooks() {
+		// Initialize video chat system.
+		WPMatch_Video_Chat::init();
+
+		// Note: Video chat hooks are registered directly in WPMatch_Video_Chat::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to AI chatbot functionality.
+	 */
+	private function define_ai_chatbot_hooks() {
+		// Initialize AI chatbot system.
+		WPMatch_AI_Chatbot::init();
+
+		// Note: AI chatbot hooks are registered directly in WPMatch_AI_Chatbot::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to gamification functionality.
+	 */
+	private function define_gamification_hooks() {
+		// Initialize gamification system.
+		WPMatch_Gamification::init();
+
+		// Note: Gamification hooks are registered directly in WPMatch_Gamification::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to events functionality.
+	 */
+	private function define_events_hooks() {
+		// Initialize events system.
+		WPMatch_Events::init();
+
+		// Note: Events hooks are registered directly in WPMatch_Events::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to voice notes functionality.
+	 */
+	private function define_voice_notes_hooks() {
+		// Initialize voice notes system.
+		WPMatch_Voice_Notes::init();
+
+		// Note: Voice notes hooks are registered directly in WPMatch_Voice_Notes::init()
+		// since they use static methods and REST API routes.
+	}
+
+	/**
+	 * Register all of the hooks related to location-based functionality.
+	 */
+	private function define_location_hooks() {
+		// Initialize location system.
+		WPMatch_Location::init();
+
+		// Note: Location hooks are registered directly in WPMatch_Location::init()
+		// since they use static methods and REST API routes.
 	}
 
 	/**

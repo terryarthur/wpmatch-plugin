@@ -305,13 +305,18 @@ class WPMatch_Membership_Setup {
 	 */
 	private static function create_membership_product( $name, $level, $price, $billing_period = 'month', $trial_days = 0, $features = array() ) {
 		try {
-			// Check if WooCommerce Subscriptions is active.
-			$use_subscriptions = class_exists( 'WC_Subscriptions' );
+			// Check if any subscription plugin is active.
+			$use_subscriptions = class_exists( 'WC_Subscriptions' ) || class_exists( 'Subscriptions_For_Woocommerce' );
 
-			// Create product.
-			if ( $use_subscriptions ) {
+			// Create product based on available subscription plugin.
+			if ( class_exists( 'WC_Subscriptions' ) ) {
+				// Official WooCommerce Subscriptions.
 				$product = new WC_Product_Subscription();
+			} elseif ( class_exists( 'Subscriptions_For_Woocommerce' ) ) {
+				// Subscriptions for WooCommerce plugin.
+				$product = new WC_Product_Simple();
 			} else {
+				// Fallback to simple product.
 				$product = new WC_Product_Simple();
 			}
 
@@ -331,24 +336,45 @@ class WPMatch_Membership_Setup {
 			// Set SKU.
 			$product->set_sku( 'wpmatch-' . $level );
 
-			// Set subscription data if using WooCommerce Subscriptions.
-			if ( $use_subscriptions ) {
-				// Subscription period.
-				update_post_meta( $product->get_id(), '_subscription_period', $billing_period );
-				update_post_meta( $product->get_id(), '_subscription_period_interval', 1 );
+			// Save the product first to get ID.
+			$product_id = $product->save();
 
-				// Trial period.
-				if ( $trial_days > 0 ) {
-					update_post_meta( $product->get_id(), '_subscription_trial_length', $trial_days );
-					update_post_meta( $product->get_id(), '_subscription_trial_period', 'day' );
+			// Set subscription data based on available plugin.
+			if ( $use_subscriptions && $product_id ) {
+				if ( class_exists( 'WC_Subscriptions' ) ) {
+					// Official WooCommerce Subscriptions.
+					update_post_meta( $product_id, '_subscription_period', $billing_period );
+					update_post_meta( $product_id, '_subscription_period_interval', 1 );
+
+					if ( $trial_days > 0 ) {
+						update_post_meta( $product_id, '_subscription_trial_length', $trial_days );
+						update_post_meta( $product_id, '_subscription_trial_period', 'day' );
+					}
+
+					update_post_meta( $product_id, '_subscription_limit', 'active' );
+
+				} elseif ( class_exists( 'Subscriptions_For_Woocommerce' ) ) {
+					// Subscriptions for WooCommerce plugin.
+					update_post_meta( $product_id, '_wps_sfw_product', 'yes' );
+					update_post_meta( $product_id, '_wps_sfw_subscription_price', $price );
+					update_post_meta( $product_id, '_wps_sfw_subscription_period', $billing_period );
+					update_post_meta( $product_id, '_wps_sfw_subscription_period_interval', '1' );
+
+					if ( $trial_days > 0 ) {
+						update_post_meta( $product_id, '_wps_sfw_subscription_trial_period', 'day' );
+						update_post_meta( $product_id, '_wps_sfw_subscription_trial_length', $trial_days );
+					}
+
+					// Set subscription specific settings.
+					update_post_meta( $product_id, '_wps_sfw_subscription_sign_up_fee', '0' );
+					update_post_meta( $product_id, '_wps_sfw_subscription_expiry_interval', '0' ); // 0 = never expires.
 				}
 
-				// Limit to one active subscription.
-				update_post_meta( $product->get_id(), '_subscription_limit', 'active' );
+				// Add WPMatch subscription tracking.
+				update_post_meta( $product_id, '_wpmatch_is_subscription', 'yes' );
+				update_post_meta( $product_id, '_wpmatch_billing_period', $billing_period );
+				update_post_meta( $product_id, '_wpmatch_trial_days', $trial_days );
 			}
-
-			// Save the product.
-			$product_id = $product->save();
 
 			// Add custom meta for WPMatch.
 			update_post_meta( $product_id, '_wpmatch_membership_level', $level );
