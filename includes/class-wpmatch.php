@@ -50,7 +50,7 @@ class WPMatch {
 	 * the public-facing side of the site.
 	 */
 	private function __construct() {
-		$this->version = WPMATCH_VERSION;
+		$this->version     = WPMATCH_VERSION;
 		$this->plugin_name = 'wpmatch';
 
 		$this->load_dependencies();
@@ -183,6 +183,7 @@ class WPMatch {
 		$this->loader->add_action( 'wp_ajax_wpmatch_admin_action', $plugin_admin, 'handle_admin_ajax' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_generate_sample_data', $plugin_admin, 'generate_sample_data' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_create_demo_pages', $plugin_admin, 'create_demo_pages' );
+		$this->loader->add_action( 'wp_ajax_wpmatch_cleanup_demo_data', $plugin_admin, 'cleanup_demo_data' );
 	}
 
 	/**
@@ -306,7 +307,7 @@ class WPMatch {
 	 * @return bool Whether the settings were updated.
 	 */
 	public function update_setting( $key, $value ) {
-		$settings = $this->get_settings();
+		$settings         = $this->get_settings();
 		$settings[ $key ] = $value;
 		return update_option( 'wpmatch_settings', $settings );
 	}

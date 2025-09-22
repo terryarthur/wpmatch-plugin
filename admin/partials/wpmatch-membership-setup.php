@@ -133,6 +133,167 @@ $membership_products = get_option( 'wpmatch_membership_products', array() );
 			</form>
 		</div>
 
+		<!-- Custom Tier Builder -->
+		<div class="card">
+			<h2><?php esc_html_e( 'Create Custom Membership Tier', 'wpmatch' ); ?></h2>
+			<p><?php esc_html_e( 'Design your own membership tier with custom features and pricing.', 'wpmatch' ); ?></p>
+
+			<form method="post" action="" id="custom-tier-form">
+				<?php wp_nonce_field( 'wpmatch_create_custom_tier', 'wpmatch_custom_tier_nonce' ); ?>
+				<input type="hidden" name="action" value="create_custom_tier">
+
+				<table class="form-table">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Tier Name', 'wpmatch' ); ?></th>
+						<td>
+							<input type="text" name="custom_tier_name" placeholder="e.g., Professional, Student, VIP" required style="width: 300px;" />
+							<p class="description"><?php esc_html_e( 'The name users will see for this membership level.', 'wpmatch' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Price', 'wpmatch' ); ?></th>
+						<td>
+							<input type="number" name="custom_tier_price" step="0.01" min="0" required style="width: 150px;" />
+							<?php echo esc_html( get_woocommerce_currency_symbol() ); ?>
+							<select name="custom_billing_period">
+								<option value="month"><?php esc_html_e( '/ month', 'wpmatch' ); ?></option>
+								<option value="year"><?php esc_html_e( '/ year', 'wpmatch' ); ?></option>
+								<option value="week"><?php esc_html_e( '/ week', 'wpmatch' ); ?></option>
+								<option value="day"><?php esc_html_e( '/ day', 'wpmatch' ); ?></option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Features', 'wpmatch' ); ?></th>
+						<td>
+							<div class="custom-features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="unlimited_likes" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Unlimited Daily Likes', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Remove daily like limits', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="see_who_liked" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'See Who Liked You', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'View profiles that liked you', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="advanced_search" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Advanced Search Filters', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Enhanced filtering options', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="profile_visitors" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Profile Visitors', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'See who viewed your profile', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="read_receipts" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Read Receipts', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'See when messages are read', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="profile_boost_weekly" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Weekly Profile Boost', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Boost visibility weekly', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="profile_boost_monthly" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Monthly Profile Boost', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Boost visibility monthly', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="priority_support" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Priority Support', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Faster customer service', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="hide_ads" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Ad-Free Experience', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Remove all advertisements', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="incognito_mode" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Incognito Browsing', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Browse profiles privately', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="message_filters" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Advanced Message Filters', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Filter incoming messages', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+
+								<label style="display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+									<input type="checkbox" name="custom_features[]" value="super_likes" style="margin-right: 10px;">
+									<div>
+										<strong><?php esc_html_e( 'Super Likes', 'wpmatch' ); ?></strong><br>
+										<small><?php esc_html_e( 'Send special highlighted likes', 'wpmatch' ); ?></small>
+									</div>
+								</label>
+							</div>
+
+							<div style="margin-top: 20px;">
+								<label style="display: flex; align-items: flex-start;">
+									<span style="font-weight: bold; margin-right: 10px; margin-top: 2px;"><?php esc_html_e( 'Daily Likes Limit:', 'wpmatch' ); ?></span>
+									<div>
+										<input type="number" name="custom_daily_likes" min="1" placeholder="e.g., 50, 100, 500" style="width: 150px;" />
+										<p class="description"><?php esc_html_e( 'Number of daily likes allowed (leave empty for unlimited)', 'wpmatch' ); ?></p>
+									</div>
+								</label>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Trial Period', 'wpmatch' ); ?></th>
+						<td>
+							<input type="number" name="custom_trial_days" min="0" max="90" value="0" style="width: 100px;" />
+							<?php esc_html_e( 'days', 'wpmatch' ); ?>
+							<p class="description"><?php esc_html_e( 'Free trial period for new subscribers (0 for no trial)', 'wpmatch' ); ?></p>
+						</td>
+					</tr>
+				</table>
+
+				<p class="submit">
+					<button type="submit" class="button button-primary">
+						<?php esc_html_e( 'Create Custom Tier', 'wpmatch' ); ?>
+					</button>
+				</p>
+			</form>
+		</div>
+
 		<?php if ( ! empty( $membership_products ) ) : ?>
 		<div class="card">
 			<h2><?php esc_html_e( 'Existing Membership Products', 'wpmatch' ); ?></h2>

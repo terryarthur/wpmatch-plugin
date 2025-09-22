@@ -392,6 +392,208 @@ class WPMatch_Admin {
 	}
 
 	/**
+	 * Clean up demo data (users, pages, menu).
+	 */
+	public function cleanup_demo_data() {
+		// Verify nonce.
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmatch_admin_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed', 'wpmatch' ) ) );
+		}
+
+		// Check capabilities.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'wpmatch' ) ) );
+		}
+
+		try {
+			$cleanup_results = $this->remove_demo_data();
+			wp_send_json_success(
+				array(
+					'message'        => __( 'Demo data cleanup completed successfully!', 'wpmatch' ),
+					'cleanup_counts' => $cleanup_results,
+				)
+			);
+		} catch ( Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Remove demo data from the system.
+	 *
+	 * @return array Cleanup statistics.
+	 */
+	private function remove_demo_data() {
+		$cleanup_stats = array(
+			'users_removed'    => 0,
+			'pages_removed'    => 0,
+			'menus_removed'    => 0,
+			'profiles_removed' => 0,
+			'messages_removed' => 0,
+		);
+
+		// Remove demo users (identified by email domain @example.com).
+		$demo_users = get_users(
+			array(
+				'search'         => '@example.com',
+				'search_columns' => array( 'user_email' ),
+				'fields'         => 'all',
+			)
+		);
+
+		foreach ( $demo_users as $user ) {
+			// Only remove users with @example.com emails to be safe.
+			if ( strpos( $user->user_email, '@example.com' ) !== false ) {
+				// Clean up user's profile data and interactions first.
+				$this->cleanup_user_profile_data( $user->ID );
+
+				// Remove the user.
+				if ( wp_delete_user( $user->ID ) ) {
+					++$cleanup_stats['users_removed'];
+				}
+			}
+		}
+
+		// Remove demo pages (identified by specific slugs we created).
+		$demo_page_slugs = array(
+			'dating',
+			'browse',
+			'search',
+			'matches',
+			'profile/edit',
+			'messages',
+			'premium',
+			'help',
+		);
+
+		foreach ( $demo_page_slugs as $slug ) {
+			$page = get_page_by_path( $slug );
+			if ( $page && ! is_wp_error( $page ) ) {
+				// Additional check - only remove if it contains our demo content.
+				$content = get_post_field( 'post_content', $page->ID );
+				if ( strpos( $content, 'wpmatch-' ) !== false || strpos( $content, 'Dating Home' ) !== false || strpos( $content, 'Find your perfect match' ) !== false ) {
+					if ( wp_delete_post( $page->ID, true ) ) {
+						++$cleanup_stats['pages_removed'];
+					}
+				}
+			}
+		}
+
+		// Remove demo navigation menu.
+		$menu = wp_get_nav_menu_object( 'Dating Navigation' );
+		if ( $menu && ! is_wp_error( $menu ) ) {
+			if ( wp_delete_nav_menu( $menu->term_id ) ) {
+				++$cleanup_stats['menus_removed'];
+			}
+		}
+
+		// Clean up any orphaned profile data and demo interactions.
+		$this->cleanup_orphaned_demo_data();
+
+		return $cleanup_stats;
+	}
+
+	/**
+	 * Clean up user profile data and interactions.
+	 *
+	 * @param int $user_id User ID to clean up.
+	 */
+	private function cleanup_user_profile_data( $user_id ) {
+		global $wpdb;
+
+		// Clean up user meta related to WPMatch.
+		$meta_keys_to_remove = array(
+			'wpmatch_profile',
+			'wpmatch_preferences',
+			'wpmatch_location',
+			'wpmatch_last_active',
+			'wpmatch_verification_status',
+			'wpmatch_membership_level',
+		);
+
+		foreach ( $meta_keys_to_remove as $meta_key ) {
+			delete_user_meta( $user_id, $meta_key );
+		}
+
+		// Clean up any matches, likes, messages involving this user.
+		// This would depend on how your database tables are structured.
+		// For now, we'll clean up based on common patterns.
+
+		// If you have custom tables for matches, likes, messages, etc., clean them here.
+		// Example (adjust table names and structure as needed):
+		/*
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_likes',
+			array(
+				'user_id' => $user_id
+			),
+			array( '%d' )
+		);
+
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_likes',
+			array(
+				'liked_user_id' => $user_id
+			),
+			array( '%d' )
+		);
+
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_matches',
+			array(
+				'user_1_id' => $user_id
+			),
+			array( '%d' )
+		);
+
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_matches',
+			array(
+				'user_2_id' => $user_id
+			),
+			array( '%d' )
+		);
+
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_messages',
+			array(
+				'sender_id' => $user_id
+			),
+			array( '%d' )
+		);
+
+		$wpdb->delete(
+			$wpdb->prefix . 'wpmatch_messages',
+			array(
+				'recipient_id' => $user_id
+			),
+			array( '%d' )
+		);
+		*/
+	}
+
+	/**
+	 * Clean up any orphaned demo data.
+	 */
+	private function cleanup_orphaned_demo_data() {
+		global $wpdb;
+
+		// Clean up any demo-related options.
+		$demo_options = array(
+			'wpmatch_demo_users_created',
+			'wpmatch_demo_pages_created',
+			'wpmatch_demo_menu_created',
+		);
+
+		foreach ( $demo_options as $option ) {
+			delete_option( $option );
+		}
+
+		// Clean up any orphaned profile data where user no longer exists.
+		// This is more complex and would depend on your specific data structure.
+	}
+
+	/**
 	 * Create sample users with complete profiles.
 	 */
 	private function create_sample_users() {
@@ -588,7 +790,180 @@ class WPMatch_Admin {
 			}
 		}
 
+		// Create sample interactions between users.
+		$this->create_sample_interactions( $created_users );
+
 		return $created_users;
+	}
+
+	/**
+	 * Create sample interactions between demo users.
+	 *
+	 * @param array $created_users Array of created user IDs.
+	 * @since 1.0.0
+	 */
+	private function create_sample_interactions( $created_users ) {
+		if ( count( $created_users ) < 2 ) {
+			return; // Need at least 2 users for interactions.
+		}
+
+		global $wpdb;
+
+		// Get table names.
+		$swipes_table   = $wpdb->prefix . 'wpmatch_swipes';
+		$matches_table  = $wpdb->prefix . 'wpmatch_matches';
+		$messages_table = $wpdb->prefix . 'wpmatch_messages';
+
+		// Sample interactions - create realistic dating app activity.
+		$interactions = array(
+			// Sarah likes Mike (mutual match).
+			array(
+				'swiper_id' => $created_users[0], // sarah_adventurer.
+				'target_id' => $created_users[1], // mike_chef.
+				'action'    => 'like',
+				'mutual'    => true,
+			),
+			// Mike likes Sarah back (creates match).
+			array(
+				'swiper_id' => $created_users[1], // mike_chef.
+				'target_id' => $created_users[0], // sarah_adventurer.
+				'action'    => 'like',
+				'mutual'    => true,
+			),
+			// Emma likes Sarah.
+			array(
+				'swiper_id' => $created_users[2], // emma_artist.
+				'target_id' => $created_users[0], // sarah_adventurer.
+				'action'    => 'like',
+				'mutual'    => false,
+			),
+			// Alex likes Emma (mutual match).
+			array(
+				'swiper_id' => $created_users[3], // alex_teacher.
+				'target_id' => $created_users[2], // emma_artist.
+				'action'    => 'like',
+				'mutual'    => true,
+			),
+			// Emma likes Alex back.
+			array(
+				'swiper_id' => $created_users[2], // emma_artist.
+				'target_id' => $created_users[3], // alex_teacher.
+				'action'    => 'like',
+				'mutual'    => true,
+			),
+			// David passes on Sarah.
+			array(
+				'swiper_id' => $created_users[4], // david_musician.
+				'target_id' => $created_users[0], // sarah_adventurer.
+				'action'    => 'pass',
+				'mutual'    => false,
+			),
+			// Sarah likes David (one-sided).
+			array(
+				'swiper_id' => $created_users[0], // sarah_adventurer.
+				'target_id' => $created_users[4], // david_musician.
+				'action'    => 'like',
+				'mutual'    => false,
+			),
+		);
+
+		// Create swipes.
+		foreach ( $interactions as $interaction ) {
+			$wpdb->insert(
+				$swipes_table,
+				array(
+					'user_id'    => $interaction['swiper_id'],
+					'target_id'  => $interaction['target_id'],
+					'action'     => $interaction['action'],
+					'created_at' => current_time( 'mysql' ),
+				),
+				array( '%d', '%d', '%s', '%s' )
+			);
+		}
+
+		// Create mutual matches.
+		$matches = array(
+			// Sarah & Mike match.
+			array( $created_users[0], $created_users[1] ),
+			// Emma & Alex match.
+			array( $created_users[2], $created_users[3] ),
+		);
+
+		foreach ( $matches as $match ) {
+			// Create unique conversation ID.
+			$conversation_id = 'conv_' . min( $match[0], $match[1] ) . '_' . max( $match[0], $match[1] );
+
+			// Insert match record.
+			$wpdb->insert(
+				$matches_table,
+				array(
+					'user_1_id'       => min( $match[0], $match[1] ),
+					'user_2_id'       => max( $match[0], $match[1] ),
+					'conversation_id' => $conversation_id,
+					'matched_at'      => current_time( 'mysql' ),
+					'status'          => 'active',
+				),
+				array( '%d', '%d', '%s', '%s', '%s' )
+			);
+		}
+
+		// Create sample messages between matches.
+		$sample_messages = array(
+			// Sarah & Mike conversation.
+			array(
+				'conversation_id' => 'conv_' . min( $created_users[0], $created_users[1] ) . '_' . max( $created_users[0], $created_users[1] ),
+				'sender_id'       => $created_users[0], // Sarah.
+				'recipient_id'    => $created_users[1], // Mike.
+				'content'         => 'Hi Mike! I saw you\'re a chef - that\'s amazing! I love trying new restaurants. What\'s your favorite cuisine to cook?',
+				'created_at'      => date( 'Y-m-d H:i:s', strtotime( '-2 hours' ) ),
+			),
+			array(
+				'conversation_id' => 'conv_' . min( $created_users[0], $created_users[1] ) . '_' . max( $created_users[0], $created_users[1] ),
+				'sender_id'       => $created_users[1], // Mike.
+				'recipient_id'    => $created_users[0], // Sarah.
+				'content'         => 'Hey Sarah! Thanks for the message! I love cooking Italian and Mediterranean food the most. Your hiking photos are incredible - where was that mountain shot taken?',
+				'created_at'      => date( 'Y-m-d H:i:s', strtotime( '-1 hour 45 minutes' ) ),
+			),
+			array(
+				'conversation_id' => 'conv_' . min( $created_users[0], $created_users[1] ) . '_' . max( $created_users[0], $created_users[1] ),
+				'sender_id'       => $created_users[0], // Sarah.
+				'recipient_id'    => $created_users[1], // Mike.
+				'content'         => 'That was Half Dome in Yosemite! One of my favorite climbs. Maybe I could cook for you sometime? I make a mean pasta 😄',
+				'created_at'      => date( 'Y-m-d H:i:s', strtotime( '-1 hour 30 minutes' ) ),
+			),
+			// Emma & Alex conversation.
+			array(
+				'conversation_id' => 'conv_' . min( $created_users[2], $created_users[3] ) . '_' . max( $created_users[2], $created_users[3] ),
+				'sender_id'       => $created_users[3], // Alex.
+				'recipient_id'    => $created_users[2], // Emma.
+				'content'         => 'Hi Emma! Your art is beautiful - I checked out your portfolio. Do you have any pieces displayed locally?',
+				'created_at'      => date( 'Y-m-d H:i:s', strtotime( '-3 hours' ) ),
+			),
+			array(
+				'conversation_id' => 'conv_' . min( $created_users[2], $created_users[3] ) . '_' . max( $created_users[2], $created_users[3] ),
+				'sender_id'       => $created_users[2], // Emma.
+				'recipient_id'    => $created_users[3], // Alex.
+				'content'         => 'Thank you so much! Yes, I have a few pieces at the downtown gallery on 3rd Street. I love that you\'re a teacher - what grade do you teach?',
+				'created_at'      => date( 'Y-m-d H:i:s', strtotime( '-2 hours 30 minutes' ) ),
+			),
+		);
+
+		// Insert sample messages.
+		foreach ( $sample_messages as $message ) {
+			$wpdb->insert(
+				$messages_table,
+				array(
+					'conversation_id' => $message['conversation_id'],
+					'sender_id'       => $message['sender_id'],
+					'recipient_id'    => $message['recipient_id'],
+					'message_content' => $message['content'],
+					'message_type'    => 'text',
+					'is_read'         => 0,
+					'created_at'      => $message['created_at'],
+				),
+				array( '%s', '%d', '%d', '%s', '%s', '%d', '%s' )
+			);
+		}
 	}
 
 	/**
@@ -610,15 +985,27 @@ class WPMatch_Admin {
 					</div>
 
 					<div style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
-						<h3>✏️ Edit Profile</h3>
-						<p>Create an amazing profile that shows off your personality.</p>
-						<a href="/profile/edit/" style="background: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Edit Profile</a>
+						<h3>🔍 Search Matches</h3>
+						<p>Use advanced filters to find exactly who you\'re looking for.</p>
+						<a href="/search/" style="background: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Search Now</a>
 					</div>
 
 					<div style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
 						<h3>💕 My Matches</h3>
 						<p>See who you\'ve matched with and start conversations.</p>
 						<a href="/matches/" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Matches</a>
+					</div>
+
+					<div style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+						<h3>✏️ Edit Profile</h3>
+						<p>Create an amazing profile that shows off your personality.</p>
+						<a href="/profile/edit/" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Edit Profile</a>
+					</div>
+
+					<div style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+						<h3>⭐ Go Premium</h3>
+						<p>Unlock unlimited likes, see who liked you, and get more matches!</p>
+						<a href="/premium/" style="background: #ffc107; color: #212529; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Upgrade Now</a>
 					</div>
 				</div>
 
@@ -678,6 +1065,34 @@ class WPMatch_Admin {
 				<p style="text-align: center; margin-top: 20px;">
 					Already have an account? <a href="' . wp_login_url() . '">Sign in here</a>
 				</p>',
+			),
+			array(
+				'title'   => 'Search Matches',
+				'slug'    => 'search',
+				'content' => '<h2>Find Your Perfect Match</h2>
+				<p>Use our advanced search filters to find exactly who you\'re looking for. Set your preferences for age, distance, interests, and more!</p>
+
+				[wpmatch_search]',
+			),
+			array(
+				'title'   => 'Premium Memberships',
+				'slug'    => 'premium',
+				'content' => '<h2>Upgrade Your Dating Experience</h2>
+				<p>Get more matches, see who liked you, and unlock exclusive features with our premium memberships.</p>
+
+				[wpmatch_premium_shop]
+
+				<div style="background: #f8f9fa; padding: 20px; margin: 30px 0; border-radius: 8px; text-align: center;">
+					<h3 style="color: #fd297b;">✨ Why Go Premium?</h3>
+					<ul style="text-align: left; display: inline-block; margin: 0;">
+						<li>Unlimited daily likes</li>
+						<li>See who liked your profile</li>
+						<li>Advanced search filters</li>
+						<li>Read receipts for messages</li>
+						<li>Profile boost for more visibility</li>
+						<li>Priority customer support</li>
+					</ul>
+				</div>',
 			),
 			array(
 				'title'   => 'Help & Dating Tips',
