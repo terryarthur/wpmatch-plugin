@@ -22,15 +22,15 @@ if ( ! $user_id ) {
 
 // Get user's membership data.
 $current_membership = WPMatch_Membership_Manager::get_user_membership_level( $user_id );
-$memberships = get_user_meta( $user_id, '_wpmatch_memberships', true );
-$membership_data = get_user_meta( $user_id, '_wpmatch_membership_data', true );
+$memberships        = get_user_meta( $user_id, '_wpmatch_memberships', true );
+$membership_data    = get_user_meta( $user_id, '_wpmatch_membership_data', true );
 
 // Get membership features (using a simple feature map for now).
 $all_features = array(
 	'free'     => array(
-		'basic_swipe'       => __( 'Basic Swiping', 'wpmatch' ),
-		'basic_messaging'   => __( 'Basic Messaging', 'wpmatch' ),
-		'profile_creation'  => __( 'Profile Creation', 'wpmatch' ),
+		'basic_swipe'      => __( 'Basic Swiping', 'wpmatch' ),
+		'basic_messaging'  => __( 'Basic Messaging', 'wpmatch' ),
+		'profile_creation' => __( 'Profile Creation', 'wpmatch' ),
 	),
 	'basic'    => array(
 		'basic_swipe'       => __( 'Basic Swiping', 'wpmatch' ),
@@ -125,7 +125,7 @@ if ( function_exists( 'wcs_get_users_subscriptions' ) ) {
 										<span class="value">
 											<?php
 											$expires_date = date_i18n( get_option( 'date_format' ), $membership_data['expires_at'] );
-											$days_left = ceil( ( $membership_data['expires_at'] - time() ) / DAY_IN_SECONDS );
+											$days_left    = ceil( ( $membership_data['expires_at'] - time() ) / DAY_IN_SECONDS );
 
 											if ( $days_left > 0 ) {
 												/* translators: %1$s: expiry date, %2$d: days remaining */
@@ -325,7 +325,7 @@ if ( function_exists( 'wcs_get_users_subscriptions' ) ) {
 		<?php
 		$usage_stats = get_user_meta( $user_id, '_wpmatch_usage_stats', true );
 		if ( is_array( $usage_stats ) && ! empty( $usage_stats ) ) :
-		?>
+			?>
 			<div class="usage-stats-card">
 				<div class="card-header">
 					<h3><?php esc_html_e( 'Usage Statistics', 'wpmatch' ); ?></h3>
@@ -386,7 +386,7 @@ if ( function_exists( 'wcs_get_users_subscriptions' ) ) {
 						// Show last 10 events.
 						$recent_logs = array_slice( array_reverse( $membership_logs ), 0, 10 );
 						foreach ( $recent_logs as $log ) :
-						?>
+							?>
 							<div class="timeline-item">
 								<div class="timeline-date">
 									<?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $log['timestamp'] ) ); ?>

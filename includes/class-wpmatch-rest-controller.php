@@ -65,6 +65,10 @@ class WPMatch_REST_Controller {
 		$this->register_user_interests_routes();
 		$this->register_user_preferences_routes();
 
+		// Register core dating logic routes.
+		$this->register_matching_routes();
+		$this->register_swipe_action_routes();
+
 		// Register feature routes.
 		$this->register_gamification_routes();
 		$this->register_events_routes();
@@ -1237,6 +1241,413 @@ class WPMatch_REST_Controller {
 		);
 
 		$this->endpoints['user_preferences'] = true;
+	}
+
+	/**
+	 * Register matching algorithm routes.
+	 */
+	protected function register_matching_routes() {
+		if ( ! class_exists( 'WPMatch_Matching_Algorithm' ) ) {
+			return;
+		}
+
+		// Get daily suggestions.
+		register_rest_route(
+			$this->namespace,
+			'/matches/daily-suggestions',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'api_get_daily_suggestions' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'count' => array(
+						'default' => 5,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Get next matches.
+		register_rest_route(
+			$this->namespace,
+			'/matches/next',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'api_get_next_matches' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'count'  => array(
+						'default' => 10,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Build user queue.
+		register_rest_route(
+			$this->namespace,
+			'/matches/build-queue',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'api_build_user_queue' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'force_refresh' => array(
+						'default' => false,
+						'type'    => 'boolean',
+					),
+				),
+			)
+		);
+
+		// Calculate compatibility.
+		register_rest_route(
+			$this->namespace,
+			'/matches/compatibility/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'api_calculate_compatibility' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		$this->endpoints['matching'] = true;
+	}
+
+	/**
+	 * Register swipe action routes.
+	 */
+	protected function register_swipe_action_routes() {
+		if ( ! class_exists( 'WPMatch_Swipe_Actions' ) ) {
+			return;
+		}
+
+		$swipe_actions = new WPMatch_Swipe_Actions( 'wpmatch', WPMATCH_VERSION );
+
+		// Like user.
+		register_rest_route(
+			$this->namespace,
+			'/actions/like/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_like_user' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Dislike user.
+		register_rest_route(
+			$this->namespace,
+			'/actions/dislike/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_dislike_user' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Super like user.
+		register_rest_route(
+			$this->namespace,
+			'/actions/super-like/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_super_like_user' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Block user.
+		register_rest_route(
+			$this->namespace,
+			'/actions/block/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_block_user' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Report user.
+		register_rest_route(
+			$this->namespace,
+			'/actions/report/(?P<target_user_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_report_user' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Undo last action.
+		register_rest_route(
+			$this->namespace,
+			'/actions/undo',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $swipe_actions, 'api_undo_last_action' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Get action history.
+		register_rest_route(
+			$this->namespace,
+			'/actions/history',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $swipe_actions, 'api_get_action_history' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'limit'  => array(
+						'default' => 50,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Get users who liked me.
+		register_rest_route(
+			$this->namespace,
+			'/actions/liked-me',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $swipe_actions, 'api_get_users_who_liked_me' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'limit'  => array(
+						'default' => 20,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Get mutual likes.
+		register_rest_route(
+			$this->namespace,
+			'/actions/mutual-likes',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $swipe_actions, 'api_get_mutual_likes' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'limit'  => array(
+						'default' => 20,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Register messaging routes.
+		$this->register_messaging_system_routes();
+
+		$this->endpoints['swipe_actions'] = true;
+	}
+
+	/**
+	 * Register messaging system routes.
+	 */
+	protected function register_messaging_system_routes() {
+		if ( ! class_exists( 'WPMatch_Messaging' ) ) {
+			return;
+		}
+
+		$messaging = new WPMatch_Messaging( 'wpmatch', WPMATCH_VERSION );
+
+		// Send message.
+		register_rest_route(
+			$this->namespace,
+			'/messages/send',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $messaging, 'api_send_message' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Get conversation messages.
+		register_rest_route(
+			$this->namespace,
+			'/messages/conversation/(?P<conversation_id>[a-zA-Z0-9_]+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $messaging, 'api_get_conversation_messages' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'limit'  => array(
+						'default' => 50,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Get user conversations.
+		register_rest_route(
+			$this->namespace,
+			'/messages/conversations',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $messaging, 'api_get_user_conversations' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+				'args'                => array(
+					'limit'  => array(
+						'default' => 20,
+						'type'    => 'integer',
+					),
+					'offset' => array(
+						'default' => 0,
+						'type'    => 'integer',
+					),
+				),
+			)
+		);
+
+		// Mark messages as read.
+		register_rest_route(
+			$this->namespace,
+			'/messages/mark-read/(?P<conversation_id>[a-zA-Z0-9_]+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $messaging, 'api_mark_messages_as_read' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Delete message.
+		register_rest_route(
+			$this->namespace,
+			'/messages/delete/(?P<message_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $messaging, 'api_delete_message' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Block conversation.
+		register_rest_route(
+			$this->namespace,
+			'/messages/block/(?P<conversation_id>[a-zA-Z0-9_]+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $messaging, 'api_block_conversation' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		// Get unread count.
+		register_rest_route(
+			$this->namespace,
+			'/messages/unread-count',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $messaging, 'api_get_unread_count' ),
+				'permission_callback' => array( $this, 'is_authenticated' ),
+			)
+		);
+
+		$this->endpoints['messaging'] = true;
+	}
+
+	/**
+	 * API endpoint for daily suggestions.
+	 */
+	public function api_get_daily_suggestions( $request ) {
+		$user_id = get_current_user_id();
+		$count   = absint( $request->get_param( 'count' ) );
+
+		$suggestions = WPMatch_Matching_Algorithm::get_daily_suggestions( $user_id, $count );
+
+		return rest_ensure_response(
+			array(
+				'success'     => true,
+				'suggestions' => $suggestions,
+				'count'       => count( $suggestions ),
+			)
+		);
+	}
+
+	/**
+	 * API endpoint for next matches.
+	 */
+	public function api_get_next_matches( $request ) {
+		$user_id = get_current_user_id();
+		$count   = absint( $request->get_param( 'count' ) );
+		$offset  = absint( $request->get_param( 'offset' ) );
+
+		$matches = WPMatch_Matching_Algorithm::get_next_matches( $user_id, $count, $offset );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'matches' => $matches,
+				'count'   => count( $matches ),
+			)
+		);
+	}
+
+	/**
+	 * API endpoint for building user queue.
+	 */
+	public function api_build_user_queue( $request ) {
+		$user_id       = get_current_user_id();
+		$force_refresh = (bool) $request->get_param( 'force_refresh' );
+
+		$queue = WPMatch_Matching_Algorithm::build_user_queue( $user_id, $force_refresh );
+
+		return rest_ensure_response(
+			array(
+				'success'       => true,
+				'queue'         => $queue,
+				'queue_size'    => count( $queue ),
+				'force_refresh' => $force_refresh,
+			)
+		);
+	}
+
+	/**
+	 * API endpoint for calculating compatibility.
+	 */
+	public function api_calculate_compatibility( $request ) {
+		$user_id        = get_current_user_id();
+		$target_user_id = absint( $request->get_param( 'target_user_id' ) );
+
+		$compatibility = WPMatch_Matching_Algorithm::calculate_comprehensive_compatibility( $user_id, $target_user_id );
+
+		return rest_ensure_response(
+			array(
+				'success'        => true,
+				'compatibility'  => $compatibility,
+				'user_id'        => $user_id,
+				'target_user_id' => $target_user_id,
+			)
+		);
 	}
 }
 

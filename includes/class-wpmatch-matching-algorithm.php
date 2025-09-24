@@ -826,4 +826,196 @@ class WPMatch_Matching_Algorithm {
 
 		return '0.0.0.0';
 	}
+
+	/**
+	 * Get daily match suggestions for a user.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id User ID.
+	 * @param int $count Number of suggestions.
+	 * @return array Match suggestions.
+	 */
+	public static function get_daily_suggestions( $user_id, $count = 5 ) {
+		// Check if suggestions already generated today.
+		$cache_key          = 'wpmatch_daily_suggestions_' . $user_id . '_' . date( 'Y-m-d' );
+		$cached_suggestions = get_transient( $cache_key );
+
+		if ( false !== $cached_suggestions ) {
+			return $cached_suggestions;
+		}
+
+		// Build fresh queue.
+		$queue = self::build_user_queue( $user_id, false );
+
+		// Take the requested count.
+		$final_suggestions = array_slice( $queue, 0, $count );
+
+		// Cache for 24 hours.
+		set_transient( $cache_key, $final_suggestions, DAY_IN_SECONDS );
+
+		return $final_suggestions;
+	}
+
+	/**
+	 * Get next batch of potential matches from queue.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id User ID.
+	 * @param int $count Number of matches to get.
+	 * @param int $offset Offset for pagination.
+	 * @return array Potential matches with full profile data.
+	 */
+	public static function get_next_matches( $user_id, $count = 10, $offset = 0 ) {
+		global $wpdb;
+
+		$queue_table    = $wpdb->prefix . 'wpmatch_match_queue';
+		$profiles_table = $wpdb->prefix . 'wpmatch_user_profiles';
+
+		// Get queue entries with profile data.
+		$queue_entries = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT q.*, p.*, u.display_name, u.user_login
+			FROM {$queue_table} q
+			INNER JOIN {$profiles_table} p ON q.potential_match_id = p.user_id
+			INNER JOIN {$wpdb->users} u ON p.user_id = u.ID
+			WHERE q.user_id = %d
+			ORDER BY q.priority DESC, q.compatibility_score DESC
+			LIMIT %d OFFSET %d",
+				$user_id,
+				$count,
+				$offset
+			),
+			ARRAY_A
+		);
+
+		// Add media and additional data.
+		foreach ( $queue_entries as &$entry ) {
+			$entry['photos']              = self::get_user_photos( $entry['potential_match_id'] );
+			$entry['distance']            = self::calculate_distance_for_user( $user_id, $entry['potential_match_id'] );
+			$entry['common_interests']    = self::get_common_interests( $user_id, $entry['potential_match_id'] );
+			$entry['is_online']           = self::is_user_online( $entry['potential_match_id'] );
+			$entry['verification_status'] = self::get_verification_status( $entry['potential_match_id'] );
+		}
+
+		return $queue_entries;
+	}
+
+	/**
+	 * Get user photos for profile display.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id User ID.
+	 * @return array User photos.
+	 */
+	private static function get_user_photos( $user_id ) {
+		global $wpdb;
+
+		$media_table = $wpdb->prefix . 'wpmatch_user_media';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT file_path, file_name, is_primary, display_order
+			FROM {$media_table}
+			WHERE user_id = %d AND media_type = 'photo' AND is_verified = 1
+			ORDER BY is_primary DESC, display_order ASC
+			LIMIT 6",
+				$user_id
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Calculate distance between current user and target user.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id Current user ID.
+	 * @param int $target_user_id Target user ID.
+	 * @return float Distance in miles.
+	 */
+	private static function calculate_distance_for_user( $user_id, $target_user_id ) {
+		$user_profile   = self::get_user_profile( $user_id );
+		$target_profile = self::get_user_profile( $target_user_id );
+
+		if ( ! $user_profile || ! $target_profile ||
+			! $user_profile->latitude || ! $user_profile->longitude ||
+			! $target_profile->latitude || ! $target_profile->longitude ) {
+			return 0;
+		}
+
+		return self::calculate_distance(
+			$user_profile->latitude,
+			$user_profile->longitude,
+			$target_profile->latitude,
+			$target_profile->longitude
+		);
+	}
+
+	/**
+	 * Get common interests between two users.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id1 First user ID.
+	 * @param int $user_id2 Second user ID.
+	 * @return array Common interests.
+	 */
+	private static function get_common_interests( $user_id1, $user_id2 ) {
+		global $wpdb;
+
+		$interests_table = $wpdb->prefix . 'wpmatch_user_interests';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT DISTINCT i1.interest_name, i1.interest_category
+			FROM {$interests_table} i1
+			INNER JOIN {$interests_table} i2 ON i1.interest_name = i2.interest_name
+			WHERE i1.user_id = %d AND i2.user_id = %d
+			ORDER BY i1.interest_category, i1.interest_name",
+				$user_id1,
+				$user_id2
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Check if user is currently online.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id User ID.
+	 * @return bool True if online.
+	 */
+	private static function is_user_online( $user_id ) {
+		$last_activity = get_user_meta( $user_id, 'wpmatch_last_activity', true );
+
+		if ( ! $last_activity ) {
+			return false;
+		}
+
+		$threshold = strtotime( '-15 minutes' );
+		return strtotime( $last_activity ) > $threshold;
+	}
+
+	/**
+	 * Get verification status for user.
+	 *
+	 * @since 1.0.0
+	 * @param int $user_id User ID.
+	 * @return array Verification status.
+	 */
+	private static function get_verification_status( $user_id ) {
+		global $wpdb;
+
+		$verifications_table = $wpdb->prefix . 'wpmatch_user_verifications';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT verification_type, verification_status
+			FROM {$verifications_table}
+			WHERE user_id = %d AND verification_status = 'verified'",
+				$user_id
+			),
+			ARRAY_A
+		);
+	}
 }

@@ -130,98 +130,78 @@ $total_pages = ceil( $total_filtered / $per_page );
 	<!-- Statistics Dashboard -->
 	<div class="wpmatch-stats-grid">
 		<div class="wpmatch-stat-card">
-			<div class="stat-icon">
+			<div class="wpmatch-stat-header">
 				<span class="dashicons dashicons-admin-users"></span>
+				<span class="wpmatch-stat-label"><?php esc_html_e( 'Total Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="stat-content">
-				<h3><?php echo esc_html( number_format( $total_users ) ); ?></h3>
-				<p><?php esc_html_e( 'Total Users', 'wpmatch' ); ?></p>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-change">
+				<span class="dashicons dashicons-admin-users"></span>
+				<?php esc_html_e( 'All registered users', 'wpmatch' ); ?>
 			</div>
 		</div>
 
-		<div class="wpmatch-stat-card active">
-			<div class="stat-icon">
+		<div class="wpmatch-stat-card">
+			<div class="wpmatch-stat-header">
 				<span class="dashicons dashicons-yes-alt"></span>
+				<span class="wpmatch-stat-label"><?php esc_html_e( 'Active Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="stat-content">
-				<h3><?php echo esc_html( number_format( $active_users ) ); ?></h3>
-				<p><?php esc_html_e( 'Active Users', 'wpmatch' ); ?></p>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $active_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-change positive">
+				<span class="dashicons dashicons-arrow-up-alt"></span>
+				<?php esc_html_e( 'Currently active', 'wpmatch' ); ?>
 			</div>
 		</div>
 
-		<div class="wpmatch-stat-card verified">
-			<div class="stat-icon">
+		<div class="wpmatch-stat-card">
+			<div class="wpmatch-stat-header">
 				<span class="dashicons dashicons-awards"></span>
+				<span class="wpmatch-stat-label"><?php esc_html_e( 'Verified Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="stat-content">
-				<h3><?php echo esc_html( number_format( $verified_users ) ); ?></h3>
-				<p><?php esc_html_e( 'Verified Users', 'wpmatch' ); ?></p>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $verified_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-change positive">
+				<span class="dashicons dashicons-yes"></span>
+				<?php esc_html_e( 'Identity confirmed', 'wpmatch' ); ?>
 			</div>
 		</div>
 
-		<div class="wpmatch-stat-card recent">
-			<div class="stat-icon">
+		<div class="wpmatch-stat-card">
+			<div class="wpmatch-stat-header">
 				<span class="dashicons dashicons-calendar-alt"></span>
+				<span class="wpmatch-stat-label"><?php esc_html_e( 'New This Week', 'wpmatch' ); ?></span>
 			</div>
-			<div class="stat-content">
-				<h3><?php echo esc_html( number_format( $recent_users ) ); ?></h3>
-				<p><?php esc_html_e( 'New This Week', 'wpmatch' ); ?></p>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $recent_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-change positive">
+				<span class="dashicons dashicons-arrow-up-alt"></span>
+				<?php esc_html_e( 'Recent signups', 'wpmatch' ); ?>
 			</div>
-		</div>
-	</div>
-
-	<!-- Filters and Search -->
-	<div class="wpmatch-filters-section">
-		<div class="wpmatch-filters-header">
-			<h2><?php esc_html_e( 'User Directory', 'wpmatch' ); ?></h2>
-			<div class="wpmatch-search-box">
-				<form method="get" action="">
-					<?php foreach ( $_GET as $key => $value ) : ?>
-						<?php if ( $key !== 's' ) : ?>
-							<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>">
-						<?php endif; ?>
-					<?php endforeach; ?>
-					<input type="search" name="s" value="<?php echo esc_attr( $search_query ); ?>" placeholder="<?php esc_attr_e( 'Search users...', 'wpmatch' ); ?>" class="search-input">
-					<button type="submit" class="search-button">
-						<span class="dashicons dashicons-search"></span>
-					</button>
-				</form>
-			</div>
-		</div>
-
-		<div class="wpmatch-filter-tabs">
-			<a href="<?php echo esc_url( remove_query_arg( 'status' ) ); ?>" class="filter-tab <?php echo empty( $status_filter ) ? 'active' : ''; ?>">
-				<?php esc_html_e( 'All Users', 'wpmatch' ); ?>
-				<span class="tab-count"><?php echo esc_html( $total_users ); ?></span>
-			</a>
-			<a href="<?php echo esc_url( add_query_arg( 'status', 'active' ) ); ?>" class="filter-tab <?php echo 'active' === $status_filter ? 'active' : ''; ?>">
-				<?php esc_html_e( 'Active', 'wpmatch' ); ?>
-				<span class="tab-count"><?php echo esc_html( $active_users ); ?></span>
-			</a>
-			<a href="<?php echo esc_url( add_query_arg( 'status', 'pending' ) ); ?>" class="filter-tab <?php echo 'pending' === $status_filter ? 'active' : ''; ?>">
-				<?php esc_html_e( 'Pending', 'wpmatch' ); ?>
-				<span class="tab-count"><?php echo esc_html( $pending_users ); ?></span>
-			</a>
-			<a href="<?php echo esc_url( add_query_arg( 'status', 'blocked' ) ); ?>" class="filter-tab <?php echo 'blocked' === $status_filter ? 'active' : ''; ?>">
-				<?php esc_html_e( 'Blocked', 'wpmatch' ); ?>
-				<span class="tab-count"><?php echo esc_html( $blocked_users ); ?></span>
-			</a>
 		</div>
 	</div>
 
 	<!-- Users Table -->
 	<div class="wpmatch-users-table-container">
 		<?php if ( ! empty( $users ) ) : ?>
-			<div class="wpmatch-table-actions">
-				<div class="bulk-actions">
-					<select name="bulk_action" id="bulk-action-select">
-						<option value=""><?php esc_html_e( 'Bulk Actions', 'wpmatch' ); ?></option>
-						<option value="activate"><?php esc_html_e( 'Activate', 'wpmatch' ); ?></option>
-						<option value="deactivate"><?php esc_html_e( 'Deactivate', 'wpmatch' ); ?></option>
-						<option value="verify"><?php esc_html_e( 'Verify', 'wpmatch' ); ?></option>
-						<option value="block"><?php esc_html_e( 'Block', 'wpmatch' ); ?></option>
-					</select>
-					<button type="button" class="wpmatch-button secondary" onclick="performBulkAction()"><?php esc_html_e( 'Apply', 'wpmatch' ); ?></button>
+			<div class="wpmatch-table-toolbar">
+				<div class="wpmatch-filters-inline">
+					<span class="directory-title"><?php esc_html_e( 'User Directory', 'wpmatch' ); ?></span>
+					<div class="wpmatch-filter-tabs-inline">
+						<a href="<?php echo esc_url( remove_query_arg( 'status' ) ); ?>" class="filter-tab-inline <?php echo empty( $status_filter ) ? 'active' : ''; ?>">
+							<?php esc_html_e( 'All Users', 'wpmatch' ); ?>
+							<span class="tab-count"><?php echo esc_html( $total_users ); ?></span>
+						</a>
+						<a href="<?php echo esc_url( add_query_arg( 'status', 'active' ) ); ?>" class="filter-tab-inline <?php echo 'active' === $status_filter ? 'active' : ''; ?>">
+							<?php esc_html_e( 'Active', 'wpmatch' ); ?>
+							<span class="tab-count"><?php echo esc_html( $active_users ); ?></span>
+						</a>
+						<a href="<?php echo esc_url( add_query_arg( 'status', 'pending' ) ); ?>" class="filter-tab-inline <?php echo 'pending' === $status_filter ? 'active' : ''; ?>">
+							<?php esc_html_e( 'Pending', 'wpmatch' ); ?>
+							<span class="tab-count"><?php echo esc_html( $pending_users ); ?></span>
+						</a>
+						<a href="<?php echo esc_url( add_query_arg( 'status', 'blocked' ) ); ?>" class="filter-tab-inline <?php echo 'blocked' === $status_filter ? 'active' : ''; ?>">
+							<?php esc_html_e( 'Blocked', 'wpmatch' ); ?>
+							<span class="tab-count"><?php echo esc_html( $blocked_users ); ?></span>
+						</a>
+					</div>
 				</div>
 				<div class="showing-results">
 					<?php
@@ -233,6 +213,32 @@ $total_pages = ceil( $total_filtered / $per_page );
 						$total_filtered
 					);
 					?>
+				</div>
+				<div class="wpmatch-search-box-inline">
+					<form method="get" action="">
+						<?php foreach ( $_GET as $key => $value ) : ?>
+							<?php if ( $key !== 's' ) : ?>
+								<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>">
+							<?php endif; ?>
+						<?php endforeach; ?>
+						<input type="search" name="s" value="<?php echo esc_attr( $search_query ); ?>" placeholder="<?php esc_attr_e( 'Search users...', 'wpmatch' ); ?>" class="search-input-compact">
+						<button type="submit" class="search-button-compact">
+							<span class="dashicons dashicons-search"></span>
+						</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="wpmatch-bulk-actions-bar">
+				<div class="bulk-actions">
+					<select name="bulk_action" id="bulk-action-select">
+						<option value=""><?php esc_html_e( 'Bulk Actions', 'wpmatch' ); ?></option>
+						<option value="activate"><?php esc_html_e( 'Activate', 'wpmatch' ); ?></option>
+						<option value="deactivate"><?php esc_html_e( 'Deactivate', 'wpmatch' ); ?></option>
+						<option value="verify"><?php esc_html_e( 'Verify', 'wpmatch' ); ?></option>
+						<option value="block"><?php esc_html_e( 'Block', 'wpmatch' ); ?></option>
+					</select>
+					<button type="button" class="wpmatch-button secondary" onclick="performBulkAction()"><?php esc_html_e( 'Apply', 'wpmatch' ); ?></button>
 				</div>
 			</div>
 

@@ -589,9 +589,9 @@ class WPMatch_Video_Chat {
 		// Enqueue WebRTC adapter.
 		wp_enqueue_script(
 			'webrtc-adapter',
-			'https://webrtc.github.io/adapter/adapter-latest.js',
+			WPMATCH_PLUGIN_URL . 'public/js/webrtc-adapter.js',
 			array(),
-			'latest',
+			'1.0.0',
 			true
 		);
 
@@ -615,24 +615,24 @@ class WPMatch_Video_Chat {
 				'iceServers'      => $this->ice_servers,
 				'signalingServer' => $this->signaling_server,
 				'strings'         => array(
-					'calling'           => esc_html__( 'Calling...', 'wpmatch' ),
-					'connecting'        => esc_html__( 'Connecting...', 'wpmatch' ),
-					'connected'         => esc_html__( 'Connected', 'wpmatch' ),
-					'callEnded'         => esc_html__( 'Call ended', 'wpmatch' ),
-					'callDeclined'      => esc_html__( 'Call declined', 'wpmatch' ),
-					'networkError'      => esc_html__( 'Network error', 'wpmatch' ),
-					'permissionDenied'  => esc_html__( 'Camera/microphone permission denied', 'wpmatch' ),
-					'incomingCall'      => esc_html__( 'Incoming video call from', 'wpmatch' ),
-					'accept'            => esc_html__( 'Accept', 'wpmatch' ),
-					'decline'           => esc_html__( 'Decline', 'wpmatch' ),
-					'endCall'           => esc_html__( 'End Call', 'wpmatch' ),
-					'muteAudio'         => esc_html__( 'Mute', 'wpmatch' ),
-					'unmuteAudio'       => esc_html__( 'Unmute', 'wpmatch' ),
-					'turnOffVideo'      => esc_html__( 'Turn off video', 'wpmatch' ),
-					'turnOnVideo'       => esc_html__( 'Turn on video', 'wpmatch' ),
-					'switchCamera'      => esc_html__( 'Switch camera', 'wpmatch' ),
-					'shareScreen'       => esc_html__( 'Share screen', 'wpmatch' ),
-					'stopSharing'       => esc_html__( 'Stop sharing', 'wpmatch' ),
+					'calling'          => esc_html__( 'Calling...', 'wpmatch' ),
+					'connecting'       => esc_html__( 'Connecting...', 'wpmatch' ),
+					'connected'        => esc_html__( 'Connected', 'wpmatch' ),
+					'callEnded'        => esc_html__( 'Call ended', 'wpmatch' ),
+					'callDeclined'     => esc_html__( 'Call declined', 'wpmatch' ),
+					'networkError'     => esc_html__( 'Network error', 'wpmatch' ),
+					'permissionDenied' => esc_html__( 'Camera/microphone permission denied', 'wpmatch' ),
+					'incomingCall'     => esc_html__( 'Incoming video call from', 'wpmatch' ),
+					'accept'           => esc_html__( 'Accept', 'wpmatch' ),
+					'decline'          => esc_html__( 'Decline', 'wpmatch' ),
+					'endCall'          => esc_html__( 'End Call', 'wpmatch' ),
+					'muteAudio'        => esc_html__( 'Mute', 'wpmatch' ),
+					'unmuteAudio'      => esc_html__( 'Unmute', 'wpmatch' ),
+					'turnOffVideo'     => esc_html__( 'Turn off video', 'wpmatch' ),
+					'turnOnVideo'      => esc_html__( 'Turn on video', 'wpmatch' ),
+					'switchCamera'     => esc_html__( 'Switch camera', 'wpmatch' ),
+					'shareScreen'      => esc_html__( 'Share screen', 'wpmatch' ),
+					'stopSharing'      => esc_html__( 'Stop sharing', 'wpmatch' ),
 				),
 			)
 		);
@@ -661,10 +661,10 @@ class WPMatch_Video_Chat {
 		// Check if users are matched.
 		if ( $this->are_users_matched( get_current_user_id(), $user_id ) ) {
 			$actions['video_call'] = array(
-				'label'  => esc_html__( 'Video Call', 'wpmatch' ),
-				'icon'   => 'fas fa-video',
-				'class'  => 'btn-video-call',
-				'data'   => array(
+				'label' => esc_html__( 'Video Call', 'wpmatch' ),
+				'icon'  => 'fas fa-video',
+				'class' => 'btn-video-call',
+				'data'  => array(
 					'user-id' => $user_id,
 				),
 			);
@@ -753,9 +753,9 @@ class WPMatch_Video_Chat {
 	public function handle_signaling() {
 		check_ajax_referer( 'wp_rest', 'nonce' );
 
-		$action = isset( $_POST['signal_type'] ) ? sanitize_text_field( wp_unslash( $_POST['signal_type'] ) ) : '';
+		$action  = isset( $_POST['signal_type'] ) ? sanitize_text_field( wp_unslash( $_POST['signal_type'] ) ) : '';
 		$room_id = isset( $_POST['room_id'] ) ? sanitize_text_field( wp_unslash( $_POST['room_id'] ) ) : '';
-		$data = isset( $_POST['data'] ) ? wp_unslash( $_POST['data'] ) : null;
+		$data    = isset( $_POST['data'] ) ? wp_unslash( $_POST['data'] ) : null;
 
 		if ( ! $action || ! $room_id ) {
 			wp_send_json_error( 'Invalid signaling request' );
@@ -954,9 +954,9 @@ class WPMatch_Video_Chat {
 				'type'    => 'video_call',
 				'data'    => wp_json_encode(
 					array(
-						'room_id'     => $room_id,
-						'caller_id'   => $caller_id,
-						'caller_name' => $caller->display_name,
+						'room_id'       => $room_id,
+						'caller_id'     => $caller_id,
+						'caller_name'   => $caller->display_name,
 						'caller_avatar' => get_avatar_url( $caller->ID ),
 					)
 				),
@@ -1026,7 +1026,7 @@ class WPMatch_Video_Chat {
 			return array();
 		}
 
-		$sanitized = array();
+		$sanitized    = array();
 		$allowed_keys = array( 'background', 'effects', 'max_duration', 'theme' );
 
 		foreach ( $allowed_keys as $key ) {
@@ -1041,60 +1041,129 @@ class WPMatch_Video_Chat {
 	/**
 	 * Placeholder methods for remaining API endpoints.
 	 */
-
 	public function api_accept_call( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Call accepted' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Call accepted',
+			)
+		);
 	}
 
 	public function api_decline_call( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Call declined' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Call declined',
+			)
+		);
 	}
 
 	public function api_end_call( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Call ended' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Call ended',
+			)
+		);
 	}
 
 	public function api_get_call_status( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'status' => 'connected' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'status'  => 'connected',
+			)
+		);
 	}
 
 	public function api_upload_video_profile( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_video_profile( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_create_room( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_join_room( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_speed_dating_sessions( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_join_speed_dating( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_speed_dating_match( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_exchange_ice_candidate( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'ICE candidate stored' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'ICE candidate stored',
+			)
+		);
 	}
 
 	public function api_send_offer( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Offer stored' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Offer stored',
+			)
+		);
 	}
 
 	public function api_send_answer( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Answer stored' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Answer stored',
+			)
+		);
 	}
 }

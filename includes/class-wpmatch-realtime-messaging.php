@@ -66,77 +66,93 @@ class WPMatch_Realtime_Messaging {
 	 * Register REST API routes for messaging.
 	 */
 	public static function register_api_routes() {
-		register_rest_route( 'wpmatch/v1', '/messages', array(
-			'methods'             => 'GET',
-			'callback'            => array( __CLASS__, 'get_conversation' ),
-			'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
-			'args'                => array(
-				'conversation_id' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_numeric( $param );
-					},
+		register_rest_route(
+			'wpmatch/v1',
+			'/messages',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_conversation' ),
+				'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
+				'args'                => array(
+					'conversation_id' => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param );
+						},
+					),
+					'page'            => array(
+						'default'           => 1,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param ) && $param > 0;
+						},
+					),
 				),
-				'page' => array(
-					'default'           => 1,
-					'validate_callback' => function( $param ) {
-						return is_numeric( $param ) && $param > 0;
-					},
-				),
-			),
-		) );
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/messages', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'send_message' ),
-			'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
-			'args'                => array(
-				'recipient_id' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_numeric( $param );
-					},
+		register_rest_route(
+			'wpmatch/v1',
+			'/messages',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'send_message' ),
+				'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
+				'args'                => array(
+					'recipient_id' => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param );
+						},
+					),
+					'content'      => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_string( $param ) && strlen( $param ) <= self::MAX_MESSAGE_LENGTH;
+						},
+					),
+					'message_type' => array(
+						'default'           => 'text',
+						'validate_callback' => function ( $param ) {
+							return in_array( $param, array( 'text', 'image', 'emoji', 'gif' ), true );
+						},
+					),
 				),
-				'content' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_string( $param ) && strlen( $param ) <= self::MAX_MESSAGE_LENGTH;
-					},
-				),
-				'message_type' => array(
-					'default'           => 'text',
-					'validate_callback' => function( $param ) {
-						return in_array( $param, array( 'text', 'image', 'emoji', 'gif' ), true );
-					},
-				),
-			),
-		) );
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/conversations', array(
-			'methods'             => 'GET',
-			'callback'            => array( __CLASS__, 'get_conversations' ),
-			'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/conversations',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_conversations' ),
+				'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/typing', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'handle_typing_status' ),
-			'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
-			'args'                => array(
-				'conversation_id' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_numeric( $param );
-					},
+		register_rest_route(
+			'wpmatch/v1',
+			'/typing',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'handle_typing_status' ),
+				'permission_callback' => array( __CLASS__, 'check_messaging_permissions' ),
+				'args'                => array(
+					'conversation_id' => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param );
+						},
+					),
+					'is_typing'       => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_bool( $param );
+						},
+					),
 				),
-				'is_typing' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_bool( $param );
-					},
-				),
-			),
-		) );
+			)
+		);
 	}
 
 	/**
@@ -179,24 +195,30 @@ class WPMatch_Realtime_Messaging {
 		}
 
 		// Send real-time notification via WebSocket.
-		self::send_realtime_notification( $recipient_id, array(
-			'type'            => 'new_message',
-			'message_id'      => $message_id,
-			'conversation_id' => $conversation_id,
-			'sender_id'       => $sender_id,
-			'content'         => $content,
-			'message_type'    => $message_type,
-			'timestamp'       => current_time( 'mysql' ),
-		) );
+		self::send_realtime_notification(
+			$recipient_id,
+			array(
+				'type'            => 'new_message',
+				'message_id'      => $message_id,
+				'conversation_id' => $conversation_id,
+				'sender_id'       => $sender_id,
+				'content'         => $content,
+				'message_type'    => $message_type,
+				'timestamp'       => current_time( 'mysql' ),
+			)
+		);
 
 		// Trigger hooks for notifications and analytics.
 		do_action( 'wpmatch_message_sent', $sender_id, $recipient_id, $message_id );
 
-		return new WP_REST_Response( array(
-			'success'    => true,
-			'message_id' => $message_id,
-			'timestamp'  => current_time( 'mysql' ),
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'success'    => true,
+				'message_id' => $message_id,
+				'timestamp'  => current_time( 'mysql' ),
+			),
+			200
+		);
 	}
 
 	/**
@@ -240,11 +262,14 @@ class WPMatch_Realtime_Messaging {
 		// Mark messages as read.
 		self::mark_messages_read( $conversation_id, $user_id );
 
-		return new WP_REST_Response( array(
-			'messages' => $messages,
-			'page'     => $page,
-			'has_more' => count( $messages ) === $limit,
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'messages' => $messages,
+				'page'     => $page,
+				'has_more' => count( $messages ) === $limit,
+			),
+			200
+		);
 	}
 
 	/**
@@ -296,9 +321,12 @@ class WPMatch_Realtime_Messaging {
 			)
 		);
 
-		return new WP_REST_Response( array(
-			'conversations' => $conversations,
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'conversations' => $conversations,
+			),
+			200
+		);
 	}
 
 	/**
@@ -323,13 +351,16 @@ class WPMatch_Realtime_Messaging {
 
 		if ( $other_user_id ) {
 			// Send typing indicator via WebSocket.
-			self::send_realtime_notification( $other_user_id, array(
-				'type'            => 'typing_indicator',
-				'conversation_id' => $conversation_id,
-				'user_id'         => $user_id,
-				'is_typing'       => $is_typing,
-				'timestamp'       => current_time( 'mysql' ),
-			) );
+			self::send_realtime_notification(
+				$other_user_id,
+				array(
+					'type'            => 'typing_indicator',
+					'conversation_id' => $conversation_id,
+					'user_id'         => $user_id,
+					'is_typing'       => $is_typing,
+					'timestamp'       => current_time( 'mysql' ),
+				)
+			);
 		}
 
 		return new WP_REST_Response( array( 'success' => true ), 200 );
@@ -464,18 +495,18 @@ class WPMatch_Realtime_Messaging {
 		$messages_table = $wpdb->prefix . 'wpmatch_messages';
 
 		// Get recipient ID from conversation_id format (user1_user2)
-		$user_ids = explode( '_', $conversation_id );
+		$user_ids     = explode( '_', $conversation_id );
 		$recipient_id = ( $user_ids[0] == $sender_id ) ? $user_ids[1] : $user_ids[0];
 
 		$result = $wpdb->insert(
 			$messages_table,
 			array(
-				'conversation_id'  => $conversation_id,
-				'sender_id'        => $sender_id,
-				'recipient_id'     => $recipient_id,
-				'message_content'  => $content,
-				'message_type'     => $message_type,
-				'created_at'       => current_time( 'mysql' ),
+				'conversation_id' => $conversation_id,
+				'sender_id'       => $sender_id,
+				'recipient_id'    => $recipient_id,
+				'message_content' => $content,
+				'message_type'    => $message_type,
+				'created_at'      => current_time( 'mysql' ),
 			),
 			array( '%s', '%d', '%d', '%s', '%s', '%s' )
 		);
@@ -500,10 +531,10 @@ class WPMatch_Realtime_Messaging {
 		$wpdb->insert(
 			$notifications_table,
 			array(
-				'user_id'     => $user_id,
-				'data'        => wp_json_encode( $data ),
-				'created_at'  => current_time( 'mysql' ),
-				'delivered'   => 0,
+				'user_id'    => $user_id,
+				'data'       => wp_json_encode( $data ),
+				'created_at' => current_time( 'mysql' ),
+				'delivered'  => 0,
 			),
 			array( '%d', '%s', '%s', '%d' )
 		);
@@ -613,12 +644,12 @@ class WPMatch_Realtime_Messaging {
 
 		// Check if messages table already exists (created by main activator)
 		$messages_table = $wpdb->prefix . 'wpmatch_messages';
-		$table_exists = $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $messages_table ) ) === $messages_table;
+		$table_exists   = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $messages_table ) ) === $messages_table;
 
 		// Only create realtime-specific tables, not the main messages table
 		// Real-time notifications table.
 		$notifications_table = $wpdb->prefix . 'wpmatch_realtime_notifications';
-		$sql_notifications = "CREATE TABLE IF NOT EXISTS $notifications_table (
+		$sql_notifications   = "CREATE TABLE IF NOT EXISTS $notifications_table (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			data longtext NOT NULL,
@@ -840,10 +871,12 @@ class WPMatch_Realtime_Messaging {
 		$message_id      = self::store_message( $conversation_id, $sender_id, $content, 'text' );
 
 		if ( $message_id ) {
-			wp_send_json_success( array(
-				'message_id' => $message_id,
-				'timestamp'  => current_time( 'mysql' ),
-			) );
+			wp_send_json_success(
+				array(
+					'message_id' => $message_id,
+					'timestamp'  => current_time( 'mysql' ),
+				)
+			);
 		} else {
 			wp_send_json_error( 'Failed to send message' );
 		}
@@ -914,12 +947,15 @@ class WPMatch_Realtime_Messaging {
 		$other_user_id = self::get_conversation_other_user( $conversation_id, $user_id );
 
 		if ( $other_user_id ) {
-			self::send_realtime_notification( $other_user_id, array(
-				'type'            => 'typing_indicator',
-				'conversation_id' => $conversation_id,
-				'user_id'         => $user_id,
-				'is_typing'       => $is_typing,
-			) );
+			self::send_realtime_notification(
+				$other_user_id,
+				array(
+					'type'            => 'typing_indicator',
+					'conversation_id' => $conversation_id,
+					'user_id'         => $user_id,
+					'is_typing'       => $is_typing,
+				)
+			);
 		}
 
 		wp_send_json_success();

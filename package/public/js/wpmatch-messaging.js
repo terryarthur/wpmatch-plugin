@@ -1,520 +1,475 @@
-/**
- * WPMatch Real-time Messaging Interface
- *
- * Handles real-time messaging functionality on the frontend including
- * WebSocket connections, message display, typing indicators, and notifications.
- *
- * @package WPMatch
- * @since 1.2.0
- */
+jQuery(document).ready(function($) {
+    'use strict';
 
-class WPMatchMessaging {
-    constructor(options = {}) {
-        this.options = {
-            apiUrl: wpMatch.apiUrl || '/wp-json/wpmatch/v1',
-            nonce: wpMatch.nonce || '',
-            currentUserId: wpMatch.currentUserId || 0,
-            pollInterval: 3000,
-            typingTimeout: 3000,
-            ...options
-        };
+    var currentConversationId = null;
+    var messagePollingInterval = null;
+    var typingTimeout = null;
+    var isTyping = false;
 
-        this.conversations = new Map();
-        this.currentConversationId = null;
-        this.typingTimer = null;
-        this.isTyping = false;
-        this.lastMessageId = 0;
-        this.pollTimer = null;
+    // Initialize messaging interface
+    function initMessagingInterface() {
+        bindEvents();
+        loadConversations();
 
-        this.init();
+        // Start polling for new messages
+        startMessagePolling();
     }
 
-    /**
-     * Initialize messaging interface.
-     */
-    init() {
-        this.bindEvents();
-        this.startPolling();
-        this.loadConversations();
-    }
+    // Bind event listeners
+    function bindEvents() {
+        // Conversation selection
+        $(document).on('click', '.wpmatch-conversation-item', function() {
+            var conversationId = $(this).data('conversation-id');
+            selectConversation(conversationId);
+        });
 
-    /**
-     * Bind DOM events.
-     */
-    bindEvents() {
-        // Send message button.
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('.wpmatch-send-message')) {
+        // Search conversations
+        $('.wpmatch-search-input').on('input', function() {
+            var searchTerm = $(this).val().toLowerCase();
+            filterConversations(searchTerm);
+        });
+
+        // Send message
+        $('.wpmatch-send-button').on('click', sendMessage);
+        $('.wpmatch-message-input').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
                 e.preventDefault();
-                this.sendMessage();
+                sendMessage();
             }
         });
 
-        // Enter key to send message.
-        document.addEventListener('keypress', (e) => {
-            if (e.target.matches('.wpmatch-message-input') && e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
-            }
+        // Typing indicator
+        $('.wpmatch-message-input').on('input', function() {
+            handleTyping();
         });
 
-        // Typing indicator.
-        document.addEventListener('input', (e) => {
-            if (e.target.matches('.wpmatch-message-input')) {
-                this.handleTyping();
-            }
+        // Auto-resize message input
+        $('.wpmatch-message-input').on('input', function() {
+            autoResizeTextarea(this);
         });
 
-        // Conversation selection.
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('.wpmatch-conversation-item')) {
-                e.preventDefault();
-                const conversationId = e.target.dataset.conversationId;
-                this.loadConversation(conversationId);
-            }
-        });
-
-        // Mark messages as read when conversation is viewed.
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.currentConversationId) {
-                this.markMessagesRead(this.currentConversationId);
-            }
+        // Attachment button
+        $('.wpmatch-attachment-button').on('click', function() {
+            // Placeholder for file attachment functionality
+            alert('File attachment feature coming soon!');
         });
     }
 
-    /**
-     * Start polling for new messages.
-     */
-    startPolling() {
-        this.pollTimer = setInterval(() => {
-            this.checkForNewMessages();
-        }, this.options.pollInterval);
-    }
+    // Load conversations list
+    function loadConversations() {
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_get_conversations',
+                nonce: wpmatchMessaging.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    renderConversations(response.data);
 
-    /**
-     * Stop polling.
-     */
-    stopPolling() {
-        if (this.pollTimer) {
-            clearInterval(this.pollTimer);
-            this.pollTimer = null;
-        }
-    }
-
-    /**
-     * Send a message.
-     */
-    async sendMessage() {
-        const input = document.querySelector('.wpmatch-message-input');
-        const recipientId = document.querySelector('[data-recipient-id]')?.dataset.recipientId;
-
-        if (!input || !recipientId) {
-            console.error('Missing message input or recipient ID');
-            return;
-        }
-
-        const content = input.value.trim();
-        if (!content) {
-            return;
-        }
-
-        // Clear input immediately for better UX.
-        input.value = '';
-
-        // Add optimistic message to UI.
-        this.addMessageToUI({
-            sender_id: this.options.currentUserId,
-            content: content,
-            sent_at: new Date().toISOString(),
-            sending: true
-        });
-
-        try {
-            const response = await fetch(`${this.options.apiUrl}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': this.options.nonce
-                },
-                body: JSON.stringify({
-                    recipient_id: parseInt(recipientId),
-                    content: content,
-                    message_type: 'text'
-                })
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to send message');
-            }
-
-            // Remove optimistic message and add real one.
-            this.updateOptimisticMessage(result.message_id);
-
-        } catch (error) {
-            console.error('Error sending message:', error);
-            this.showError('Failed to send message. Please try again.');
-
-            // Remove failed optimistic message.
-            this.removeOptimisticMessage();
-        }
-    }
-
-    /**
-     * Load conversations list.
-     */
-    async loadConversations() {
-        try {
-            const response = await fetch(`${this.options.apiUrl}/conversations`, {
-                headers: {
-                    'X-WP-Nonce': this.options.nonce
+                    // Auto-select first conversation if none selected
+                    if (!currentConversationId && response.data.length > 0) {
+                        selectConversation(response.data[0].id);
+                    }
+                } else {
+                    showEmptyConversations();
                 }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to load conversations');
+            },
+            error: function() {
+                showError('Failed to load conversations');
             }
-
-            this.renderConversations(result.conversations);
-
-        } catch (error) {
-            console.error('Error loading conversations:', error);
-            this.showError('Failed to load conversations.');
-        }
+        });
     }
 
-    /**
-     * Load specific conversation messages.
-     */
-    async loadConversation(conversationId) {
-        this.currentConversationId = conversationId;
+    // Render conversations in sidebar
+    function renderConversations(conversations) {
+        var $list = $('.wpmatch-conversations-list');
+        $list.empty();
 
-        try {
-            const response = await fetch(`${this.options.apiUrl}/messages?conversation_id=${conversationId}`, {
-                headers: {
-                    'X-WP-Nonce': this.options.nonce
+        if (conversations.length === 0) {
+            showEmptyConversations();
+            return;
+        }
+
+        conversations.forEach(function(conversation) {
+            var itemHtml = createConversationItem(conversation);
+            $list.append(itemHtml);
+        });
+    }
+
+    // Create conversation list item
+    function createConversationItem(conversation) {
+        var timeAgo = formatTimeAgo(conversation.last_message_time);
+        var unreadCount = conversation.unread_count || 0;
+        var unreadBadge = unreadCount > 0 ? '<span class="wpmatch-unread-count">' + unreadCount + '</span>' : '';
+        var onlineIndicator = conversation.user.online ? '<div class="wpmatch-online-indicator"></div>' : '';
+
+        var itemHtml = '<div class="wpmatch-conversation-item" data-conversation-id="' + conversation.id + '">' +
+            '<div class="wpmatch-conversation-photo" style="background-image: url(' + (conversation.user.photo || wpmatchMessaging.defaultPhoto) + ');">' +
+                onlineIndicator +
+            '</div>' +
+            '<div class="wpmatch-conversation-info">' +
+                '<div class="wpmatch-conversation-header">' +
+                    '<div class="wpmatch-conversation-name">' + conversation.user.name + '</div>' +
+                    '<div class="wpmatch-message-time">' + timeAgo + '</div>' +
+                '</div>' +
+                '<div class="wpmatch-last-message">' + (conversation.last_message || 'No messages yet') + '</div>' +
+            '</div>' +
+            unreadBadge +
+        '</div>';
+
+        return $(itemHtml);
+    }
+
+    // Select and load conversation
+    function selectConversation(conversationId) {
+        currentConversationId = conversationId;
+
+        // Update UI
+        $('.wpmatch-conversation-item').removeClass('active');
+        $('.wpmatch-conversation-item[data-conversation-id="' + conversationId + '"]').addClass('active');
+
+        // Load messages
+        loadMessages(conversationId);
+
+        // Mark as read
+        markConversationAsRead(conversationId);
+    }
+
+    // Load messages for conversation
+    function loadMessages(conversationId) {
+        showChatLoading();
+
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_get_messages',
+                nonce: wpmatchMessaging.nonce,
+                conversation_id: conversationId
+            },
+            success: function(response) {
+                if (response.success) {
+                    renderMessages(response.data.messages, response.data.user);
+                } else {
+                    showChatError('Failed to load messages');
                 }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to load conversation');
+            },
+            error: function() {
+                showChatError('Network error occurred');
             }
-
-            this.renderMessages(result.messages);
-            this.markMessagesRead(conversationId);
-
-        } catch (error) {
-            console.error('Error loading conversation:', error);
-            this.showError('Failed to load conversation.');
-        }
+        });
     }
 
-    /**
-     * Check for new messages via polling.
-     */
-    async checkForNewMessages() {
-        if (!this.currentConversationId) {
+    // Render messages in chat area
+    function renderMessages(messages, userInfo) {
+        // Update chat header
+        updateChatHeader(userInfo);
+
+        // Render messages
+        var $messagesContainer = $('.wpmatch-chat-messages');
+        $messagesContainer.empty();
+
+        if (messages.length === 0) {
+            $messagesContainer.html('<div class="wpmatch-empty-chat"><h3>Start the conversation!</h3><p>Say hello to ' + userInfo.name + '</p></div>');
             return;
         }
 
-        try {
-            const response = await fetch(`${this.options.apiUrl}/messages?conversation_id=${this.currentConversationId}&since=${this.lastMessageId}`, {
-                headers: {
-                    'X-WP-Nonce': this.options.nonce
+        messages.forEach(function(message) {
+            var messageHtml = createMessageElement(message);
+            $messagesContainer.append(messageHtml);
+        });
+
+        // Scroll to bottom
+        scrollToBottom();
+    }
+
+    // Update chat header with user info
+    function updateChatHeader(userInfo) {
+        $('.wpmatch-chat-user-photo').css('background-image', 'url(' + (userInfo.photo || wpmatchMessaging.defaultPhoto) + ')');
+        $('.wpmatch-chat-user-info h4').text(userInfo.name);
+        $('.wpmatch-chat-user-status').text(userInfo.online ? 'Online now' : 'Last seen ' + formatTimeAgo(userInfo.last_seen));
+    }
+
+    // Create message element
+    function createMessageElement(message) {
+        var isSent = message.sender_id == wpmatchMessaging.currentUserId;
+        var messageClass = isSent ? 'sent' : 'received';
+        var timeFormatted = formatMessageTime(message.created_at);
+        var readStatus = isSent && message.read_at ? 'Read' : (isSent ? 'Delivered' : '');
+
+        var messageHtml = '<div class="wpmatch-message ' + messageClass + '">' +
+            '<div class="wpmatch-message-content">' +
+                '<div class="wpmatch-message-text">' + escapeHtml(message.content) + '</div>' +
+                '<div class="wpmatch-message-meta">' +
+                    '<span class="wpmatch-message-time">' + timeFormatted + '</span>' +
+                    (readStatus ? '<span class="wpmatch-read-status">' + readStatus + '</span>' : '') +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        return $(messageHtml);
+    }
+
+    // Send message
+    function sendMessage() {
+        var $input = $('.wpmatch-message-input');
+        var message = $input.val().trim();
+
+        if (!message || !currentConversationId) return;
+
+        var $sendBtn = $('.wpmatch-send-button');
+        $sendBtn.prop('disabled', true);
+
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_send_message',
+                nonce: wpmatchMessaging.nonce,
+                conversation_id: currentConversationId,
+                message: message
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Clear input
+                    $input.val('').trigger('input');
+
+                    // Add message to chat
+                    var messageHtml = createMessageElement(response.data);
+                    $('.wpmatch-chat-messages').append(messageHtml);
+                    scrollToBottom();
+
+                    // Update conversation list
+                    updateConversationPreview(currentConversationId, message);
+                } else {
+                    alert('Failed to send message: ' + (response.data || 'Unknown error'));
                 }
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.messages && result.messages.length > 0) {
-                result.messages.forEach(message => {
-                    this.addMessageToUI(message);
-                });
-
-                this.lastMessageId = Math.max(...result.messages.map(m => m.id));
-                this.markMessagesRead(this.currentConversationId);
+            },
+            error: function() {
+                alert('Network error. Please try again.');
+            },
+            complete: function() {
+                $sendBtn.prop('disabled', false);
             }
-
-        } catch (error) {
-            console.error('Error checking for new messages:', error);
-        }
+        });
     }
 
-    /**
-     * Handle typing indicator.
-     */
-    handleTyping() {
-        if (!this.currentConversationId) {
-            return;
+    // Handle typing indicator
+    function handleTyping() {
+        if (!isTyping) {
+            isTyping = true;
+            sendTypingIndicator(true);
         }
 
-        // Clear existing timer.
-        if (this.typingTimer) {
-            clearTimeout(this.typingTimer);
-        }
-
-        // Send typing start if not already typing.
-        if (!this.isTyping) {
-            this.isTyping = true;
-            this.sendTypingIndicator(true);
-        }
-
-        // Set timer to stop typing indicator.
-        this.typingTimer = setTimeout(() => {
-            this.isTyping = false;
-            this.sendTypingIndicator(false);
-        }, this.options.typingTimeout);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+            isTyping = false;
+            sendTypingIndicator(false);
+        }, 2000);
     }
 
-    /**
-     * Send typing indicator status.
-     */
-    async sendTypingIndicator(isTyping) {
-        if (!this.currentConversationId) {
-            return;
-        }
+    // Send typing indicator to server
+    function sendTypingIndicator(typing) {
+        if (!currentConversationId) return;
 
-        try {
-            await fetch(`${this.options.apiUrl}/typing`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': this.options.nonce
-                },
-                body: JSON.stringify({
-                    conversation_id: this.currentConversationId,
-                    is_typing: isTyping
-                })
-            });
-        } catch (error) {
-            console.error('Error sending typing indicator:', error);
-        }
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_typing_indicator',
+                nonce: wpmatchMessaging.nonce,
+                conversation_id: currentConversationId,
+                typing: typing
+            }
+        });
     }
 
-    /**
-     * Mark messages as read.
-     */
-    async markMessagesRead(conversationId) {
-        try {
-            await fetch(`${this.options.apiUrl}/messages/read`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': this.options.nonce
-                },
-                body: JSON.stringify({
-                    conversation_id: conversationId
-                })
-            });
-        } catch (error) {
-            console.error('Error marking messages as read:', error);
-        }
+    // Filter conversations by search term
+    function filterConversations(searchTerm) {
+        $('.wpmatch-conversation-item').each(function() {
+            var name = $(this).find('.wpmatch-conversation-name').text().toLowerCase();
+            var lastMessage = $(this).find('.wpmatch-last-message').text().toLowerCase();
+
+            if (name.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
     }
 
-    /**
-     * Render conversations list.
-     */
-    renderConversations(conversations) {
-        const container = document.querySelector('.wpmatch-conversations-list');
-        if (!container) {
-            return;
-        }
-
-        const html = conversations.map(conversation => `
-            <div class="wpmatch-conversation-item" data-conversation-id="${conversation.id}">
-                <div class="conversation-avatar">
-                    <img src="${this.getAvatarUrl(conversation.other_user_id)}" alt="${conversation.other_user_name}">
-                    ${conversation.unread_count > 0 ? `<span class="unread-badge">${conversation.unread_count}</span>` : ''}
-                </div>
-                <div class="conversation-details">
-                    <div class="conversation-name">${conversation.other_user_name}</div>
-                    <div class="conversation-preview">${conversation.last_message || 'No messages yet'}</div>
-                    <div class="conversation-time">${this.formatTime(conversation.last_message_time)}</div>
-                </div>
-            </div>
-        `).join('');
-
-        container.innerHTML = html;
+    // Mark conversation as read
+    function markConversationAsRead(conversationId) {
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_mark_read',
+                nonce: wpmatchMessaging.nonce,
+                conversation_id: conversationId
+            },
+            success: function() {
+                // Remove unread badge
+                $('.wpmatch-conversation-item[data-conversation-id="' + conversationId + '"] .wpmatch-unread-count').remove();
+            }
+        });
     }
 
-    /**
-     * Render messages in conversation.
-     */
-    renderMessages(messages) {
-        const container = document.querySelector('.wpmatch-messages-container');
-        if (!container) {
-            return;
-        }
+    // Update conversation preview
+    function updateConversationPreview(conversationId, lastMessage) {
+        var $conversation = $('.wpmatch-conversation-item[data-conversation-id="' + conversationId + '"]');
+        $conversation.find('.wpmatch-last-message').text(lastMessage);
+        $conversation.find('.wpmatch-message-time').text('Just now');
 
-        const html = messages.reverse().map(message => this.renderMessage(message)).join('');
-        container.innerHTML = html;
-
-        // Scroll to bottom.
-        container.scrollTop = container.scrollHeight;
+        // Move to top of list
+        $conversation.prependTo('.wpmatch-conversations-list');
     }
 
-    /**
-     * Add single message to UI.
-     */
-    addMessageToUI(message) {
-        const container = document.querySelector('.wpmatch-messages-container');
-        if (!container) {
-            return;
-        }
-
-        const messageElement = document.createElement('div');
-        messageElement.innerHTML = this.renderMessage(message);
-        container.appendChild(messageElement.firstElementChild);
-
-        // Scroll to bottom.
-        container.scrollTop = container.scrollHeight;
-
-        // Play notification sound for incoming messages.
-        if (message.sender_id !== this.options.currentUserId) {
-            this.playNotificationSound();
-        }
+    // Start polling for new messages
+    function startMessagePolling() {
+        messagePollingInterval = setInterval(function() {
+            if (currentConversationId) {
+                checkForNewMessages();
+            }
+            refreshConversationsList();
+        }, 5000); // Poll every 5 seconds
     }
 
-    /**
-     * Render single message.
-     */
-    renderMessage(message) {
-        const isOwn = message.sender_id == this.options.currentUserId;
-        const statusClass = message.sending ? 'sending' : (message.read_at ? 'read' : 'delivered');
+    // Check for new messages in current conversation
+    function checkForNewMessages() {
+        var lastMessageTime = $('.wpmatch-message:last .wpmatch-message-time').attr('data-timestamp') || 0;
 
-        return `
-            <div class="wpmatch-message ${isOwn ? 'own-message' : 'other-message'}" data-message-id="${message.id || 'temp'}">
-                <div class="message-content">
-                    <div class="message-text">${this.escapeHtml(message.content)}</div>
-                    <div class="message-meta">
-                        <span class="message-time">${this.formatTime(message.sent_at)}</span>
-                        ${isOwn ? `<span class="message-status ${statusClass}"></span>` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_check_new_messages',
+                nonce: wpmatchMessaging.nonce,
+                conversation_id: currentConversationId,
+                since: lastMessageTime
+            },
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    response.data.forEach(function(message) {
+                        var messageHtml = createMessageElement(message);
+                        $('.wpmatch-chat-messages').append(messageHtml);
+                    });
+                    scrollToBottom();
+                }
+            }
+        });
     }
 
-    /**
-     * Update optimistic message with real data.
-     */
-    updateOptimisticMessage(messageId) {
-        const tempMessage = document.querySelector('[data-message-id="temp"]');
-        if (tempMessage) {
-            tempMessage.dataset.messageId = messageId;
-            tempMessage.querySelector('.message-status').classList.remove('sending');
-            tempMessage.querySelector('.message-status').classList.add('delivered');
-        }
+    // Refresh conversations list
+    function refreshConversationsList() {
+        $.ajax({
+            url: wpmatchMessaging.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wpmatch_get_conversations',
+                nonce: wpmatchMessaging.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    var selectedId = currentConversationId;
+                    renderConversations(response.data);
+
+                    if (selectedId) {
+                        $('.wpmatch-conversation-item[data-conversation-id="' + selectedId + '"]').addClass('active');
+                    }
+                }
+            }
+        });
     }
 
-    /**
-     * Remove failed optimistic message.
-     */
-    removeOptimisticMessage() {
-        const tempMessage = document.querySelector('[data-message-id="temp"]');
-        if (tempMessage) {
-            tempMessage.remove();
-        }
+    // Utility functions
+    function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     }
 
-    /**
-     * Show error message.
-     */
-    showError(message) {
-        const errorContainer = document.querySelector('.wpmatch-error-messages');
-        if (errorContainer) {
-            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
-            setTimeout(() => {
-                errorContainer.innerHTML = '';
-            }, 5000);
-        }
+    function scrollToBottom() {
+        var $messages = $('.wpmatch-chat-messages');
+        $messages.scrollTop($messages[0].scrollHeight);
     }
 
-    /**
-     * Play notification sound.
-     */
-    playNotificationSound() {
-        // Only play if user has enabled sound notifications.
-        const soundEnabled = localStorage.getItem('wpmatch_sound_notifications') !== 'false';
-        if (!soundEnabled) {
-            return;
-        }
+    function formatTimeAgo(timestamp) {
+        if (!timestamp) return '';
 
-        try {
-            const audio = new Audio(wpMatch.notificationSound || '/wp-content/plugins/wpmatch/public/sounds/notification.mp3');
-            audio.volume = 0.3;
-            audio.play().catch(e => {
-                console.log('Could not play notification sound:', e);
-            });
-        } catch (error) {
-            console.log('Audio not supported:', error);
-        }
-    }
+        var now = new Date();
+        var time = new Date(timestamp);
+        var diffMs = now - time;
+        var diffMins = Math.floor(diffMs / (1000 * 60));
+        var diffHours = Math.floor(diffMins / 60);
+        var diffDays = Math.floor(diffHours / 24);
 
-    /**
-     * Utility methods.
-     */
-
-    /**
-     * Get avatar URL for user.
-     */
-    getAvatarUrl(userId) {
-        return `https://www.gravatar.com/avatar/${userId}?s=48&d=mp`;
-    }
-
-    /**
-     * Format timestamp for display.
-     */
-    formatTime(timestamp) {
-        if (!timestamp) {
-            return '';
-        }
-
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diffInHours = (now - date) / (1000 * 60 * 60);
-
-        if (diffInHours < 24) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else if (diffInHours < 24 * 7) {
-            return date.toLocaleDateString([], { weekday: 'short' });
+        if (diffDays > 0) {
+            return diffDays + 'd';
+        } else if (diffHours > 0) {
+            return diffHours + 'h';
+        } else if (diffMins > 0) {
+            return diffMins + 'm';
         } else {
-            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            return 'now';
         }
     }
 
-    /**
-     * Escape HTML to prevent XSS.
-     */
-    escapeHtml(text) {
-        const div = document.createElement('div');
+    function formatMessageTime(timestamp) {
+        var date = new Date(timestamp);
+        return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    /**
-     * Destroy messaging interface.
-     */
-    destroy() {
-        this.stopPolling();
+    function showEmptyConversations() {
+        $('.wpmatch-conversations-list').html(
+            '<div style="text-align: center; padding: 40px 20px; color: #666;">' +
+                '<h4>No conversations yet</h4>' +
+                '<p>Start matching with people to begin chatting!</p>' +
+            '</div>'
+        );
 
-        if (this.typingTimer) {
-            clearTimeout(this.typingTimer);
+        $('.wpmatch-chat-area').html(
+            '<div class="wpmatch-empty-chat">' +
+                '<h3>No conversation selected</h3>' +
+                '<p>Select a conversation from the sidebar to start chatting</p>' +
+            '</div>'
+        );
+    }
+
+    function showChatLoading() {
+        $('.wpmatch-chat-area').html(
+            '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">' +
+                '<div>Loading conversation...</div>' +
+            '</div>'
+        );
+    }
+
+    function showChatError(message) {
+        $('.wpmatch-chat-area').html(
+            '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #e91e63;">' +
+                '<div>' + message + '</div>' +
+            '</div>'
+        );
+    }
+
+    function showError(message) {
+        console.error('Messaging error:', message);
+    }
+
+    // Cleanup on page unload
+    $(window).on('beforeunload', function() {
+        if (messagePollingInterval) {
+            clearInterval(messagePollingInterval);
         }
-    }
-}
+    });
 
-// Auto-initialize when DOM is ready.
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof wpMatch !== 'undefined' && document.querySelector('.wpmatch-messaging-interface')) {
-        window.wpMatchMessaging = new WPMatchMessaging();
-    }
+    // Initialize the interface
+    initMessagingInterface();
 });
-
-// Export for manual initialization.
-window.WPMatchMessaging = WPMatchMessaging;

@@ -200,7 +200,7 @@ class WPMatch_Uninstaller {
 	 */
 	private static function remove_uploaded_files() {
 		// Get upload directory.
-		$upload_dir = wp_upload_dir();
+		$upload_dir  = wp_upload_dir();
 		$wpmatch_dir = $upload_dir['basedir'] . '/wpmatch';
 
 		// Remove directory if it exists.

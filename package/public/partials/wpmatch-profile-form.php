@@ -176,8 +176,8 @@ if ( isset( $_POST['wpmatch_save_profile'] ) && isset( $_POST['wpmatch_profile_n
 
 								// Display existing photos.
 								for ( $i = 0; $i < 10; $i++ ) {
-									$photo = isset( $photos[ $i ] ) ? $photos[ $i ] : null;
-									$photo_url = $photo ? $photo->file_path : '';
+									$photo      = isset( $photos[ $i ] ) ? $photos[ $i ] : null;
+									$photo_url  = $photo ? $photo->file_path : '';
 									$is_primary = $photo ? $photo->is_primary : ( 0 === $i );
 									?>
 									<div class="wpmatch-photo-slot" data-slot="<?php echo esc_attr( $i ); ?>">

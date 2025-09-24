@@ -169,12 +169,12 @@ class WPMatch_Feature_Restrictions {
 	 */
 	public static function get_restriction_message( $feature ) {
 		$messages = array(
-			'super_likes'        => __( 'Super Likes are available with Gold and Platinum memberships.', 'wpmatch' ),
-			'see_who_liked_you'  => __( 'See who liked you is available with Basic, Gold, and Platinum memberships.', 'wpmatch' ),
-			'advanced_filters'   => __( 'Advanced search filters are available with Platinum membership.', 'wpmatch' ),
-			'boost_profile'      => __( 'Profile boost is available with Gold and Platinum memberships.', 'wpmatch' ),
-			'unlimited_likes'    => __( 'Unlimited likes are available with premium memberships.', 'wpmatch' ),
-			'priority_support'   => __( 'Priority support is available with Platinum membership.', 'wpmatch' ),
+			'super_likes'       => __( 'Super Likes are available with Gold and Platinum memberships.', 'wpmatch' ),
+			'see_who_liked_you' => __( 'See who liked you is available with Basic, Gold, and Platinum memberships.', 'wpmatch' ),
+			'advanced_filters'  => __( 'Advanced search filters are available with Platinum membership.', 'wpmatch' ),
+			'boost_profile'     => __( 'Profile boost is available with Gold and Platinum memberships.', 'wpmatch' ),
+			'unlimited_likes'   => __( 'Unlimited likes are available with premium memberships.', 'wpmatch' ),
+			'priority_support'  => __( 'Priority support is available with Platinum membership.', 'wpmatch' ),
 		);
 
 		return isset( $messages[ $feature ] ) ? $messages[ $feature ] : __( 'This feature requires a premium membership.', 'wpmatch' );
@@ -191,8 +191,8 @@ class WPMatch_Feature_Restrictions {
 		$has_access = WPMatch_Membership_Manager::user_can_access_feature( $user_id, $feature );
 
 		$result = array(
-			'has_access' => $has_access,
-			'message'    => '',
+			'has_access'  => $has_access,
+			'message'     => '',
 			'upgrade_url' => '',
 		);
 

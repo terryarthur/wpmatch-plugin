@@ -197,7 +197,7 @@
         disableLocation: function(e) {
             e.preventDefault();
 
-            if (!confirm(wpmatch_location.strings.disable_confirm)) return;
+            if (!confirm(wpMatchLocation.strings.disable_confirm)) return;
 
             WPMatchLocation.stopLocationTracking();
             WPMatchLocation.clearLocationOnServer();
@@ -359,7 +359,7 @@
          */
         updateLocationOnServer: function(location) {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/update',
+                url: wpMatchLocation.apiUrl + '/location/update',
                 type: 'POST',
                 data: {
                     latitude: location.latitude,
@@ -368,7 +368,7 @@
                     privacy_level: this.settings.privacy_level
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -386,10 +386,10 @@
          */
         clearLocationOnServer: function() {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/clear',
+                url: wpMatchLocation.apiUrl + '/location/clear',
                 type: 'POST',
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -404,10 +404,10 @@
          */
         loadSettings: function() {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/settings',
+                url: wpMatchLocation.apiUrl + '/location/settings',
                 type: 'GET',
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -527,14 +527,14 @@
          */
         saveSetting: function(key, value) {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/settings',
+                url: wpMatchLocation.apiUrl + '/location/settings',
                 type: 'POST',
                 data: {
                     setting: key,
                     value: value
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -552,14 +552,14 @@
             this.showLoadingState($container);
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/nearby',
+                url: wpMatchLocation.apiUrl + '/location/nearby',
                 type: 'GET',
                 data: {
                     radius: this.settings.search_radius,
                     limit: 20
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -569,7 +569,7 @@
                     }
                 },
                 error: function() {
-                    WPMatchLocation.showError($container, wpmatch_location.strings.load_error);
+                    WPMatchLocation.showError($container, wpMatchLocation.strings.load_error);
                 }
             });
         },
@@ -584,7 +584,7 @@
             if (users.length === 0) {
                 $grid.html(`
                     <div class="no-nearby-users">
-                        <p>${wpmatch_location.strings.no_nearby_users}</p>
+                        <p>${wpMatchLocation.strings.no_nearby_users}</p>
                     </div>
                 `);
                 return;
@@ -607,7 +607,7 @@
             return $(`
                 <div class="user-card" data-user-id="${user.user_id}">
                     <div class="user-card-header">
-                        <img src="${user.avatar || wpmatch_location.default_avatar}" alt="${user.display_name}" class="user-avatar">
+                        <img src="${user.avatar || wpMatchLocation.default_avatar}" alt="${user.display_name}" class="user-avatar">
                         <div class="distance-badge">${distance}</div>
                     </div>
                     <div class="user-card-content">
@@ -698,7 +698,7 @@
             WPMatchLocation.recordSearchActivity('profile_view', userId);
 
             // Navigate to profile (implementation depends on your routing)
-            window.location.href = wpmatch_location.profile_url + '?user_id=' + userId;
+            window.location.href = wpMatchLocation.profile_url + '?user_id=' + userId;
         },
 
         /**
@@ -713,7 +713,7 @@
             WPMatchLocation.recordSearchActivity('message_sent', userId);
 
             // Navigate to messages (implementation depends on your routing)
-            window.location.href = wpmatch_location.messages_url + '?user_id=' + userId;
+            window.location.href = wpMatchLocation.messages_url + '?user_id=' + userId;
         },
 
         /**
@@ -726,13 +726,13 @@
             const $btn = $(this);
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/favorite',
+                url: wpMatchLocation.apiUrl + '/location/favorite',
                 type: 'POST',
                 data: {
                     user_id: userId
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -743,7 +743,7 @@
                     }
                 },
                 error: function() {
-                    WPMatchLocation.showNotification(wpmatch_location.strings.error, 'error');
+                    WPMatchLocation.showNotification(wpMatchLocation.strings.error, 'error');
                 }
             });
         },
@@ -753,14 +753,14 @@
          */
         recordSearchActivity: function(activity, targetUserId) {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/activity',
+                url: wpMatchLocation.apiUrl + '/location/activity',
                 type: 'POST',
                 data: {
                     activity: activity,
                     target_user_id: targetUserId
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 }
             });
         },
@@ -773,14 +773,14 @@
             this.showLoadingState($container);
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/events',
+                url: wpMatchLocation.apiUrl + '/location/events',
                 type: 'GET',
                 data: {
                     filter: filter,
                     radius: this.settings.search_radius
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -790,7 +790,7 @@
                     }
                 },
                 error: function() {
-                    WPMatchLocation.showError($container, wpmatch_location.strings.load_error);
+                    WPMatchLocation.showError($container, wpMatchLocation.strings.load_error);
                 }
             });
         },
@@ -805,7 +805,7 @@
             if (events.length === 0) {
                 $grid.html(`
                     <div class="no-location-events">
-                        <p>${wpmatch_location.strings.no_events}</p>
+                        <p>${wpMatchLocation.strings.no_events}</p>
                     </div>
                 `);
                 return;
@@ -880,10 +880,10 @@
          */
         loadSearchHistory: function() {
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/search-history',
+                url: wpMatchLocation.apiUrl + '/location/search-history',
                 type: 'GET',
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -903,7 +903,7 @@
             if (searches.length === 0) {
                 $list.html(`
                     <div class="no-search-history">
-                        <p>${wpmatch_location.strings.no_history}</p>
+                        <p>${wpMatchLocation.strings.no_history}</p>
                     </div>
                 `);
                 return;
@@ -948,13 +948,13 @@
             const searchId = $(this).data('search-id');
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/repeat-search',
+                url: wpMatchLocation.apiUrl + '/location/repeat-search',
                 type: 'POST',
                 data: {
                     search_id: searchId
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -973,13 +973,13 @@
         clearSearchHistory: function(e) {
             e.preventDefault();
 
-            if (!confirm(wpmatch_location.strings.clear_history_confirm)) return;
+            if (!confirm(wpMatchLocation.strings.clear_history_confirm)) return;
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/clear-history',
+                url: wpMatchLocation.apiUrl + '/location/clear-history',
                 type: 'POST',
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1000,13 +1000,13 @@
             const $item = $(this).closest('.search-history-item');
 
             $.ajax({
-                url: wpmatch_location.rest_url + 'wpmatch/v1/location/delete-search',
+                url: wpMatchLocation.apiUrl + '/location/delete-search',
                 type: 'POST',
                 data: {
                     search_id: searchId
                 },
                 headers: {
-                    'X-WP-Nonce': wpmatch_location.nonce
+                    'X-WP-Nonce': wpMatchLocation.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1039,7 +1039,7 @@
             $container.html(`
                 <div class="location-loading">
                     <div class="loading-spinner"></div>
-                    <span>${wpmatch_location.strings.loading}</span>
+                    <span>${wpMatchLocation.strings.loading}</span>
                 </div>
             `);
         },

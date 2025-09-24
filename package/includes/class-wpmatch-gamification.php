@@ -9,6 +9,12 @@
  * @since 1.7.0
  */
 
+/**
+ * WPMatch Gamification class.
+ *
+ * Handles all gamification features including achievements, challenges,
+ * points, rewards, and leaderboards for enhanced user engagement.
+ */
 class WPMatch_Gamification {
 
 	/**
@@ -48,7 +54,7 @@ class WPMatch_Gamification {
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-		// Delay setup until after WordPress has loaded text domains
+		// Delay setup until after WordPress has loaded text domains.
 		add_action( 'init', array( $this, 'setup_achievement_types' ), 5 );
 		add_action( 'init', array( $this, 'setup_daily_challenges' ), 5 );
 	}
@@ -920,7 +926,19 @@ class WPMatch_Gamification {
 	 * @param string $action Achievement trigger action.
 	 * @param array  $data Additional data.
 	 */
-	public function trigger_achievement( $action, $data = array() ) {
+	public static function trigger_achievement( $action, $data = array() ) {
+		// Create instance to access achievement data and methods
+		$instance = new self( 'wpmatch', WPMATCH_VERSION );
+		$instance->trigger_achievement_instance( $action, $data );
+	}
+
+	/**
+	 * Instance method to trigger achievement check.
+	 *
+	 * @param string $action Achievement trigger action.
+	 * @param array  $data Additional data.
+	 */
+	public function trigger_achievement_instance( $action, $data = array() ) {
 		$user_id = isset( $data['user_id'] ) ? $data['user_id'] : get_current_user_id();
 
 		if ( ! $user_id ) {
@@ -949,7 +967,7 @@ class WPMatch_Gamification {
 	 * @param int $user2_id Second user ID.
 	 */
 	public function handle_new_match_created( $match_id, $user1_id, $user2_id ) {
-		// Trigger match achievement for both users
+		// Trigger match achievement for both users.
 		$this->trigger_achievement(
 			'match_created',
 			array(
@@ -965,7 +983,7 @@ class WPMatch_Gamification {
 			)
 		);
 
-		// Check for first match achievement specifically
+		// Check for first match achievement specifically.
 		$this->trigger_achievement(
 			'first_match',
 			array(
@@ -995,9 +1013,10 @@ class WPMatch_Gamification {
 		$table_name = $wpdb->prefix . 'wpmatch_user_achievements';
 
 		// Get current progress.
-		$user_achievement = $wpdb->get_row(
+		$achievements_table = $wpdb->prefix . 'wpmatch_achievements';
+		$user_achievement   = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $table_name WHERE user_id = %d AND achievement_id = (
+				"SELECT * FROM {$wpdb->prefix}wpmatch_user_achievements WHERE user_id = %d AND achievement_id = (
 					SELECT id FROM {$wpdb->prefix}wpmatch_achievements WHERE achievement_key = %s
 				)",
 				$user_id,
@@ -1079,7 +1098,7 @@ class WPMatch_Gamification {
 		// Get current points.
 		$current_points = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $table_name WHERE user_id = %d",
+				"SELECT * FROM {$wpdb->prefix}wpmatch_user_points WHERE user_id = %d",
 				$user_id
 			)
 		);
@@ -1124,7 +1143,7 @@ class WPMatch_Gamification {
 
 		$points = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $table_name WHERE user_id = %d",
+				"SELECT * FROM {$wpdb->prefix}wpmatch_user_points WHERE user_id = %d",
 				$user_id
 			)
 		);
@@ -1306,30 +1325,68 @@ class WPMatch_Gamification {
 	/**
 	 * Placeholder methods for remaining functionality.
 	 */
+	/**
+	 * Update user login streak.
+	 *
+	 * @param string  $user_login Username.
+	 * @param WP_User $user User object.
+	 */
 	public function update_login_streak( $user_login, $user ) {
 		// Implementation for login streak tracking.
 	}
 
+	/**
+	 * Reset daily challenges.
+	 */
 	public function reset_daily_challenges() {
 		// Implementation for resetting daily challenges.
 	}
 
+	/**
+	 * Update leaderboards.
+	 */
 	public function update_leaderboards() {
 		// Implementation for updating leaderboards.
 	}
 
+	/**
+	 * Update achievement progress.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $achievement_key Achievement key.
+	 * @param int    $progress Progress value.
+	 */
 	public function update_achievement_progress( $user_id, $achievement_key, $progress ) {
 		// Implementation for updating achievement progress.
 	}
 
+	/**
+	 * Update challenge progress.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $action Action type.
+	 */
 	public function update_challenge_progress( $user_id, $action ) {
 		// Implementation for updating challenge progress.
 	}
 
+	/**
+	 * Update user streak.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $action Action type.
+	 */
 	public function update_streak( $user_id, $action ) {
 		// Implementation for updating streaks.
 	}
 
+	/**
+	 * Trigger achievement notification.
+	 *
+	 * @param int   $user_id User ID.
+	 * @param array $achievement Achievement data.
+	 * @param int   $level Achievement level.
+	 */
 	public function trigger_achievement_notification( $user_id, $achievement, $level ) {
 		// Implementation for triggering achievement notifications.
 	}
@@ -1346,6 +1403,12 @@ class WPMatch_Gamification {
 	/**
 	 * Placeholder API methods.
 	 */
+	/**
+	 * API endpoint to get user achievements.
+	 *
+	 * @param WP_REST_Request $request REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_achievements( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1355,8 +1418,14 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get user points.
+	 *
+	 * @param WP_REST_Request $request REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_user_points( $request ) {
-		$user_id = $request->get_param( 'user_id' ) ?: get_current_user_id();
+		$user_id = $request->get_param( 'user_id' ) ? $request->get_param( 'user_id' ) : get_current_user_id();
 		$points  = $this->get_user_points( $user_id );
 
 		return rest_ensure_response(
@@ -1367,6 +1436,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get daily challenges.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_daily_challenges( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1376,6 +1451,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get challenge progress.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_challenge_progress( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1385,6 +1466,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get leaderboards.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_leaderboards( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1394,6 +1481,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get rewards.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_rewards( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1403,6 +1496,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to redeem a reward.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_redeem_reward( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1412,6 +1511,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get user stats.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_user_stats( $request ) {
 		return rest_ensure_response(
 			array(
@@ -1421,6 +1526,12 @@ class WPMatch_Gamification {
 		);
 	}
 
+	/**
+	 * API endpoint to get user streaks.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 */
 	public function api_get_user_streaks( $request ) {
 		return rest_ensure_response(
 			array(

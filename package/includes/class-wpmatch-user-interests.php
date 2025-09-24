@@ -239,8 +239,8 @@ class WPMatch_User_Interests {
 		$this->version     = $version;
 
 		// Initialize dependencies.
-		$this->cache_manager = new WPMatch_Cache_Manager( $plugin_name, $version );
-		$this->job_queue     = new WPMatch_Job_Queue( $plugin_name, $version );
+		$this->cache_manager = WPMatch_Cache_Manager::get_instance();
+		$this->job_queue     = WPMatch_Job_Queue::get_instance();
 	}
 
 	/**

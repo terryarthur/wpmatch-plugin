@@ -60,40 +60,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- Quick Start Tab -->
 		<div id="tab-quick-start" class="wpmatch-tab-panel active" role="tabpanel" aria-labelledby="tab-quick-start">
 			<div class="card">
-				<h2><?php esc_html_e( '🚀 Quick Start Guide', 'wpmatch' ); ?></h2>
-				<p><?php esc_html_e( 'Get your dating site up and running in 5 minutes:', 'wpmatch' ); ?></p>
+				<h2><?php esc_html_e( '🚀 Quick Start Guide - Get your dating site up and running in 5 minutes!', 'wpmatch' ); ?></h2>
 
 				<div class="wpmatch-setup-steps-horizontal">
-					<div class="steps-progress">
-						<div class="step-item">
-							<div class="step-circle">
-								<span class="step-number">1</span>
-							</div>
-							<div class="step-line"></div>
-						</div>
-						<div class="step-item">
-							<div class="step-circle">
-								<span class="step-number">2</span>
-							</div>
-							<div class="step-line"></div>
-						</div>
-						<div class="step-item">
-							<div class="step-circle">
-								<span class="step-number">3</span>
-							</div>
-							<div class="step-line"></div>
-						</div>
-						<div class="step-item">
-							<div class="step-circle">
-								<span class="step-number">4</span>
-							</div>
-						</div>
-					</div>
 
 					<div class="steps-content">
 						<div class="step-content-item">
 							<div class="step-icon">
-								<span class="dashicons dashicons-admin-settings"></span>
+								<span class="step-number">1</span>
 							</div>
 							<h3><?php esc_html_e( 'Configure Settings', 'wpmatch' ); ?></h3>
 							<p><?php esc_html_e( 'Set up age limits, distance preferences, and photo requirements for your dating site.', 'wpmatch' ); ?></p>
@@ -104,7 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						<div class="step-content-item">
 							<div class="step-icon">
-								<span class="dashicons dashicons-admin-page"></span>
+								<span class="step-number">2</span>
 							</div>
 							<h3><?php esc_html_e( 'Create Pages', 'wpmatch' ); ?></h3>
 							<p><?php esc_html_e( 'Add essential dating pages with shortcodes for browsing, profiles, and matches.', 'wpmatch' ); ?></p>
@@ -120,7 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						<div class="step-content-item">
 							<div class="step-icon">
-								<span class="dashicons dashicons-admin-users"></span>
+								<span class="step-number">3</span>
 							</div>
 							<h3><?php esc_html_e( 'Enable Registration', 'wpmatch' ); ?></h3>
 							<p><?php esc_html_e( 'Allow new users to join by enabling WordPress user registration.', 'wpmatch' ); ?></p>
@@ -131,7 +105,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						<div class="step-content-item">
 							<div class="step-icon">
-								<span class="dashicons dashicons-groups"></span>
+								<span class="step-number">4</span>
 							</div>
 							<h3><?php esc_html_e( 'Add Sample Data', 'wpmatch' ); ?></h3>
 							<p><?php esc_html_e( 'Generate test user profiles to demonstrate how your dating site works.', 'wpmatch' ); ?></p>
@@ -150,8 +124,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<h2><?php esc_html_e( '📝 Available Shortcodes', 'wpmatch' ); ?></h2>
 				<p><?php esc_html_e( 'Use these shortcodes to add dating functionality to any page or post:', 'wpmatch' ); ?></p>
 
-				<div class="wpmatch-shortcode-list">
-					<div class="shortcode-item">
+				<div class="wpmatch-two-row-grid">
+					<div class="grid-item">
 						<h3><code>[wpmatch_profile_form]</code></h3>
 						<p><?php esc_html_e( 'Displays the profile creation/editing form for logged-in users.', 'wpmatch' ); ?></p>
 						<div class="shortcode-example">
@@ -161,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><em><?php esc_html_e( 'Best for: Create a dedicated "Edit Profile" page', 'wpmatch' ); ?></em></p>
 					</div>
 
-					<div class="shortcode-item">
+					<div class="grid-item">
 						<h3><code>[wpmatch_swipe]</code></h3>
 						<p><?php esc_html_e( 'Displays the Tinder-style swipe interface for browsing potential matches.', 'wpmatch' ); ?></p>
 						<div class="shortcode-example">
@@ -171,7 +145,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><em><?php esc_html_e( 'Best for: Main "Browse" or "Discover" page', 'wpmatch' ); ?></em></p>
 					</div>
 
-					<div class="shortcode-item">
+					<div class="grid-item">
 						<h3><code>[wpmatch_matches]</code></h3>
 						<p><?php esc_html_e( 'Displays user\'s current matches with pagination.', 'wpmatch' ); ?></p>
 						<div class="shortcode-example">
@@ -181,7 +155,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><em><?php esc_html_e( 'Best for: "My Matches" page', 'wpmatch' ); ?></em></p>
 					</div>
 
-					<div class="shortcode-item">
+					<div class="grid-item">
 						<h3><code>[wpmatch_profile]</code></h3>
 						<p><?php esc_html_e( 'Displays a user profile (read-only view).', 'wpmatch' ); ?></p>
 						<div class="shortcode-example">
@@ -192,7 +166,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p><em><?php esc_html_e( 'Best for: Public profile pages or "My Profile" view', 'wpmatch' ); ?></em></p>
 					</div>
 
-					<div class="shortcode-item">
+					<div class="grid-item">
 						<h3><code>[wpmatch_registration]</code></h3>
 						<p><?php esc_html_e( 'Displays a custom registration form for new users.', 'wpmatch' ); ?></p>
 						<div class="shortcode-example">
@@ -211,43 +185,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<h2><?php esc_html_e( '📄 Recommended Page Structure', 'wpmatch' ); ?></h2>
 				<p><?php esc_html_e( 'Create these pages for a complete dating site experience:', 'wpmatch' ); ?></p>
 
-				<div class="wpmatch-pages-grid">
-					<div class="page-template">
+				<div class="wpmatch-two-row-grid">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '❤️ Browse Matches', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/browse/</code></p>
 						<p><strong><?php esc_html_e( 'Shortcode:', 'wpmatch' ); ?></strong> <code>[wpmatch_swipe]</code></p>
 						<p><?php esc_html_e( 'Your main discovery page where users swipe through potential matches.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="page-template">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '👤 Edit Profile', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/profile/edit/</code></p>
 						<p><strong><?php esc_html_e( 'Shortcode:', 'wpmatch' ); ?></strong> <code>[wpmatch_profile_form]</code></p>
 						<p><?php esc_html_e( 'Where users create and edit their dating profiles.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="page-template">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '💕 My Matches', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/matches/</code></p>
 						<p><strong><?php esc_html_e( 'Shortcode:', 'wpmatch' ); ?></strong> <code>[wpmatch_matches]</code></p>
 						<p><?php esc_html_e( 'Display user\'s mutual matches and potential conversations.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="page-template">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '👁️ My Profile', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/profile/</code></p>
 						<p><strong><?php esc_html_e( 'Shortcode:', 'wpmatch' ); ?></strong> <code>[wpmatch_profile]</code></p>
 						<p><?php esc_html_e( 'Read-only view of user\'s own profile as others see it.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="page-template">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '📝 Join Us', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/register/</code></p>
 						<p><strong><?php esc_html_e( 'Shortcode:', 'wpmatch' ); ?></strong> <code>[wpmatch_registration redirect="/profile/edit/"]</code></p>
 						<p><?php esc_html_e( 'Custom registration page that redirects to profile setup.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="page-template">
+					<div class="grid-item">
 						<h3><?php esc_html_e( '🏠 Dating Home', 'wpmatch' ); ?></h3>
 						<p><strong><?php esc_html_e( 'Page slug:', 'wpmatch' ); ?></strong> <code>/dating/</code></p>
 						<p><strong><?php esc_html_e( 'Content:', 'wpmatch' ); ?></strong> <?php esc_html_e( 'Custom content + links to other pages', 'wpmatch' ); ?></p>
@@ -268,8 +242,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<h2><?php esc_html_e( '👥 User Management', 'wpmatch' ); ?></h2>
 
 				<h3><?php esc_html_e( 'User Roles & Capabilities', 'wpmatch' ); ?></h3>
-				<div class="wpmatch-user-roles">
-					<div class="user-role">
+				<div class="wpmatch-two-row-grid">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Dating Member', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Basic free members with standard dating features.', 'wpmatch' ); ?></p>
 						<ul>
@@ -280,7 +254,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</ul>
 					</div>
 
-					<div class="user-role">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Premium Member', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Paid members with enhanced features.', 'wpmatch' ); ?></p>
 						<ul>
@@ -292,7 +266,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</ul>
 					</div>
 
-					<div class="user-role">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Dating Moderator', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Staff members who moderate content.', 'wpmatch' ); ?></p>
 						<ul>
@@ -319,28 +293,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<h3><?php esc_html_e( 'Common Issues', 'wpmatch' ); ?></h3>
 
-				<div class="wpmatch-faq">
-					<div class="faq-item">
+				<div class="wpmatch-two-row-grid">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Shortcodes not working / showing raw code', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Make sure you\'re using the exact shortcode syntax. Check that the plugin is active and there are no PHP errors.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="faq-item">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Users can\'t register', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Enable user registration in WordPress Settings → General → "Anyone can register". Also check that your registration page is published.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="faq-item">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'No potential matches showing', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'You need at least 2 users with completed profiles. Use the "Generate Sample Data" button above to create test users.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="faq-item">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'Swipe interface not working', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Make sure JavaScript is enabled. Check browser console for errors. The interface requires completed user profiles to function.', 'wpmatch' ); ?></p>
 					</div>
 
-					<div class="faq-item">
+					<div class="grid-item">
 						<h4><?php esc_html_e( 'CSS/styling issues', 'wpmatch' ); ?></h4>
 						<p><?php esc_html_e( 'Clear any caching plugins. Check that your theme doesn\'t conflict with our CSS. You can customize styles in Appearance → Customize.', 'wpmatch' ); ?></p>
 					</div>

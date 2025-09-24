@@ -59,11 +59,11 @@ class WPMatch_Mobile_API {
 				'callback'            => array( $this, 'api_mobile_login' ),
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'username' => array(
+					'username'    => array(
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_user',
 					),
-					'password' => array(
+					'password'    => array(
 						'required' => true,
 					),
 					'device_info' => array(
@@ -82,16 +82,16 @@ class WPMatch_Mobile_API {
 				'callback'            => array( $this, 'api_mobile_register' ),
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'email'    => array(
+					'email'       => array(
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_email',
 						'validate_callback' => array( $this, 'validate_email' ),
 					),
-					'username' => array(
+					'username'    => array(
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_user',
 					),
-					'password' => array(
+					'password'    => array(
 						'required' => true,
 					),
 					'device_info' => array(
@@ -390,16 +390,16 @@ class WPMatch_Mobile_API {
 				'callback'            => array( $this, 'api_update_privacy_settings' ),
 				'permission_callback' => array( $this, 'check_mobile_auth' ),
 				'args'                => array(
-					'show_age'       => array(
+					'show_age'      => array(
 						'sanitize_callback' => 'rest_sanitize_boolean',
 					),
-					'show_distance'  => array(
+					'show_distance' => array(
 						'sanitize_callback' => 'rest_sanitize_boolean',
 					),
-					'discoverable'   => array(
+					'discoverable'  => array(
 						'sanitize_callback' => 'rest_sanitize_boolean',
 					),
-					'online_status'  => array(
+					'online_status' => array(
 						'sanitize_callback' => 'rest_sanitize_boolean',
 					),
 				),
@@ -582,13 +582,13 @@ class WPMatch_Mobile_API {
 		$wpdb->replace(
 			$table_name,
 			array(
-				'user_id'       => $user_id,
-				'device_token'  => isset( $device_info['device_token'] ) ? sanitize_text_field( $device_info['device_token'] ) : '',
-				'platform'      => isset( $device_info['platform'] ) ? sanitize_text_field( $device_info['platform'] ) : '',
-				'app_version'   => isset( $device_info['app_version'] ) ? sanitize_text_field( $device_info['app_version'] ) : '',
-				'os_version'    => isset( $device_info['os_version'] ) ? sanitize_text_field( $device_info['os_version'] ) : '',
-				'device_model'  => isset( $device_info['device_model'] ) ? sanitize_text_field( $device_info['device_model'] ) : '',
-				'last_active'   => current_time( 'mysql' ),
+				'user_id'      => $user_id,
+				'device_token' => isset( $device_info['device_token'] ) ? sanitize_text_field( $device_info['device_token'] ) : '',
+				'platform'     => isset( $device_info['platform'] ) ? sanitize_text_field( $device_info['platform'] ) : '',
+				'app_version'  => isset( $device_info['app_version'] ) ? sanitize_text_field( $device_info['app_version'] ) : '',
+				'os_version'   => isset( $device_info['os_version'] ) ? sanitize_text_field( $device_info['os_version'] ) : '',
+				'device_model' => isset( $device_info['device_model'] ) ? sanitize_text_field( $device_info['device_model'] ) : '',
+				'last_active'  => current_time( 'mysql' ),
 			),
 			array( '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
@@ -895,7 +895,7 @@ class WPMatch_Mobile_API {
 			$profile = $this->get_user_profile( $match['user_id'] );
 			if ( $profile ) {
 				$profile['compatibility_score'] = $match['compatibility_score'];
-				$profiles[] = $profile;
+				$profiles[]                     = $profile;
 			}
 		}
 
@@ -925,7 +925,7 @@ class WPMatch_Mobile_API {
 
 		// Record swipe using existing API.
 		if ( class_exists( 'WPMatch_API' ) ) {
-			$api_instance = new WPMatch_API( 'wpmatch', WPMATCH_VERSION );
+			$api_instance  = new WPMatch_API( 'wpmatch', WPMATCH_VERSION );
 			$swipe_request = new WP_REST_Request( 'POST', '/wpmatch/v1/swipe' );
 			$swipe_request->set_param( 'target_user_id', $target_user_id );
 			$swipe_request->set_param( 'swipe_type', $action );
@@ -946,10 +946,10 @@ class WPMatch_Mobile_API {
 				array(
 					'success' => true,
 					'data'    => array(
-						'is_match'     => isset( $response_data['is_match'] ) ? $response_data['is_match'] : false,
-						'match_id'     => isset( $response_data['match_id'] ) ? $response_data['match_id'] : null,
-						'action'       => $action,
-						'target_user'  => $this->get_user_profile( $target_user_id ),
+						'is_match'    => isset( $response_data['is_match'] ) ? $response_data['is_match'] : false,
+						'match_id'    => isset( $response_data['match_id'] ) ? $response_data['match_id'] : null,
+						'action'      => $action,
+						'target_user' => $this->get_user_profile( $target_user_id ),
 					),
 				)
 			);
@@ -1004,12 +1004,12 @@ class WPMatch_Mobile_API {
 		$match_profiles = array();
 		foreach ( $matches as $match ) {
 			$other_user_id = ( $match->user1_id == $user_id ) ? $match->user2_id : $match->user1_id;
-			$profile = $this->get_user_profile( $other_user_id );
+			$profile       = $this->get_user_profile( $other_user_id );
 
 			if ( $profile ) {
-				$profile['match_id'] = $match->id;
+				$profile['match_id']   = $match->id;
 				$profile['matched_at'] = $match->created_at;
-				$match_profiles[] = $profile;
+				$match_profiles[]      = $profile;
 			}
 		}
 
@@ -1055,21 +1055,21 @@ class WPMatch_Mobile_API {
 		}
 
 		return array(
-			'id'             => $user->ID,
-			'username'       => $user->user_login,
-			'display_name'   => $user->display_name,
-			'bio'            => get_user_meta( $user_id, 'wpmatch_bio', true ),
-			'age'            => (int) get_user_meta( $user_id, 'wpmatch_age', true ),
-			'location'       => get_user_meta( $user_id, 'wpmatch_location', true ),
-			'interests'      => get_user_meta( $user_id, 'wpmatch_interests', true ),
-			'preferences'    => get_user_meta( $user_id, 'wpmatch_preferences', true ),
-			'photos'         => $formatted_photos,
-			'verification'   => array(
-				'email_verified'  => (bool) get_user_meta( $user_id, 'wpmatch_email_verified', true ),
-				'photo_verified'  => (bool) get_user_meta( $user_id, 'wpmatch_photo_verified', true ),
+			'id'            => $user->ID,
+			'username'      => $user->user_login,
+			'display_name'  => $user->display_name,
+			'bio'           => get_user_meta( $user_id, 'wpmatch_bio', true ),
+			'age'           => (int) get_user_meta( $user_id, 'wpmatch_age', true ),
+			'location'      => get_user_meta( $user_id, 'wpmatch_location', true ),
+			'interests'     => get_user_meta( $user_id, 'wpmatch_interests', true ),
+			'preferences'   => get_user_meta( $user_id, 'wpmatch_preferences', true ),
+			'photos'        => $formatted_photos,
+			'verification'  => array(
+				'email_verified' => (bool) get_user_meta( $user_id, 'wpmatch_email_verified', true ),
+				'photo_verified' => (bool) get_user_meta( $user_id, 'wpmatch_photo_verified', true ),
 			),
-			'last_active'    => get_user_meta( $user_id, 'wpmatch_last_active', true ),
-			'online_status'  => $this->get_user_online_status( $user_id ),
+			'last_active'   => get_user_meta( $user_id, 'wpmatch_last_active', true ),
+			'online_status' => $this->get_user_online_status( $user_id ),
 		);
 	}
 
@@ -1080,9 +1080,12 @@ class WPMatch_Mobile_API {
 	 */
 	private function initialize_user_profile( $user_id ) {
 		$default_preferences = array(
-			'age_range'     => array( 'min' => 18, 'max' => 99 ),
-			'distance'      => 50,
-			'show_me'       => 'everyone',
+			'age_range' => array(
+				'min' => 18,
+				'max' => 99,
+			),
+			'distance'  => 50,
+			'show_me'   => 'everyone',
 		);
 
 		update_user_meta( $user_id, 'wpmatch_preferences', $default_preferences );
@@ -1129,7 +1132,7 @@ class WPMatch_Mobile_API {
 			return array();
 		}
 
-		$sanitized = array();
+		$sanitized      = array();
 		$allowed_fields = array( 'device_token', 'platform', 'app_version', 'os_version', 'device_model' );
 
 		foreach ( $allowed_fields as $field ) {
@@ -1240,44 +1243,93 @@ class WPMatch_Mobile_API {
 	 * Placeholder methods for remaining endpoints.
 	 * These would be implemented with full functionality.
 	 */
-
 	public function api_upload_photo( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_delete_photo( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_conversations( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_messages( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_send_message( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_notification_settings( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_update_notification_settings( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_privacy_settings( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_update_privacy_settings( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_register_device( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 }

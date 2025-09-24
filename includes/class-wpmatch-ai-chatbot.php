@@ -389,7 +389,7 @@ class WPMatch_AI_Chatbot {
 				'callback'            => array( $this, 'api_get_dating_advice' ),
 				'permission_callback' => array( $this, 'check_user_auth' ),
 				'args'                => array(
-					'category' => array(
+					'category'  => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'situation' => array(
@@ -635,10 +635,10 @@ class WPMatch_AI_Chatbot {
 
 		return rest_ensure_response(
 			array(
-				'success'    => true,
-				'data'       => array(
-					'response'   => $ai_response['content'],
-					'confidence' => $ai_response['confidence'],
+				'success' => true,
+				'data'    => array(
+					'response'    => $ai_response['content'],
+					'confidence'  => $ai_response['confidence'],
 					'suggestions' => $ai_response['suggestions'] ?? array(),
 				),
 			)
@@ -653,8 +653,8 @@ class WPMatch_AI_Chatbot {
 	 */
 	public function api_get_conversation_starters( $request ) {
 		$target_user_id = $request->get_param( 'target_user_id' );
-		$category = $request->get_param( 'category' );
-		$count = $request->get_param( 'count' );
+		$category       = $request->get_param( 'category' );
+		$count          = $request->get_param( 'count' );
 
 		$starters = $this->get_conversation_starters( $target_user_id, $category, $count );
 
@@ -710,11 +710,11 @@ class WPMatch_AI_Chatbot {
 		$table_name = $wpdb->prefix . 'wpmatch_conversation_starters';
 
 		$where_clause = 'WHERE is_active = 1';
-		$params = array();
+		$params       = array();
 
 		if ( ! empty( $category ) ) {
 			$where_clause .= ' AND category = %s';
-			$params[] = $category;
+			$params[]      = $category;
 		}
 
 		if ( $target_user_id ) {
@@ -739,13 +739,13 @@ class WPMatch_AI_Chatbot {
 		$formatted_starters = array();
 		foreach ( $starters as $starter ) {
 			$formatted_starters[] = array(
-				'id'            => $starter->id,
-				'question'      => $starter->question,
-				'category'      => $starter->category,
-				'subcategory'   => $starter->subcategory,
-				'follow_ups'    => maybe_unserialize( $starter->follow_up_questions ),
-				'difficulty'    => $starter->difficulty_level,
-				'success_rate'  => $starter->success_rate,
+				'id'           => $starter->id,
+				'question'     => $starter->question,
+				'category'     => $starter->category,
+				'subcategory'  => $starter->subcategory,
+				'follow_ups'   => maybe_unserialize( $starter->follow_up_questions ),
+				'difficulty'   => $starter->difficulty_level,
+				'success_rate' => $starter->success_rate,
 			);
 
 			// Update usage count.
@@ -784,10 +784,10 @@ class WPMatch_AI_Chatbot {
 		}
 
 		return array(
-			'personality_type'     => $insights->personality_type,
-			'traits'               => maybe_unserialize( $insights->traits ),
-			'communication_style'  => $insights->communication_style,
-			'preferred_topics'     => maybe_unserialize( $insights->preferred_topics ),
+			'personality_type'      => $insights->personality_type,
+			'traits'                => maybe_unserialize( $insights->traits ),
+			'communication_style'   => $insights->communication_style,
+			'preferred_topics'      => maybe_unserialize( $insights->preferred_topics ),
 			'conversation_patterns' => maybe_unserialize( $insights->conversation_patterns ),
 		);
 	}
@@ -801,17 +801,17 @@ class WPMatch_AI_Chatbot {
 	 * @return string
 	 */
 	private function build_ai_prompt( $message, $context = array(), $personality = array() ) {
-		$prompt = "You are a professional dating coach and relationship expert. ";
-		$prompt .= "Provide helpful, respectful, and encouraging dating advice. ";
-		$prompt .= "Keep responses concise but valuable. ";
+		$prompt  = 'You are a professional dating coach and relationship expert. ';
+		$prompt .= 'Provide helpful, respectful, and encouraging dating advice. ';
+		$prompt .= 'Keep responses concise but valuable. ';
 
 		if ( ! empty( $personality ) ) {
-			$prompt .= "The user's personality type is: " . ( $personality['personality_type'] ?? 'unknown' ) . ". ";
-			$prompt .= "Their communication style is: " . ( $personality['communication_style'] ?? 'adaptive' ) . ". ";
+			$prompt .= "The user's personality type is: " . ( $personality['personality_type'] ?? 'unknown' ) . '. ';
+			$prompt .= 'Their communication style is: ' . ( $personality['communication_style'] ?? 'adaptive' ) . '. ';
 		}
 
 		if ( ! empty( $context['situation'] ) ) {
-			$prompt .= "Context: " . $context['situation'] . ". ";
+			$prompt .= 'Context: ' . $context['situation'] . '. ';
 		}
 
 		$prompt .= "\n\nUser question: " . $message;
@@ -840,8 +840,8 @@ class WPMatch_AI_Chatbot {
 	 */
 	private function parse_ai_response( $response, $message ) {
 		return array(
-			'content'    => $response,
-			'confidence' => 0.85,
+			'content'     => $response,
+			'confidence'  => 0.85,
 			'suggestions' => array(),
 		);
 	}
@@ -855,7 +855,7 @@ class WPMatch_AI_Chatbot {
 	 */
 	private function get_fallback_response( $message, $context = array() ) {
 		$fallback_responses = array(
-			'conversation' => "Here are some great conversation starters: Ask about their hobbies, travel experiences, or favorite movies. Remember to be genuine and listen actively!",
+			'conversation' => 'Here are some great conversation starters: Ask about their hobbies, travel experiences, or favorite movies. Remember to be genuine and listen actively!',
 			'advice'       => "Dating tip: Be yourself, show genuine interest in getting to know them, and don't be afraid to be vulnerable. Good communication is key to any relationship.",
 			'default'      => "I'm here to help with your dating questions! Try asking about conversation starters, dating advice, or relationship tips.",
 		);
@@ -871,8 +871,8 @@ class WPMatch_AI_Chatbot {
 		}
 
 		return array(
-			'content'    => $fallback_responses[ $response_key ],
-			'confidence' => 0.6,
+			'content'     => $fallback_responses[ $response_key ],
+			'confidence'  => 0.6,
 			'suggestions' => array(),
 		);
 	}
@@ -919,35 +919,35 @@ class WPMatch_AI_Chatbot {
 				'category'    => 'interests',
 				'subcategory' => 'hobbies',
 				'question'    => "What's a hobby you've picked up recently that you're really excited about?",
-				'follow_ups'  => array( "How did you get started with that?", "What's been the most surprising thing about it?" ),
+				'follow_ups'  => array( 'How did you get started with that?', "What's been the most surprising thing about it?" ),
 				'difficulty'  => 1,
 			),
 			array(
 				'category'    => 'travel',
 				'subcategory' => 'experiences',
-				'question'    => "If you could teleport anywhere in the world right now, where would you go and why?",
-				'follow_ups'  => array( "Have you been there before?", "What would be the first thing you'd do there?" ),
+				'question'    => 'If you could teleport anywhere in the world right now, where would you go and why?',
+				'follow_ups'  => array( 'Have you been there before?', "What would be the first thing you'd do there?" ),
 				'difficulty'  => 2,
 			),
 			array(
 				'category'    => 'lifestyle',
 				'subcategory' => 'food',
 				'question'    => "What's the best meal you've had recently? I'm always looking for new places to try!",
-				'follow_ups'  => array( "Do you cook at home often?", "What's your go-to comfort food?" ),
+				'follow_ups'  => array( 'Do you cook at home often?', "What's your go-to comfort food?" ),
 				'difficulty'  => 1,
 			),
 			array(
 				'category'    => 'personal',
 				'subcategory' => 'goals',
 				'question'    => "What's something you're working towards that you're really excited about?",
-				'follow_ups'  => array( "What inspired you to pursue that?", "How long have you been working on it?" ),
+				'follow_ups'  => array( 'What inspired you to pursue that?', 'How long have you been working on it?' ),
 				'difficulty'  => 3,
 			),
 			array(
 				'category'    => 'entertainment',
 				'subcategory' => 'media',
 				'question'    => "I'm looking for a new show to binge-watch. What's been keeping you glued to your screen lately?",
-				'follow_ups'  => array( "What genre do you usually prefer?", "Any movies you'd recommend?" ),
+				'follow_ups'  => array( 'What genre do you usually prefer?', "Any movies you'd recommend?" ),
 				'difficulty'  => 1,
 			),
 		);
@@ -956,12 +956,12 @@ class WPMatch_AI_Chatbot {
 			$wpdb->insert(
 				$table_name,
 				array(
-					'category'             => $starter['category'],
-					'subcategory'          => $starter['subcategory'],
-					'question'             => $starter['question'],
-					'follow_up_questions'  => maybe_serialize( $starter['follow_ups'] ),
-					'difficulty_level'     => $starter['difficulty'],
-					'success_rate'         => 75.0,
+					'category'            => $starter['category'],
+					'subcategory'         => $starter['subcategory'],
+					'question'            => $starter['question'],
+					'follow_up_questions' => maybe_serialize( $starter['follow_ups'] ),
+					'difficulty_level'    => $starter['difficulty'],
+					'success_rate'        => 75.0,
 				),
 				array( '%s', '%s', '%s', '%s', '%d', '%f' )
 			);
@@ -1001,13 +1001,13 @@ class WPMatch_AI_Chatbot {
 			$wpdb->insert(
 				$table_name,
 				array(
-					'category'           => $item['category'],
-					'title'              => $item['title'],
-					'content'            => $item['content'],
-					'tags'               => $item['tags'],
-					'target_audience'    => 'general',
-					'difficulty_level'   => 1,
-					'helpfulness_score'  => 80.0,
+					'category'          => $item['category'],
+					'title'             => $item['title'],
+					'content'           => $item['content'],
+					'tags'              => $item['tags'],
+					'target_audience'   => 'general',
+					'difficulty_level'  => 1,
+					'helpfulness_score' => 80.0,
 				),
 				array( '%s', '%s', '%s', '%s', '%s', '%d', '%f' )
 			);
@@ -1046,7 +1046,7 @@ class WPMatch_AI_Chatbot {
 			return array();
 		}
 
-		$sanitized = array();
+		$sanitized    = array();
 		$allowed_keys = array( 'situation', 'target_user_id', 'conversation_id', 'preferences' );
 
 		foreach ( $allowed_keys as $key ) {
@@ -1071,40 +1071,84 @@ class WPMatch_AI_Chatbot {
 	/**
 	 * Placeholder methods for remaining API endpoints.
 	 */
-
 	public function api_get_personalized_starters( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_analyze_personality( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_personality_insights( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_dating_advice( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_personalized_advice( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_optimize_message( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_get_message_suggestions( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_analyze_compatibility( $request ) {
-		return rest_ensure_response( array( 'success' => false, 'message' => 'Not implemented yet' ) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	public function api_submit_feedback( $request ) {
-		return rest_ensure_response( array( 'success' => true, 'message' => 'Feedback received' ) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => 'Feedback received',
+			)
+		);
 	}
 }

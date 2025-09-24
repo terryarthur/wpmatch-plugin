@@ -136,6 +136,16 @@ class WPMatch_Admin {
 			array( $this, 'display_reports_page' )
 		);
 
+		// Revenue submenu.
+		add_submenu_page(
+			'wpmatch',
+			__( 'Revenue Analytics', 'wpmatch' ),
+			__( 'Revenue', 'wpmatch' ),
+			'manage_options',
+			'wpmatch-revenue',
+			array( $this, 'display_revenue_page' )
+		);
+
 		// Help & Documentation submenu (for site admins).
 		add_submenu_page(
 			'wpmatch',
@@ -189,10 +199,324 @@ class WPMatch_Admin {
 	}
 
 	/**
+	 * Display the revenue analytics page.
+	 */
+	public function display_revenue_page() {
+		require_once WPMATCH_PLUGIN_DIR . 'admin/partials/wpmatch-admin-revenue.php';
+	}
+
+	/**
 	 * Display the admin help page.
 	 */
 	public function display_admin_help_page() {
 		require_once WPMATCH_PLUGIN_DIR . 'admin/partials/wpmatch-admin-help.php';
+	}
+
+	/**
+	 * Register AJAX handlers for admin functions.
+	 */
+	public function register_ajax_handlers() {
+		// User management AJAX handlers
+		add_action( 'wp_ajax_wpmatch_get_user_profile', array( $this, 'ajax_get_user_profile' ) );
+		add_action( 'wp_ajax_wpmatch_update_user_profile', array( $this, 'ajax_update_user_profile' ) );
+		add_action( 'wp_ajax_wpmatch_update_user_status', array( $this, 'ajax_update_user_status' ) );
+		add_action( 'wp_ajax_wpmatch_verify_user', array( $this, 'ajax_verify_user' ) );
+		add_action( 'wp_ajax_wpmatch_bulk_user_action', array( $this, 'ajax_bulk_user_action' ) );
+
+		// Settings AJAX handlers
+		add_action( 'wp_ajax_wpmatch_reset_settings', array( $this, 'ajax_reset_settings' ) );
+		add_action( 'wp_ajax_wpmatch_export_settings', array( $this, 'ajax_export_settings' ) );
+		add_action( 'wp_ajax_wpmatch_import_settings', array( $this, 'ajax_import_settings' ) );
+		add_action( 'wp_ajax_wpmatch_auto_save_settings', array( $this, 'ajax_auto_save_settings' ) );
+	}
+
+	/**
+	 * AJAX handler for getting user profile details.
+	 */
+	public function ajax_get_user_profile() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => 'Invalid user ID' ) );
+		}
+
+		global $wpdb;
+
+		// Get WordPress user data
+		$user = get_user_by( 'ID', $user_id );
+		if ( ! $user ) {
+			wp_send_json_error( array( 'message' => 'User not found' ) );
+		}
+
+		// Get profile data
+		$profile = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}wpmatch_user_profiles WHERE user_id = %d",
+			$user_id
+		) );
+
+		if ( ! $profile ) {
+			wp_send_json_error( array( 'message' => 'Profile not found' ) );
+		}
+
+		// Get user photos
+		$photos = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}wpmatch_user_photos WHERE user_id = %d ORDER BY is_primary DESC, uploaded_at ASC",
+			$user_id
+		) );
+
+		// Get user statistics
+		$matches = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_matches WHERE (user1_id = %d OR user2_id = %d) AND status = 'mutual'",
+			$user_id, $user_id
+		) );
+
+		$total_swipes = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_swipes WHERE user_id = %d",
+			$user_id
+		) );
+
+		$likes_given = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_swipes WHERE user_id = %d AND action = 'like'",
+			$user_id
+		) );
+
+		$received_likes = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_swipes WHERE target_user_id = %d AND action = 'like'",
+			$user_id
+		) );
+
+		$statistics = array(
+			'matches' => $matches ?: 0,
+			'total_swipes' => $total_swipes ?: 0,
+			'likes_given' => $likes_given ?: 0,
+			'received_likes' => $received_likes ?: 0,
+		);
+
+		wp_send_json_success( array(
+			'user' => array(
+				'ID' => $user->ID,
+				'display_name' => $user->display_name,
+				'user_login' => $user->user_login,
+				'user_email' => $user->user_email,
+				'user_registered' => $user->user_registered,
+			),
+			'profile' => $profile,
+			'photos' => $photos,
+			'statistics' => $statistics,
+		) );
+	}
+
+	/**
+	 * AJAX handler for updating user profile.
+	 */
+	public function ajax_update_user_profile() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => 'Invalid user ID' ) );
+		}
+
+		global $wpdb;
+
+		$update_data = array();
+
+		// Sanitize and collect update data
+		if ( isset( $_POST['age'] ) ) {
+			$update_data['age'] = absint( $_POST['age'] );
+		}
+		if ( isset( $_POST['location'] ) ) {
+			$update_data['location'] = sanitize_text_field( $_POST['location'] );
+		}
+		if ( isset( $_POST['about_me'] ) ) {
+			$update_data['about_me'] = sanitize_textarea_field( $_POST['about_me'] );
+		}
+
+		if ( empty( $update_data ) ) {
+			wp_send_json_error( array( 'message' => 'No data to update' ) );
+		}
+
+		// Update profile
+		$result = $wpdb->update(
+			$wpdb->prefix . 'wpmatch_user_profiles',
+			$update_data,
+			array( 'user_id' => $user_id ),
+			array_fill( 0, count( $update_data ), '%s' ),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => 'Failed to update profile' ) );
+		}
+
+		wp_send_json_success( array( 'message' => 'Profile updated successfully' ) );
+	}
+
+	/**
+	 * AJAX handler for updating user status.
+	 */
+	public function ajax_update_user_status() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+		$status = sanitize_text_field( $_POST['status'] );
+
+		if ( ! $user_id || ! in_array( $status, array( 'active', 'blocked', 'pending', 'inactive' ) ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid parameters' ) );
+		}
+
+		global $wpdb;
+
+		// Update user status
+		$result = $wpdb->update(
+			$wpdb->prefix . 'wpmatch_user_profiles',
+			array( 'status' => $status ),
+			array( 'user_id' => $user_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => 'Failed to update status' ) );
+		}
+
+		wp_send_json_success( array( 'message' => 'User status updated successfully' ) );
+	}
+
+	/**
+	 * AJAX handler for verifying user.
+	 */
+	public function ajax_verify_user() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$user_id = absint( $_POST['user_id'] );
+
+		if ( ! $user_id ) {
+			wp_send_json_error( array( 'message' => 'Invalid user ID' ) );
+		}
+
+		global $wpdb;
+
+		// Update verification status
+		$result = $wpdb->update(
+			$wpdb->prefix . 'wpmatch_user_profiles',
+			array( 'is_verified' => 1 ),
+			array( 'user_id' => $user_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			wp_send_json_error( array( 'message' => 'Failed to verify user' ) );
+		}
+
+		wp_send_json_success( array( 'message' => 'User verified successfully' ) );
+	}
+
+	/**
+	 * AJAX handler for bulk user actions.
+	 */
+	public function ajax_bulk_user_action() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$user_ids = array_map( 'absint', $_POST['user_ids'] );
+		$bulk_action = sanitize_text_field( $_POST['bulk_action'] );
+
+		if ( empty( $user_ids ) || ! in_array( $bulk_action, array( 'activate', 'deactivate', 'verify', 'block' ) ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid parameters' ) );
+		}
+
+		global $wpdb;
+
+		// Map actions to database values
+		$update_data = array();
+		switch ( $bulk_action ) {
+			case 'activate':
+				$update_data['status'] = 'active';
+				break;
+			case 'deactivate':
+				$update_data['status'] = 'inactive';
+				break;
+			case 'block':
+				$update_data['status'] = 'blocked';
+				break;
+			case 'verify':
+				$update_data['is_verified'] = 1;
+				break;
+		}
+
+		$success_count = 0;
+
+		// Process each user
+		foreach ( $user_ids as $user_id ) {
+			$result = $wpdb->update(
+				$wpdb->prefix . 'wpmatch_user_profiles',
+				$update_data,
+				array( 'user_id' => $user_id ),
+				array_fill( 0, count( $update_data ), '%s' ),
+				array( '%d' )
+			);
+
+			if ( false !== $result ) {
+				$success_count++;
+			}
+		}
+
+		if ( 0 === $success_count ) {
+			wp_send_json_error( array( 'message' => 'Failed to update any users' ) );
+		}
+
+		wp_send_json_success( array(
+			'message' => sprintf(
+				/* translators: 1: number of users updated, 2: total users selected */
+				__( 'Successfully updated %1$d of %2$d users', 'wpmatch' ),
+				$success_count,
+				count( $user_ids )
+			)
+		) );
 	}
 
 	/**
@@ -1801,6 +2125,208 @@ class WPMatch_Admin {
 		set_theme_mod( 'nav_menu_locations', $locations );
 
 		return true;
+	}
+
+	/**
+	 * AJAX handler for resetting settings to defaults.
+	 */
+	public function ajax_reset_settings() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		// Get default settings
+		$default_settings = array(
+			'site_name' => get_bloginfo( 'name' ),
+			'enable_plugin' => true,
+			'debug_mode' => false,
+			'enable_registration' => true,
+			'enable_social_login' => false,
+			'min_age' => 18,
+			'max_photos' => 10,
+			'required_profile_completion' => 80,
+			'default_search_radius' => 50,
+			'daily_match_suggestions' => 5,
+			'age_weight' => 30,
+			'location_weight' => 40,
+			'interests_weight' => 30,
+			'require_email_verification' => true,
+			'enable_photo_verification' => true,
+			'enable_reporting' => true,
+			'auto_block_reports' => 5,
+			'enable_content_filter' => true,
+			'enable_email_notifications' => true,
+			'notify_new_matches' => true,
+			'notify_new_messages' => true,
+			'weekly_digest' => false,
+			'api_rate_limit' => 100,
+			'cache_duration' => 300,
+			'auto_cleanup' => false,
+			'custom_css' => '',
+		);
+
+		// Reset settings
+		update_option( 'wpmatch_settings', $default_settings );
+
+		wp_send_json_success( array( 'message' => __( 'Settings reset to defaults successfully.', 'wpmatch' ) ) );
+	}
+
+	/**
+	 * AJAX handler for exporting settings.
+	 */
+	public function ajax_export_settings() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		// Get current settings
+		$settings = get_option( 'wpmatch_settings', array() );
+
+		// Add metadata
+		$export_data = array(
+			'wpmatch_version' => WPMATCH_VERSION,
+			'export_date' => current_time( 'Y-m-d H:i:s' ),
+			'site_url' => home_url(),
+			'settings' => $settings,
+		);
+
+		wp_send_json_success( $export_data );
+	}
+
+	/**
+	 * AJAX handler for importing settings.
+	 */
+	public function ajax_import_settings() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$settings_json = sanitize_textarea_field( $_POST['settings'] );
+		$import_data = json_decode( $settings_json, true );
+
+		if ( ! $import_data || ! isset( $import_data['settings'] ) ) {
+			wp_send_json_error( __( 'Invalid settings file format.', 'wpmatch' ) );
+		}
+
+		$settings = $import_data['settings'];
+
+		// Validate and sanitize settings
+		$sanitized_settings = array();
+		$allowed_settings = array(
+			'site_name', 'enable_plugin', 'debug_mode', 'enable_registration',
+			'enable_social_login', 'min_age', 'max_photos', 'required_profile_completion',
+			'default_search_radius', 'daily_match_suggestions', 'age_weight',
+			'location_weight', 'interests_weight', 'require_email_verification',
+			'enable_photo_verification', 'enable_reporting', 'auto_block_reports',
+			'enable_content_filter', 'enable_email_notifications', 'notify_new_matches',
+			'notify_new_messages', 'weekly_digest', 'api_rate_limit', 'cache_duration',
+			'auto_cleanup', 'custom_css'
+		);
+
+		foreach ( $allowed_settings as $key ) {
+			if ( isset( $settings[ $key ] ) ) {
+				switch ( $key ) {
+					case 'site_name':
+					case 'custom_css':
+						$sanitized_settings[ $key ] = sanitize_text_field( $settings[ $key ] );
+						break;
+					case 'min_age':
+					case 'max_photos':
+					case 'required_profile_completion':
+					case 'default_search_radius':
+					case 'daily_match_suggestions':
+					case 'age_weight':
+					case 'location_weight':
+					case 'interests_weight':
+					case 'auto_block_reports':
+					case 'api_rate_limit':
+					case 'cache_duration':
+						$sanitized_settings[ $key ] = absint( $settings[ $key ] );
+						break;
+					default:
+						$sanitized_settings[ $key ] = (bool) $settings[ $key ];
+						break;
+				}
+			}
+		}
+
+		// Update settings
+		update_option( 'wpmatch_settings', $sanitized_settings );
+
+		wp_send_json_success( array( 'message' => __( 'Settings imported successfully.', 'wpmatch' ) ) );
+	}
+
+	/**
+	 * AJAX handler for auto-saving settings.
+	 */
+	public function ajax_auto_save_settings() {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'wpmatch_admin_nonce' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user capabilities
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		// Process settings from $_POST
+		if ( isset( $_POST['wpmatch_settings'] ) && is_array( $_POST['wpmatch_settings'] ) ) {
+			$settings = $_POST['wpmatch_settings'];
+
+			// Sanitize settings
+			$sanitized_settings = array();
+			foreach ( $settings as $key => $value ) {
+				$sanitized_key = sanitize_key( $key );
+				switch ( $sanitized_key ) {
+					case 'site_name':
+					case 'custom_css':
+						$sanitized_settings[ $sanitized_key ] = sanitize_text_field( $value );
+						break;
+					case 'min_age':
+					case 'max_photos':
+					case 'required_profile_completion':
+					case 'default_search_radius':
+					case 'daily_match_suggestions':
+					case 'age_weight':
+					case 'location_weight':
+					case 'interests_weight':
+					case 'auto_block_reports':
+					case 'api_rate_limit':
+					case 'cache_duration':
+						$sanitized_settings[ $sanitized_key ] = absint( $value );
+						break;
+					default:
+						$sanitized_settings[ $sanitized_key ] = (bool) $value;
+						break;
+				}
+			}
+
+			// Update settings
+			update_option( 'wpmatch_settings', $sanitized_settings );
+
+			wp_send_json_success( array( 'message' => __( 'Settings auto-saved.', 'wpmatch' ) ) );
+		}
+
+		wp_send_json_error( array( 'message' => __( 'No settings data received.', 'wpmatch' ) ) );
 	}
 
 }

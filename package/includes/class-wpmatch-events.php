@@ -46,7 +46,7 @@ class WPMatch_Events {
 
 		// Events table.
 		$table_name = $wpdb->prefix . 'wpmatch_events';
-		$sql = "CREATE TABLE $table_name (
+		$sql        = "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			title varchar(255) NOT NULL,
 			description text,
@@ -78,7 +78,7 @@ class WPMatch_Events {
 
 		// Event registrations table.
 		$table_name = $wpdb->prefix . 'wpmatch_event_registrations';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			user_id bigint(20) NOT NULL,
@@ -98,7 +98,7 @@ class WPMatch_Events {
 
 		// Speed dating sessions table.
 		$table_name = $wpdb->prefix . 'wpmatch_speed_dating_sessions';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			session_name varchar(255),
@@ -121,7 +121,7 @@ class WPMatch_Events {
 
 		// Event matches table (for post-event connections).
 		$table_name = $wpdb->prefix . 'wpmatch_event_matches';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			user1_id bigint(20) NOT NULL,
@@ -144,7 +144,7 @@ class WPMatch_Events {
 
 		// Event chat rooms table.
 		$table_name = $wpdb->prefix . 'wpmatch_event_chat_rooms';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			room_name varchar(255) NOT NULL,
@@ -162,7 +162,7 @@ class WPMatch_Events {
 
 		// Event feedback table.
 		$table_name = $wpdb->prefix . 'wpmatch_event_feedback';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			user_id bigint(20) NOT NULL,
@@ -188,137 +188,185 @@ class WPMatch_Events {
 	 */
 	public static function register_rest_routes() {
 		// Events management.
-		register_rest_route( 'wpmatch/v1', '/events', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_events' ),
-			'permission_callback' => '__return_true',
-			'args' => array(
-				'type' => array( 'required' => false ),
-				'status' => array( 'default' => 'published' ),
-				'featured' => array( 'required' => false ),
-				'page' => array( 'default' => 1 ),
-				'per_page' => array( 'default' => 10 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_events' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'type'     => array( 'required' => false ),
+					'status'   => array( 'default' => 'published' ),
+					'featured' => array( 'required' => false ),
+					'page'     => array( 'default' => 1 ),
+					'per_page' => array( 'default' => 10 ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_create_event' ),
-			'permission_callback' => array( __CLASS__, 'check_create_permission' ),
-			'args' => array(
-				'title' => array( 'required' => true ),
-				'description' => array( 'required' => false ),
-				'event_type' => array( 'required' => true ),
-				'event_start' => array( 'required' => true ),
-				'event_end' => array( 'required' => true ),
-				'max_participants' => array( 'default' => 50 ),
-				'age_min' => array( 'default' => 18 ),
-				'age_max' => array( 'default' => 100 ),
-				'entry_fee' => array( 'default' => 0 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_create_event' ),
+				'permission_callback' => array( __CLASS__, 'check_create_permission' ),
+				'args'                => array(
+					'title'            => array( 'required' => true ),
+					'description'      => array( 'required' => false ),
+					'event_type'       => array( 'required' => true ),
+					'event_start'      => array( 'required' => true ),
+					'event_end'        => array( 'required' => true ),
+					'max_participants' => array( 'default' => 50 ),
+					'age_min'          => array( 'default' => 18 ),
+					'age_max'          => array( 'default' => 100 ),
+					'entry_fee'        => array( 'default' => 0 ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_event' ),
-			'permission_callback' => '__return_true',
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_event' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)', array(
-			'methods' => array( 'PUT', 'PATCH' ),
-			'callback' => array( __CLASS__, 'api_update_event' ),
-			'permission_callback' => array( __CLASS__, 'check_edit_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)',
+			array(
+				'methods'             => array( 'PUT', 'PATCH' ),
+				'callback'            => array( __CLASS__, 'api_update_event' ),
+				'permission_callback' => array( __CLASS__, 'check_edit_permission' ),
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Event registration.
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/register', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_register_for_event' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/register',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_register_for_event' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/unregister', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_unregister_from_event' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/unregister',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_unregister_from_event' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Event participants.
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/participants', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_event_participants' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/participants',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_event_participants' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Speed dating.
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/speed-dating/start', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_start_speed_dating' ),
-			'permission_callback' => array( __CLASS__, 'check_organizer_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-				'round_duration' => array( 'default' => 300 ),
-				'total_rounds' => array( 'default' => 6 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/speed-dating/start',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_start_speed_dating' ),
+				'permission_callback' => array( __CLASS__, 'check_organizer_permission' ),
+				'args'                => array(
+					'event_id'       => array( 'required' => true ),
+					'round_duration' => array( 'default' => 300 ),
+					'total_rounds'   => array( 'default' => 6 ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/speed-dating/status', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_speed_dating_status' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/speed-dating/status',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_speed_dating_status' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id' => array( 'required' => true ),
+				),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/speed-dating/interest', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_mark_speed_dating_interest' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-				'partner_id' => array( 'required' => true ),
-				'interested' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/speed-dating/interest',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_mark_speed_dating_interest' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id'   => array( 'required' => true ),
+					'partner_id' => array( 'required' => true ),
+					'interested' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Event feedback.
-		register_rest_route( 'wpmatch/v1', '/events/(?P<event_id>\d+)/feedback', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_submit_feedback' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'event_id' => array( 'required' => true ),
-				'rating' => array( 'required' => true ),
-				'feedback_text' => array( 'required' => false ),
-				'would_attend_again' => array( 'default' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/(?P<event_id>\d+)/feedback',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_submit_feedback' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'event_id'           => array( 'required' => true ),
+					'rating'             => array( 'required' => true ),
+					'feedback_text'      => array( 'required' => false ),
+					'would_attend_again' => array( 'default' => true ),
+				),
+			)
+		);
 
 		// My events.
-		register_rest_route( 'wpmatch/v1', '/events/my-events', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_my_events' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'type' => array( 'default' => 'registered' ), // registered, created, attended
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/events/my-events',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_my_events' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'type' => array( 'default' => 'registered' ), // registered, created, attended
+				),
+			)
+		);
 	}
 
 	/**
@@ -341,22 +389,26 @@ class WPMatch_Events {
 				WPMATCH_VERSION
 			);
 
-			wp_localize_script( 'wpmatch-events', 'wpMatchEvents', array(
-				'apiUrl' => rest_url( 'wpmatch/v1' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
-				'strings' => array(
-					'registerSuccess' => __( 'Successfully registered for event!', 'wpmatch' ),
-					'registerError' => __( 'Registration failed. Please try again.', 'wpmatch' ),
-					'eventFull' => __( 'Sorry, this event is full.', 'wpmatch' ),
-					'alreadyRegistered' => __( 'You are already registered for this event.', 'wpmatch' ),
-					'confirmUnregister' => __( 'Are you sure you want to unregister from this event?', 'wpmatch' ),
-					'feedbackSubmitted' => __( 'Thank you for your feedback!', 'wpmatch' ),
-					'speedDatingMatch' => __( 'You have a mutual match!', 'wpmatch' ),
-					'nextRound' => __( 'Get ready for the next round!', 'wpmatch' ),
-					'eventStarting' => __( 'Event is starting in 5 minutes!', 'wpmatch' ),
-					'eventStarted' => __( 'Event has started!', 'wpmatch' ),
-				),
-			) );
+			wp_localize_script(
+				'wpmatch-events',
+				'wpMatchEvents',
+				array(
+					'apiUrl'  => rest_url( 'wpmatch/v1' ),
+					'nonce'   => wp_create_nonce( 'wp_rest' ),
+					'strings' => array(
+						'registerSuccess'   => __( 'Successfully registered for event!', 'wpmatch' ),
+						'registerError'     => __( 'Registration failed. Please try again.', 'wpmatch' ),
+						'eventFull'         => __( 'Sorry, this event is full.', 'wpmatch' ),
+						'alreadyRegistered' => __( 'You are already registered for this event.', 'wpmatch' ),
+						'confirmUnregister' => __( 'Are you sure you want to unregister from this event?', 'wpmatch' ),
+						'feedbackSubmitted' => __( 'Thank you for your feedback!', 'wpmatch' ),
+						'speedDatingMatch'  => __( 'You have a mutual match!', 'wpmatch' ),
+						'nextRound'         => __( 'Get ready for the next round!', 'wpmatch' ),
+						'eventStarting'     => __( 'Event is starting in 5 minutes!', 'wpmatch' ),
+						'eventStarted'      => __( 'Event has started!', 'wpmatch' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -366,34 +418,34 @@ class WPMatch_Events {
 	public static function api_get_events( $request ) {
 		global $wpdb;
 
-		$type = $request->get_param( 'type' );
-		$status = $request->get_param( 'status' );
+		$type     = $request->get_param( 'type' );
+		$status   = $request->get_param( 'status' );
 		$featured = $request->get_param( 'featured' );
-		$page = $request->get_param( 'page' );
+		$page     = $request->get_param( 'page' );
 		$per_page = $request->get_param( 'per_page' );
 
-		$where_conditions = array( "status = %s" );
-		$where_values = array( $status );
+		$where_conditions = array( 'status = %s' );
+		$where_values     = array( $status );
 
 		if ( $type ) {
-			$where_conditions[] = "event_type = %s";
-			$where_values[] = $type;
+			$where_conditions[] = 'event_type = %s';
+			$where_values[]     = $type;
 		}
 
 		if ( $featured !== null ) {
-			$where_conditions[] = "featured = %d";
-			$where_values[] = $featured ? 1 : 0;
+			$where_conditions[] = 'featured = %d';
+			$where_values[]     = $featured ? 1 : 0;
 		}
 
 		// Only show future events by default.
-		$where_conditions[] = "event_start > %s";
-		$where_values[] = current_time( 'mysql' );
+		$where_conditions[] = 'event_start > %s';
+		$where_values[]     = current_time( 'mysql' );
 
 		$where_clause = implode( ' AND ', $where_conditions );
-		$offset = ( $page - 1 ) * $per_page;
+		$offset       = ( $page - 1 ) * $per_page;
 
 		$table_name = $wpdb->prefix . 'wpmatch_events';
-		$query = $wpdb->prepare(
+		$query      = $wpdb->prepare(
 			"SELECT * FROM $table_name WHERE $where_clause ORDER BY event_start ASC LIMIT %d OFFSET %d",
 			array_merge( $where_values, array( $per_page, $offset ) )
 		);
@@ -405,18 +457,24 @@ class WPMatch_Events {
 			$event = self::enhance_event_data( $event );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $events,
-			'pagination' => array(
-				'page' => $page,
-				'per_page' => $per_page,
-				'total_pages' => ceil( $wpdb->get_var( $wpdb->prepare(
-					"SELECT COUNT(*) FROM $table_name WHERE $where_clause",
-					$where_values
-				) ) / $per_page ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success'    => true,
+				'data'       => $events,
+				'pagination' => array(
+					'page'        => $page,
+					'per_page'    => $per_page,
+					'total_pages' => ceil(
+						$wpdb->get_var(
+							$wpdb->prepare(
+								"SELECT COUNT(*) FROM $table_name WHERE $where_clause",
+								$where_values
+							)
+						) / $per_page
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -425,13 +483,15 @@ class WPMatch_Events {
 	public static function api_get_event( $request ) {
 		global $wpdb;
 
-		$event_id = $request->get_param( 'event_id' );
+		$event_id   = $request->get_param( 'event_id' );
 		$table_name = $wpdb->prefix . 'wpmatch_events';
 
-		$event = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE id = %d",
-			$event_id
-		) );
+		$event = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE id = %d",
+				$event_id
+			)
+		);
 
 		if ( ! $event ) {
 			return new WP_Error( 'event_not_found', __( 'Event not found.', 'wpmatch' ), array( 'status' => 404 ) );
@@ -439,10 +499,12 @@ class WPMatch_Events {
 
 		$event = self::enhance_event_data( $event );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $event,
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $event,
+			)
+		);
 	}
 
 	/**
@@ -451,32 +513,32 @@ class WPMatch_Events {
 	public static function api_create_event( $request ) {
 		global $wpdb;
 
-		$user_id = get_current_user_id();
-		$title = sanitize_text_field( $request->get_param( 'title' ) );
-		$description = sanitize_textarea_field( $request->get_param( 'description' ) );
-		$event_type = sanitize_text_field( $request->get_param( 'event_type' ) );
-		$event_start = sanitize_text_field( $request->get_param( 'event_start' ) );
-		$event_end = sanitize_text_field( $request->get_param( 'event_end' ) );
+		$user_id          = get_current_user_id();
+		$title            = sanitize_text_field( $request->get_param( 'title' ) );
+		$description      = sanitize_textarea_field( $request->get_param( 'description' ) );
+		$event_type       = sanitize_text_field( $request->get_param( 'event_type' ) );
+		$event_start      = sanitize_text_field( $request->get_param( 'event_start' ) );
+		$event_end        = sanitize_text_field( $request->get_param( 'event_end' ) );
 		$max_participants = absint( $request->get_param( 'max_participants' ) );
-		$age_min = absint( $request->get_param( 'age_min' ) );
-		$age_max = absint( $request->get_param( 'age_max' ) );
-		$entry_fee = floatval( $request->get_param( 'entry_fee' ) );
+		$age_min          = absint( $request->get_param( 'age_min' ) );
+		$age_max          = absint( $request->get_param( 'age_max' ) );
+		$entry_fee        = floatval( $request->get_param( 'entry_fee' ) );
 
 		$table_name = $wpdb->prefix . 'wpmatch_events';
-		$result = $wpdb->insert(
+		$result     = $wpdb->insert(
 			$table_name,
 			array(
-				'title' => $title,
-				'description' => $description,
-				'event_type' => $event_type,
-				'creator_id' => $user_id,
+				'title'            => $title,
+				'description'      => $description,
+				'event_type'       => $event_type,
+				'creator_id'       => $user_id,
 				'max_participants' => $max_participants,
-				'age_min' => $age_min,
-				'age_max' => $age_max,
-				'event_start' => $event_start,
-				'event_end' => $event_end,
-				'entry_fee' => $entry_fee,
-				'status' => 'published',
+				'age_min'          => $age_min,
+				'age_max'          => $age_max,
+				'event_start'      => $event_start,
+				'event_end'        => $event_end,
+				'entry_fee'        => $entry_fee,
+				'status'           => 'published',
 			),
 			array( '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%s', '%f', '%s' )
 		);
@@ -490,13 +552,15 @@ class WPMatch_Events {
 		// Schedule event reminders.
 		self::schedule_event_reminders( $event_id, $event_start );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'event_id' => $event_id,
-				'message' => __( 'Event created successfully!', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'event_id' => $event_id,
+					'message'  => __( 'Event created successfully!', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -505,14 +569,16 @@ class WPMatch_Events {
 	public static function api_register_for_event( $request ) {
 		global $wpdb;
 
-		$user_id = get_current_user_id();
+		$user_id  = get_current_user_id();
 		$event_id = $request->get_param( 'event_id' );
 
 		// Check if event exists and is available.
-		$event = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}wpmatch_events WHERE id = %d AND status = 'published'",
-			$event_id
-		) );
+		$event = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}wpmatch_events WHERE id = %d AND status = 'published'",
+				$event_id
+			)
+		);
 
 		if ( ! $event ) {
 			return new WP_Error( 'event_not_found', __( 'Event not found or not available.', 'wpmatch' ), array( 'status' => 404 ) );
@@ -524,11 +590,13 @@ class WPMatch_Events {
 		}
 
 		// Check if user is already registered.
-		$existing = $wpdb->get_var( $wpdb->prepare(
-			"SELECT id FROM {$wpdb->prefix}wpmatch_event_registrations WHERE event_id = %d AND user_id = %d",
-			$event_id,
-			$user_id
-		) );
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$wpdb->prefix}wpmatch_event_registrations WHERE event_id = %d AND user_id = %d",
+				$event_id,
+				$user_id
+			)
+		);
 
 		if ( $existing ) {
 			return new WP_Error( 'already_registered', __( 'You are already registered for this event.', 'wpmatch' ), array( 'status' => 400 ) );
@@ -536,14 +604,14 @@ class WPMatch_Events {
 
 		// Register user.
 		$registration_table = $wpdb->prefix . 'wpmatch_event_registrations';
-		$result = $wpdb->insert(
+		$result             = $wpdb->insert(
 			$registration_table,
 			array(
-				'event_id' => $event_id,
-				'user_id' => $user_id,
+				'event_id'            => $event_id,
+				'user_id'             => $user_id,
 				'registration_status' => 'registered',
-				'payment_status' => $event->entry_fee > 0 ? 'pending' : 'paid',
-				'payment_amount' => $event->entry_fee,
+				'payment_status'      => $event->entry_fee > 0 ? 'pending' : 'paid',
+				'payment_amount'      => $event->entry_fee,
 			),
 			array( '%d', '%d', '%s', '%s', '%f' )
 		);
@@ -566,14 +634,16 @@ class WPMatch_Events {
 			do_action( 'wpmatch_event_registered', 'event_registration', array( 'user_id' => $user_id ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Successfully registered for event!', 'wpmatch' ),
-				'registration_id' => $wpdb->insert_id,
-				'requires_payment' => $event->entry_fee > 0,
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message'          => __( 'Successfully registered for event!', 'wpmatch' ),
+					'registration_id'  => $wpdb->insert_id,
+					'requires_payment' => $event->entry_fee > 0,
+				),
+			)
+		);
 	}
 
 	/**
@@ -582,16 +652,18 @@ class WPMatch_Events {
 	public static function api_start_speed_dating( $request ) {
 		global $wpdb;
 
-		$event_id = $request->get_param( 'event_id' );
+		$event_id       = $request->get_param( 'event_id' );
 		$round_duration = $request->get_param( 'round_duration' );
-		$total_rounds = $request->get_param( 'total_rounds' );
+		$total_rounds   = $request->get_param( 'total_rounds' );
 
 		// Get event participants.
-		$participants = $wpdb->get_results( $wpdb->prepare(
-			"SELECT user_id FROM {$wpdb->prefix}wpmatch_event_registrations
+		$participants = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT user_id FROM {$wpdb->prefix}wpmatch_event_registrations
 			WHERE event_id = %d AND registration_status = 'confirmed'",
-			$event_id
-		) );
+				$event_id
+			)
+		);
 
 		if ( count( $participants ) < 4 ) {
 			return new WP_Error( 'insufficient_participants', __( 'Need at least 4 participants for speed dating.', 'wpmatch' ), array( 'status' => 400 ) );
@@ -599,16 +671,16 @@ class WPMatch_Events {
 
 		// Create speed dating session.
 		$session_table = $wpdb->prefix . 'wpmatch_speed_dating_sessions';
-		$result = $wpdb->insert(
+		$result        = $wpdb->insert(
 			$session_table,
 			array(
-				'event_id' => $event_id,
-				'session_name' => 'Speed Dating Session',
-				'total_rounds' => $total_rounds,
+				'event_id'       => $event_id,
+				'session_name'   => 'Speed Dating Session',
+				'total_rounds'   => $total_rounds,
 				'round_duration' => $round_duration,
-				'status' => 'active',
-				'participants' => wp_json_encode( wp_list_pluck( $participants, 'user_id' ) ),
-				'session_start' => current_time( 'mysql' ),
+				'status'         => 'active',
+				'participants'   => wp_json_encode( wp_list_pluck( $participants, 'user_id' ) ),
+				'session_start'  => current_time( 'mysql' ),
 			),
 			array( '%d', '%s', '%d', '%d', '%s', '%s', '%s' )
 		);
@@ -626,15 +698,17 @@ class WPMatch_Events {
 			array( $session_id )
 		);
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'session_id' => $session_id,
-				'message' => __( 'Speed dating session started!', 'wpmatch' ),
-				'round_duration' => $round_duration,
-				'participants' => count( $participants ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'session_id'     => $session_id,
+					'message'        => __( 'Speed dating session started!', 'wpmatch' ),
+					'round_duration' => $round_duration,
+					'participants'   => count( $participants ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -643,10 +717,10 @@ class WPMatch_Events {
 	public static function api_submit_feedback( $request ) {
 		global $wpdb;
 
-		$user_id = get_current_user_id();
-		$event_id = $request->get_param( 'event_id' );
-		$rating = absint( $request->get_param( 'rating' ) );
-		$feedback_text = sanitize_textarea_field( $request->get_param( 'feedback_text' ) );
+		$user_id            = get_current_user_id();
+		$event_id           = $request->get_param( 'event_id' );
+		$rating             = absint( $request->get_param( 'rating' ) );
+		$feedback_text      = sanitize_textarea_field( $request->get_param( 'feedback_text' ) );
 		$would_attend_again = $request->get_param( 'would_attend_again' ) ? 1 : 0;
 
 		if ( $rating < 1 || $rating > 5 ) {
@@ -654,13 +728,13 @@ class WPMatch_Events {
 		}
 
 		$feedback_table = $wpdb->prefix . 'wpmatch_event_feedback';
-		$result = $wpdb->replace(
+		$result         = $wpdb->replace(
 			$feedback_table,
 			array(
-				'event_id' => $event_id,
-				'user_id' => $user_id,
-				'rating' => $rating,
-				'feedback_text' => $feedback_text,
+				'event_id'           => $event_id,
+				'user_id'            => $user_id,
+				'rating'             => $rating,
+				'feedback_text'      => $feedback_text,
 				'would_attend_again' => $would_attend_again,
 			),
 			array( '%d', '%d', '%d', '%s', '%d' )
@@ -670,22 +744,26 @@ class WPMatch_Events {
 			return new WP_Error( 'feedback_failed', __( 'Failed to submit feedback.', 'wpmatch' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Thank you for your feedback!', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message' => __( 'Thank you for your feedback!', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Get my events API endpoint.
 	 */
 	public static function api_get_my_events( $request ) {
-		return rest_ensure_response( array(
-			'success' => false,
-			'message' => 'Not implemented yet',
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	/**
@@ -693,26 +771,28 @@ class WPMatch_Events {
 	 */
 	private static function enhance_event_data( $event ) {
 		// Add creator information.
-		$creator = get_userdata( $event->creator_id );
+		$creator             = get_userdata( $event->creator_id );
 		$event->creator_name = $creator ? $creator->display_name : 'Unknown';
 
 		// Add time calculations.
-		$event->is_upcoming = strtotime( $event->event_start ) > time();
+		$event->is_upcoming      = strtotime( $event->event_start ) > time();
 		$event->is_happening_now = time() >= strtotime( $event->event_start ) && time() <= strtotime( $event->event_end );
 		$event->time_until_start = $event->is_upcoming ? human_time_diff( time(), strtotime( $event->event_start ) ) : null;
 
 		// Add registration status for current user.
 		if ( is_user_logged_in() ) {
 			global $wpdb;
-			$user_id = get_current_user_id();
-			$registration = $wpdb->get_row( $wpdb->prepare(
-				"SELECT registration_status, payment_status FROM {$wpdb->prefix}wpmatch_event_registrations
+			$user_id                = get_current_user_id();
+			$registration           = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT registration_status, payment_status FROM {$wpdb->prefix}wpmatch_event_registrations
 				WHERE event_id = %d AND user_id = %d",
-				$event->id,
-				$user_id
-			) );
+					$event->id,
+					$user_id
+				)
+			);
 			$event->user_registered = $registration ? $registration->registration_status : false;
-			$event->payment_status = $registration ? $registration->payment_status : null;
+			$event->payment_status  = $registration ? $registration->payment_status : null;
 		}
 
 		// Parse settings if they exist.
@@ -776,10 +856,12 @@ class WPMatch_Events {
 		global $wpdb;
 
 		$session_table = $wpdb->prefix . 'wpmatch_speed_dating_sessions';
-		$session = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $session_table WHERE id = %d",
-			$session_id
-		) );
+		$session       = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $session_table WHERE id = %d",
+				$session_id
+			)
+		);
 
 		if ( ! $session ) {
 			return;
@@ -820,7 +902,7 @@ class WPMatch_Events {
 		$wpdb->update(
 			$session_table,
 			array(
-				'status' => 'completed',
+				'status'      => 'completed',
 				'session_end' => current_time( 'mysql' ),
 			),
 			array( 'id' => $session_id ),
@@ -857,10 +939,12 @@ class WPMatch_Events {
 
 		$event_id = $request->get_param( 'event_id' );
 		global $wpdb;
-		$event = $wpdb->get_row( $wpdb->prepare(
-			"SELECT creator_id FROM {$wpdb->prefix}wpmatch_events WHERE id = %d",
-			$event_id
-		) );
+		$event = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT creator_id FROM {$wpdb->prefix}wpmatch_events WHERE id = %d",
+				$event_id
+			)
+		);
 
 		return $event && ( $event->creator_id == get_current_user_id() || current_user_can( 'manage_options' ) );
 	}

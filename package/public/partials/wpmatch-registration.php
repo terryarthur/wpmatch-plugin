@@ -17,7 +17,7 @@ if ( is_user_logged_in() ) {
 }
 
 $settings = get_option( 'wpmatch_settings', array() );
-$min_age = isset( $settings['min_age'] ) ? $settings['min_age'] : 18;
+$min_age  = isset( $settings['min_age'] ) ? $settings['min_age'] : 18;
 ?>
 
 <div class="wpmatch-registration-container">
@@ -182,13 +182,15 @@ $min_age = isset( $settings['min_age'] ) ? $settings['min_age'] : 18;
 								<label class="checkbox-label">
 									<input type="checkbox" id="terms_agreement" name="terms_agreement" required>
 									<span class="checkmark"></span>
-									<?php printf(
+									<?php
+									printf(
 										esc_html__( 'I agree to the %1$sTerms of Service%2$s and %3$sPrivacy Policy%4$s', 'wpmatch' ),
 										'<a href="#" target="_blank">',
 										'</a>',
 										'<a href="#" target="_blank">',
 										'</a>'
-									); ?>
+									);
+									?>
 								</label>
 								<div class="form-error" id="terms_agreement_error"></div>
 							</div>

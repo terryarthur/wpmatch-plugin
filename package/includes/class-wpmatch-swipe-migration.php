@@ -103,7 +103,7 @@ class WPMatch_Swipe_Migration {
 	 */
 	private static function migrate_to_version_1_0_0() {
 		// Include the swipe database class.
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wpmatch-swipe-db.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-wpmatch-swipe-db.php';
 
 		// Create all swipe-related tables.
 		return WPMatch_Swipe_DB::create_tables();
@@ -118,7 +118,7 @@ class WPMatch_Swipe_Migration {
 	private static function backup_existing_data() {
 		global $wpdb;
 
-		$timestamp = current_time( 'Y_m_d_H_i_s' );
+		$timestamp        = current_time( 'Y_m_d_H_i_s' );
 		$tables_to_backup = array(
 			$wpdb->prefix . 'wpmatch_swipes',
 			$wpdb->prefix . 'wpmatch_matches',
@@ -132,7 +132,7 @@ class WPMatch_Swipe_Migration {
 
 			if ( $table_exists ) {
 				$backup_table = $table . '_backup_' . $timestamp;
-				$result = $wpdb->query( "CREATE TABLE {$backup_table} LIKE {$table}" );
+				$result       = $wpdb->query( "CREATE TABLE {$backup_table} LIKE {$table}" );
 
 				if ( false === $result ) {
 					return false;

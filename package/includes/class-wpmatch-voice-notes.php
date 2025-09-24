@@ -48,7 +48,7 @@ class WPMatch_Voice_Notes {
 
 		// Voice notes table.
 		$table_name = $wpdb->prefix . 'wpmatch_voice_notes';
-		$sql = "CREATE TABLE $table_name (
+		$sql        = "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			message_id bigint(20) NOT NULL,
 			user_id bigint(20) NOT NULL,
@@ -75,7 +75,7 @@ class WPMatch_Voice_Notes {
 
 		// Voice note analytics table.
 		$table_name = $wpdb->prefix . 'wpmatch_voice_note_analytics';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			voice_note_id bigint(20) NOT NULL,
 			listener_id bigint(20) NOT NULL,
@@ -92,7 +92,7 @@ class WPMatch_Voice_Notes {
 
 		// Voice note reactions table.
 		$table_name = $wpdb->prefix . 'wpmatch_voice_note_reactions';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			voice_note_id bigint(20) NOT NULL,
 			user_id bigint(20) NOT NULL,
@@ -114,82 +114,110 @@ class WPMatch_Voice_Notes {
 	 */
 	public static function register_rest_routes() {
 		// Voice note upload.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/upload', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_upload_voice_note' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'recipient_id' => array( 'required' => true ),
-				'duration' => array( 'required' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/upload',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_upload_voice_note' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'recipient_id' => array( 'required' => true ),
+					'duration'     => array( 'required' => false ),
+				),
+			)
+		);
 
 		// Send voice note message.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/send', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_send_voice_note' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'recipient_id' => array( 'required' => true ),
-				'voice_note_id' => array( 'required' => true ),
-				'text_fallback' => array( 'required' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/send',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_send_voice_note' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'recipient_id'  => array( 'required' => true ),
+					'voice_note_id' => array( 'required' => true ),
+					'text_fallback' => array( 'required' => false ),
+				),
+			)
+		);
 
 		// Voice note playback tracking.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/(?P<voice_note_id>\d+)/play', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_track_playback' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'voice_note_id' => array( 'required' => true ),
-				'play_duration' => array( 'required' => false ),
-				'played_to_end' => array( 'default' => false ),
-				'playback_speed' => array( 'default' => 1.0 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/(?P<voice_note_id>\d+)/play',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_track_playback' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'voice_note_id'  => array( 'required' => true ),
+					'play_duration'  => array( 'required' => false ),
+					'played_to_end'  => array( 'default' => false ),
+					'playback_speed' => array( 'default' => 1.0 ),
+				),
+			)
+		);
 
 		// Voice note reactions.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/(?P<voice_note_id>\d+)/react', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_add_reaction' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'voice_note_id' => array( 'required' => true ),
-				'reaction_type' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/(?P<voice_note_id>\d+)/react',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_add_reaction' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'voice_note_id' => array( 'required' => true ),
+					'reaction_type' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Get voice note details.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/(?P<voice_note_id>\d+)', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_voice_note' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'voice_note_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/(?P<voice_note_id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_voice_note' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'voice_note_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Voice note transcription.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/(?P<voice_note_id>\d+)/transcription', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_transcription' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'voice_note_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/(?P<voice_note_id>\d+)/transcription',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_transcription' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'voice_note_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Voice note analytics.
-		register_rest_route( 'wpmatch/v1', '/voice-notes/analytics', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_analytics' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'date_from' => array( 'required' => false ),
-				'date_to' => array( 'required' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/voice-notes/analytics',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_analytics' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'date_from' => array( 'required' => false ),
+					'date_to'   => array( 'required' => false ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -212,30 +240,34 @@ class WPMatch_Voice_Notes {
 				WPMATCH_VERSION
 			);
 
-			wp_localize_script( 'wpmatch-voice-notes', 'wpMatchVoiceNotes', array(
-				'apiUrl' => rest_url( 'wpmatch/v1' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
-				'maxDuration' => apply_filters( 'wpmatch_voice_note_max_duration', 300 ), // 5 minutes.
-				'maxFileSize' => apply_filters( 'wpmatch_voice_note_max_size', 10 * 1024 * 1024 ), // 10MB.
-				'supportedFormats' => array( 'webm', 'mp4', 'm4a', 'wav', 'ogg' ),
-				'strings' => array(
-					'recording' => __( 'Recording...', 'wpmatch' ),
-					'recordingComplete' => __( 'Recording complete', 'wpmatch' ),
-					'uploadSuccess' => __( 'Voice note sent successfully!', 'wpmatch' ),
-					'uploadError' => __( 'Failed to upload voice note.', 'wpmatch' ),
-					'permissionDenied' => __( 'Microphone permission denied.', 'wpmatch' ),
-					'notSupported' => __( 'Voice recording not supported in this browser.', 'wpmatch' ),
-					'tooLong' => __( 'Recording too long. Maximum duration is 5 minutes.', 'wpmatch' ),
-					'tooLarge' => __( 'File too large. Maximum size is 10MB.', 'wpmatch' ),
-					'playbackError' => __( 'Error playing voice note.', 'wpmatch' ),
-					'transcriptionLoading' => __( 'Generating transcription...', 'wpmatch' ),
-					'transcriptionError' => __( 'Transcription failed.', 'wpmatch' ),
-					'reactionAdded' => __( 'Reaction added!', 'wpmatch' ),
-					'tapToPlay' => __( 'Tap to play', 'wpmatch' ),
-					'playing' => __( 'Playing...', 'wpmatch' ),
-					'paused' => __( 'Paused', 'wpmatch' ),
-				),
-			) );
+			wp_localize_script(
+				'wpmatch-voice-notes',
+				'wpMatchVoiceNotes',
+				array(
+					'apiUrl'           => rest_url( 'wpmatch/v1' ),
+					'nonce'            => wp_create_nonce( 'wp_rest' ),
+					'maxDuration'      => apply_filters( 'wpmatch_voice_note_max_duration', 300 ), // 5 minutes.
+					'maxFileSize'      => apply_filters( 'wpmatch_voice_note_max_size', 10 * 1024 * 1024 ), // 10MB.
+					'supportedFormats' => array( 'webm', 'mp4', 'm4a', 'wav', 'ogg' ),
+					'strings'          => array(
+						'recording'            => __( 'Recording...', 'wpmatch' ),
+						'recordingComplete'    => __( 'Recording complete', 'wpmatch' ),
+						'uploadSuccess'        => __( 'Voice note sent successfully!', 'wpmatch' ),
+						'uploadError'          => __( 'Failed to upload voice note.', 'wpmatch' ),
+						'permissionDenied'     => __( 'Microphone permission denied.', 'wpmatch' ),
+						'notSupported'         => __( 'Voice recording not supported in this browser.', 'wpmatch' ),
+						'tooLong'              => __( 'Recording too long. Maximum duration is 5 minutes.', 'wpmatch' ),
+						'tooLarge'             => __( 'File too large. Maximum size is 10MB.', 'wpmatch' ),
+						'playbackError'        => __( 'Error playing voice note.', 'wpmatch' ),
+						'transcriptionLoading' => __( 'Generating transcription...', 'wpmatch' ),
+						'transcriptionError'   => __( 'Transcription failed.', 'wpmatch' ),
+						'reactionAdded'        => __( 'Reaction added!', 'wpmatch' ),
+						'tapToPlay'            => __( 'Tap to play', 'wpmatch' ),
+						'playing'              => __( 'Playing...', 'wpmatch' ),
+						'paused'               => __( 'Paused', 'wpmatch' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -244,9 +276,9 @@ class WPMatch_Voice_Notes {
 	 */
 	public static function allow_voice_upload_types( $mimes ) {
 		$mimes['webm'] = 'audio/webm';
-		$mimes['m4a'] = 'audio/mp4';
-		$mimes['oga'] = 'audio/ogg';
-		$mimes['wav'] = 'audio/wav';
+		$mimes['m4a']  = 'audio/mp4';
+		$mimes['oga']  = 'audio/ogg';
+		$mimes['wav']  = 'audio/wav';
 		return $mimes;
 	}
 
@@ -259,7 +291,7 @@ class WPMatch_Voice_Notes {
 			return $file;
 		}
 
-		$max_size = apply_filters( 'wpmatch_voice_note_max_size', 10 * 1024 * 1024 ); // 10MB.
+		$max_size      = apply_filters( 'wpmatch_voice_note_max_size', 10 * 1024 * 1024 ); // 10MB.
 		$allowed_types = array( 'audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/mpeg' );
 
 		if ( $file['size'] > $max_size ) {
@@ -279,9 +311,9 @@ class WPMatch_Voice_Notes {
 	 * Upload voice note API endpoint.
 	 */
 	public static function api_upload_voice_note( $request ) {
-		$user_id = get_current_user_id();
+		$user_id      = get_current_user_id();
 		$recipient_id = absint( $request->get_param( 'recipient_id' ) );
-		$duration = absint( $request->get_param( 'duration' ) );
+		$duration     = absint( $request->get_param( 'duration' ) );
 
 		if ( ! $recipient_id ) {
 			return new WP_Error( 'invalid_recipient', __( 'Invalid recipient.', 'wpmatch' ), array( 'status' => 400 ) );
@@ -301,31 +333,34 @@ class WPMatch_Voice_Notes {
 		$_POST['voice_note_upload'] = true;
 
 		// Upload file.
-		$upload_dir = wp_upload_dir();
+		$upload_dir      = wp_upload_dir();
 		$voice_notes_dir = $upload_dir['basedir'] . '/wpmatch-voice-notes';
 
 		if ( ! file_exists( $voice_notes_dir ) ) {
 			wp_mkdir_p( $voice_notes_dir );
 		}
 
-		$uploaded_file = wp_handle_upload( $_FILES['voice_note'], array(
-			'test_form' => false,
-			'upload_error_handler' => array( __CLASS__, 'handle_upload_error' ),
-		) );
+		$uploaded_file = wp_handle_upload(
+			$_FILES['voice_note'],
+			array(
+				'test_form'            => false,
+				'upload_error_handler' => array( __CLASS__, 'handle_upload_error' ),
+			)
+		);
 
 		if ( isset( $uploaded_file['error'] ) ) {
 			return new WP_Error( 'upload_failed', $uploaded_file['error'], array( 'status' => 400 ) );
 		}
 
 		// Move to voice notes directory.
-		$filename = wp_unique_filename( $voice_notes_dir, basename( $uploaded_file['file'] ) );
+		$filename      = wp_unique_filename( $voice_notes_dir, basename( $uploaded_file['file'] ) );
 		$new_file_path = $voice_notes_dir . '/' . $filename;
 
 		if ( ! rename( $uploaded_file['file'], $new_file_path ) ) {
 			return new WP_Error( 'move_failed', __( 'Failed to process voice note.', 'wpmatch' ), array( 'status' => 500 ) );
 		}
 
-		$file_url = $upload_dir['baseurl'] . '/wpmatch-voice-notes/' . $filename;
+		$file_url  = $upload_dir['baseurl'] . '/wpmatch-voice-notes/' . $filename;
 		$file_size = filesize( $new_file_path );
 
 		// Save voice note record.
@@ -336,12 +371,12 @@ class WPMatch_Voice_Notes {
 			$table_name,
 			array(
 				'message_id' => 0, // Will be updated when message is sent.
-				'user_id' => $user_id,
-				'file_path' => $new_file_path,
-				'file_url' => $file_url,
-				'file_size' => $file_size,
-				'duration' => $duration,
-				'format' => pathinfo( $filename, PATHINFO_EXTENSION ),
+				'user_id'    => $user_id,
+				'file_path'  => $new_file_path,
+				'file_url'   => $file_url,
+				'file_size'  => $file_size,
+				'duration'   => $duration,
+				'format'     => pathinfo( $filename, PATHINFO_EXTENSION ),
 			),
 			array( '%d', '%d', '%s', '%s', '%d', '%d', '%s' )
 		);
@@ -357,35 +392,39 @@ class WPMatch_Voice_Notes {
 		// Schedule processing.
 		wp_schedule_single_event( time(), 'wpmatch_voice_note_uploaded', array( $voice_note_id, $user_id ) );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'voice_note_id' => $voice_note_id,
-				'file_url' => $file_url,
-				'duration' => $duration,
-				'file_size' => $file_size,
-				'message' => __( 'Voice note uploaded successfully!', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'voice_note_id' => $voice_note_id,
+					'file_url'      => $file_url,
+					'duration'      => $duration,
+					'file_size'     => $file_size,
+					'message'       => __( 'Voice note uploaded successfully!', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Send voice note message API endpoint.
 	 */
 	public static function api_send_voice_note( $request ) {
-		$user_id = get_current_user_id();
-		$recipient_id = absint( $request->get_param( 'recipient_id' ) );
+		$user_id       = get_current_user_id();
+		$recipient_id  = absint( $request->get_param( 'recipient_id' ) );
 		$voice_note_id = absint( $request->get_param( 'voice_note_id' ) );
 		$text_fallback = sanitize_textarea_field( $request->get_param( 'text_fallback' ) );
 
 		// Verify voice note belongs to user.
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'wpmatch_voice_notes';
-		$voice_note = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE id = %d AND user_id = %d",
-			$voice_note_id,
-			$user_id
-		) );
+		$voice_note = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE id = %d AND user_id = %d",
+				$voice_note_id,
+				$user_id
+			)
+		);
 
 		if ( ! $voice_note ) {
 			return new WP_Error( 'voice_note_not_found', __( 'Voice note not found.', 'wpmatch' ), array( 'status' => 404 ) );
@@ -393,7 +432,7 @@ class WPMatch_Voice_Notes {
 
 		// Send message with voice note.
 		$message_content = $text_fallback ? $text_fallback : '[Voice Note]';
-		$result = WPMatch_Message_Manager::send_message( $user_id, $recipient_id, $message_content, 'voice_note' );
+		$result          = WPMatch_Message_Manager::send_message( $user_id, $recipient_id, $message_content, 'voice_note' );
 
 		if ( ! $result['success'] ) {
 			return new WP_Error( 'send_failed', $result['message'], array( 'status' => 400 ) );
@@ -425,33 +464,37 @@ class WPMatch_Voice_Notes {
 			WPMatch_Gamification::trigger_achievement( 'voice_message_sent', array( 'user_id' => $user_id ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message_id' => $message_id,
-				'voice_note_id' => $voice_note_id,
-				'message' => __( 'Voice note sent successfully!', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message_id'    => $message_id,
+					'voice_note_id' => $voice_note_id,
+					'message'       => __( 'Voice note sent successfully!', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Track voice note playback API endpoint.
 	 */
 	public static function api_track_playback( $request ) {
-		$user_id = get_current_user_id();
-		$voice_note_id = absint( $request->get_param( 'voice_note_id' ) );
-		$play_duration = absint( $request->get_param( 'play_duration' ) );
-		$played_to_end = $request->get_param( 'played_to_end' ) ? 1 : 0;
+		$user_id        = get_current_user_id();
+		$voice_note_id  = absint( $request->get_param( 'voice_note_id' ) );
+		$play_duration  = absint( $request->get_param( 'play_duration' ) );
+		$played_to_end  = $request->get_param( 'played_to_end' ) ? 1 : 0;
 		$playback_speed = floatval( $request->get_param( 'playback_speed' ) );
 
 		// Verify voice note exists.
 		global $wpdb;
 		$voice_notes_table = $wpdb->prefix . 'wpmatch_voice_notes';
-		$voice_note = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $voice_notes_table WHERE id = %d",
-			$voice_note_id
-		) );
+		$voice_note        = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $voice_notes_table WHERE id = %d",
+				$voice_note_id
+			)
+		);
 
 		if ( ! $voice_note ) {
 			return new WP_Error( 'voice_note_not_found', __( 'Voice note not found.', 'wpmatch' ), array( 'status' => 404 ) );
@@ -462,35 +505,39 @@ class WPMatch_Voice_Notes {
 		$wpdb->insert(
 			$analytics_table,
 			array(
-				'voice_note_id' => $voice_note_id,
-				'listener_id' => $user_id,
-				'play_duration' => $play_duration,
-				'played_to_end' => $played_to_end,
+				'voice_note_id'  => $voice_note_id,
+				'listener_id'    => $user_id,
+				'play_duration'  => $play_duration,
+				'played_to_end'  => $played_to_end,
 				'playback_speed' => $playback_speed,
-				'device_type' => wp_is_mobile() ? 'mobile' : 'desktop',
+				'device_type'    => wp_is_mobile() ? 'mobile' : 'desktop',
 			),
 			array( '%d', '%d', '%d', '%d', '%f', '%s' )
 		);
 
 		// Update playback count.
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE $voice_notes_table SET playback_count = playback_count + 1 WHERE id = %d",
-			$voice_note_id
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE $voice_notes_table SET playback_count = playback_count + 1 WHERE id = %d",
+				$voice_note_id
+			)
+		);
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Playback tracked.', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message' => __( 'Playback tracked.', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Add reaction to voice note API endpoint.
 	 */
 	public static function api_add_reaction( $request ) {
-		$user_id = get_current_user_id();
+		$user_id       = get_current_user_id();
 		$voice_note_id = absint( $request->get_param( 'voice_note_id' ) );
 		$reaction_type = sanitize_text_field( $request->get_param( 'reaction_type' ) );
 
@@ -507,7 +554,7 @@ class WPMatch_Voice_Notes {
 			$reactions_table,
 			array(
 				'voice_note_id' => $voice_note_id,
-				'user_id' => $user_id,
+				'user_id'       => $user_id,
 				'reaction_type' => $reaction_type,
 			),
 			array( '%d', '%d', '%s' )
@@ -517,43 +564,51 @@ class WPMatch_Voice_Notes {
 			return new WP_Error( 'reaction_failed', __( 'Failed to add reaction.', 'wpmatch' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Reaction added successfully!', 'wpmatch' ),
-				'reaction_type' => $reaction_type,
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message'       => __( 'Reaction added successfully!', 'wpmatch' ),
+					'reaction_type' => $reaction_type,
+				),
+			)
+		);
 	}
 
 	/**
 	 * Get voice note details API endpoint.
 	 */
 	public static function api_get_voice_note( $request ) {
-		return rest_ensure_response( array(
-			'success' => false,
-			'message' => 'Not implemented yet',
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	/**
 	 * Get transcription API endpoint.
 	 */
 	public static function api_get_transcription( $request ) {
-		return rest_ensure_response( array(
-			'success' => false,
-			'message' => 'Not implemented yet',
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	/**
 	 * Get analytics API endpoint.
 	 */
 	public static function api_get_analytics( $request ) {
-		return rest_ensure_response( array(
-			'success' => false,
-			'message' => 'Not implemented yet',
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	/**
@@ -563,10 +618,12 @@ class WPMatch_Voice_Notes {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpmatch_voice_notes';
-		$voice_note = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE id = %d",
-			$voice_note_id
-		) );
+		$voice_note = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE id = %d",
+				$voice_note_id
+			)
+		);
 
 		if ( ! $voice_note ) {
 			return;
@@ -594,8 +651,8 @@ class WPMatch_Voice_Notes {
 		$wpdb->update(
 			$table_name,
 			array(
-				'waveform_data' => wp_json_encode( $waveform_data ),
-				'is_processed' => 1,
+				'waveform_data'     => wp_json_encode( $waveform_data ),
+				'is_processed'      => 1,
 				'processing_status' => 'completed',
 			),
 			array( 'id' => $voice_note_id ),
@@ -629,7 +686,7 @@ class WPMatch_Voice_Notes {
 		$wpdb->update(
 			$table_name,
 			array(
-				'transcription' => $transcription,
+				'transcription'        => $transcription,
 				'transcription_status' => 'completed',
 			),
 			array( 'id' => $voice_note_id ),
@@ -659,10 +716,12 @@ class WPMatch_Voice_Notes {
 
 		// Clean up temporary files older than 24 hours.
 		$table_name = $wpdb->prefix . 'wpmatch_voice_notes';
-		$old_files = $wpdb->get_results( $wpdb->prepare(
-			"SELECT file_path FROM $table_name WHERE message_id = 0 AND created_at < %s",
-			date( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
-		) );
+		$old_files  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT file_path FROM $table_name WHERE message_id = 0 AND created_at < %s",
+				date( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
+			)
+		);
 
 		foreach ( $old_files as $file ) {
 			if ( file_exists( $file->file_path ) ) {
@@ -671,10 +730,12 @@ class WPMatch_Voice_Notes {
 		}
 
 		// Remove database records.
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM $table_name WHERE message_id = 0 AND created_at < %s",
-			date( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM $table_name WHERE message_id = 0 AND created_at < %s",
+				date( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
+			)
+		);
 	}
 
 	/**

@@ -1,0 +1,356 @@
+/**
+ * WPMatch Social Integration Styles
+ *
+ * @package WPMatch
+ * @subpackage Social
+ * @since 1.0.0
+ */
+
+/* Social Login Buttons */
+.wpmatch-social-login {
+	margin: 20px 0;
+}
+
+.wpmatch-social-login-title {
+	text-align: center;
+	margin-bottom: 15px;
+	font-size: 14px;
+	color: #666;
+	position: relative;
+}
+
+.wpmatch-social-login-title:before,
+.wpmatch-social-login-title:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	width: calc(50% - 60px);
+	height: 1px;
+	background: #ddd;
+}
+
+.wpmatch-social-login-title:before {
+	left: 0;
+}
+
+.wpmatch-social-login-title:after {
+	right: 0;
+}
+
+.wpmatch-social-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.wpmatch-social-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px 20px;
+	border: none;
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	cursor: pointer;
+	gap: 10px;
+}
+
+/* Facebook Button */
+.wpmatch-social-button.facebook {
+	background: #1877f2;
+	color: white;
+}
+
+.wpmatch-social-button.facebook:hover {
+	background: #166fe5;
+	color: white;
+}
+
+/* Google Button */
+.wpmatch-social-button.google {
+	background: #fff;
+	border: 1px solid #dadce0;
+	color: #3c4043;
+}
+
+.wpmatch-social-button.google:hover {
+	background: #f8f9fa;
+	color: #3c4043;
+}
+
+/* Twitter Button */
+.wpmatch-social-button.twitter {
+	background: #1da1f2;
+	color: white;
+}
+
+.wpmatch-social-button.twitter:hover {
+	background: #0d8bd9;
+	color: white;
+}
+
+/* Instagram Button */
+.wpmatch-social-button.instagram {
+	background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+	color: white;
+}
+
+.wpmatch-social-button.instagram:hover {
+	opacity: 0.9;
+	color: white;
+}
+
+/* LinkedIn Button */
+.wpmatch-social-button.linkedin {
+	background: #0077b5;
+	color: white;
+}
+
+.wpmatch-social-button.linkedin:hover {
+	background: #006396;
+	color: white;
+}
+
+/* TikTok Button */
+.wpmatch-social-button.tiktok {
+	background: #000;
+	color: white;
+}
+
+.wpmatch-social-button.tiktok:hover {
+	background: #333;
+	color: white;
+}
+
+/* Social Icons */
+.wpmatch-social-icon {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+}
+
+/* Connected Social Accounts */
+.wpmatch-connected-accounts {
+	margin: 20px 0;
+}
+
+.wpmatch-connected-account {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 15px;
+	border: 1px solid #e1e1e1;
+	border-radius: 8px;
+	margin-bottom: 10px;
+	background: #f9f9f9;
+}
+
+.wpmatch-connected-account-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.wpmatch-connected-account-name {
+	font-weight: 500;
+	color: #333;
+}
+
+.wpmatch-connected-account-username {
+	font-size: 13px;
+	color: #666;
+}
+
+.wpmatch-social-disconnect {
+	background: #dc3545;
+	color: white;
+	border: none;
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 12px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.wpmatch-social-disconnect:hover {
+	background: #c82333;
+}
+
+/* Social Sharing */
+.wpmatch-social-share {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin: 15px 0;
+}
+
+.wpmatch-social-share-title {
+	font-size: 14px;
+	color: #666;
+	margin-right: 10px;
+}
+
+.wpmatch-social-share-button {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 16px;
+	transition: transform 0.3s ease;
+}
+
+.wpmatch-social-share-button:hover {
+	transform: scale(1.1);
+}
+
+.wpmatch-social-share-button.facebook {
+	background: #1877f2;
+}
+
+.wpmatch-social-share-button.twitter {
+	background: #1da1f2;
+}
+
+.wpmatch-social-share-button.linkedin {
+	background: #0077b5;
+}
+
+.wpmatch-social-share-button.instagram {
+	background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+/* Social Profile Import */
+.wpmatch-social-import {
+	background: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 8px;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+.wpmatch-social-import-title {
+	font-size: 16px;
+	font-weight: 600;
+	margin-bottom: 10px;
+	color: #333;
+}
+
+.wpmatch-social-import-description {
+	font-size: 14px;
+	color: #666;
+	margin-bottom: 15px;
+}
+
+.wpmatch-social-import-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.wpmatch-social-import-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: white;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.wpmatch-social-import-option:hover {
+	background: #f0f0f0;
+}
+
+.wpmatch-social-import-option input[type="checkbox"] {
+	margin: 0;
+}
+
+/* Loading States */
+.wpmatch-social-loading {
+	opacity: 0.6;
+	pointer-events: none;
+	position: relative;
+}
+
+.wpmatch-social-loading:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	margin: -10px 0 0 -10px;
+	border: 2px solid #f3f3f3;
+	border-top: 2px solid #3498db;
+	border-radius: 50%;
+	animation: wpmatchSocialSpin 1s linear infinite;
+}
+
+@keyframes wpmatchSocialSpin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.wpmatch-social-buttons {
+		gap: 8px;
+	}
+
+	.wpmatch-social-button {
+		padding: 10px 15px;
+		font-size: 13px;
+	}
+
+	.wpmatch-connected-account {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.wpmatch-social-share {
+		justify-content: center;
+	}
+
+	.wpmatch-social-import-options {
+		flex-direction: column;
+	}
+}
+
+/* Accessibility */
+.wpmatch-social-button:focus,
+.wpmatch-social-disconnect:focus,
+.wpmatch-social-share-button:focus {
+	outline: 2px solid #007cba;
+	outline-offset: 2px;
+}
+
+/* Success/Error Messages */
+.wpmatch-social-message {
+	padding: 10px 15px;
+	border-radius: 6px;
+	margin: 10px 0;
+	font-size: 14px;
+}
+
+.wpmatch-social-message.success {
+	background: #d4edda;
+	border: 1px solid #c3e6cb;
+	color: #155724;
+}
+
+.wpmatch-social-message.error {
+	background: #f8d7da;
+	border: 1px solid #f5c6cb;
+	color: #721c24;
+}

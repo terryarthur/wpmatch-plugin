@@ -1,0 +1,436 @@
+/**
+ * WPMatch GDPR Consent Styles
+ *
+ * @package WPMatch
+ * @subpackage GDPR
+ * @since 1.0.0
+ */
+
+/* Consent Banner */
+.wpmatch-consent-banner {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: #2c3e50;
+	color: white;
+	padding: 20px;
+	z-index: 10000;
+	box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+	transform: translateY(100%);
+	transition: transform 0.3s ease;
+}
+
+.wpmatch-consent-banner.show {
+	transform: translateY(0);
+}
+
+.wpmatch-consent-content {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.wpmatch-consent-text {
+	flex: 1;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.wpmatch-consent-text a {
+	color: #3498db;
+	text-decoration: underline;
+}
+
+.wpmatch-consent-actions {
+	display: flex;
+	gap: 10px;
+	flex-shrink: 0;
+}
+
+.wpmatch-consent-button {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.wpmatch-consent-accept {
+	background: #27ae60;
+	color: white;
+}
+
+.wpmatch-consent-accept:hover {
+	background: #229954;
+}
+
+.wpmatch-consent-decline {
+	background: #e74c3c;
+	color: white;
+}
+
+.wpmatch-consent-decline:hover {
+	background: #c0392b;
+}
+
+.wpmatch-consent-customize {
+	background: transparent;
+	color: white;
+	border: 1px solid white;
+}
+
+.wpmatch-consent-customize:hover {
+	background: white;
+	color: #2c3e50;
+}
+
+/* Consent Modal */
+.wpmatch-consent-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	z-index: 10001;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.wpmatch-consent-modal.show {
+	display: flex;
+}
+
+.wpmatch-consent-modal-content {
+	background: white;
+	border-radius: 10px;
+	max-width: 600px;
+	width: 100%;
+	max-height: 80vh;
+	overflow-y: auto;
+	position: relative;
+}
+
+.wpmatch-consent-modal-header {
+	padding: 20px 20px 0;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 20px;
+}
+
+.wpmatch-consent-modal-title {
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0 0 10px;
+	color: #2c3e50;
+}
+
+.wpmatch-consent-modal-close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	background: none;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: #999;
+	width: 30px;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.wpmatch-consent-modal-close:hover {
+	color: #333;
+}
+
+.wpmatch-consent-modal-body {
+	padding: 0 20px 20px;
+}
+
+/* Consent Categories */
+.wpmatch-consent-category {
+	margin-bottom: 20px;
+	border: 1px solid #eee;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.wpmatch-consent-category-header {
+	background: #f8f9fa;
+	padding: 15px 20px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.wpmatch-consent-category-title {
+	font-weight: 600;
+	color: #2c3e50;
+	margin: 0;
+}
+
+.wpmatch-consent-category-toggle {
+	font-size: 18px;
+	color: #666;
+	transition: transform 0.3s ease;
+}
+
+.wpmatch-consent-category.expanded .wpmatch-consent-category-toggle {
+	transform: rotate(180deg);
+}
+
+.wpmatch-consent-category-content {
+	padding: 0 20px;
+	max-height: 0;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.wpmatch-consent-category.expanded .wpmatch-consent-category-content {
+	max-height: 500px;
+	padding: 20px;
+}
+
+.wpmatch-consent-category-description {
+	color: #666;
+	font-size: 14px;
+	line-height: 1.5;
+	margin-bottom: 15px;
+}
+
+/* Consent Options */
+.wpmatch-consent-options {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.wpmatch-consent-option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px;
+	background: #f8f9fa;
+	border-radius: 5px;
+}
+
+.wpmatch-consent-option input[type="checkbox"] {
+	margin: 0;
+}
+
+.wpmatch-consent-option-label {
+	flex: 1;
+	font-size: 14px;
+	color: #333;
+}
+
+.wpmatch-consent-option-required {
+	font-size: 12px;
+	color: #e74c3c;
+	font-weight: 500;
+}
+
+/* Consent Footer */
+.wpmatch-consent-modal-footer {
+	padding: 20px;
+	border-top: 1px solid #eee;
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+}
+
+.wpmatch-consent-save {
+	background: #27ae60;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.wpmatch-consent-save:hover {
+	background: #229954;
+}
+
+/* Privacy Dashboard */
+.wpmatch-privacy-dashboard {
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	margin: 20px 0;
+}
+
+.wpmatch-privacy-section {
+	padding: 20px;
+	border-bottom: 1px solid #eee;
+}
+
+.wpmatch-privacy-section:last-child {
+	border-bottom: none;
+}
+
+.wpmatch-privacy-section-title {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 0 0 15px;
+	color: #2c3e50;
+}
+
+.wpmatch-privacy-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.wpmatch-privacy-control {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 15px;
+	background: #f8f9fa;
+	border-radius: 8px;
+}
+
+.wpmatch-privacy-control-info {
+	flex: 1;
+}
+
+.wpmatch-privacy-control-title {
+	font-weight: 500;
+	color: #333;
+	margin-bottom: 5px;
+}
+
+.wpmatch-privacy-control-description {
+	font-size: 13px;
+	color: #666;
+}
+
+/* Toggle Switches */
+.wpmatch-toggle {
+	position: relative;
+	display: inline-block;
+	width: 50px;
+	height: 24px;
+}
+
+.wpmatch-toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.wpmatch-toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: 0.3s;
+	border-radius: 24px;
+}
+
+.wpmatch-toggle-slider:before {
+	position: absolute;
+	content: "";
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: 0.3s;
+	border-radius: 50%;
+}
+
+.wpmatch-toggle input:checked + .wpmatch-toggle-slider {
+	background-color: #27ae60;
+}
+
+.wpmatch-toggle input:checked + .wpmatch-toggle-slider:before {
+	transform: translateX(26px);
+}
+
+/* Data Export/Download */
+.wpmatch-data-export {
+	text-align: center;
+	padding: 30px;
+}
+
+.wpmatch-data-export-button {
+	background: #3498db;
+	color: white;
+	border: none;
+	padding: 12px 24px;
+	border-radius: 6px;
+	font-size: 16px;
+	cursor: pointer;
+	margin: 10px;
+	transition: background-color 0.3s ease;
+}
+
+.wpmatch-data-export-button:hover {
+	background: #2980b9;
+}
+
+.wpmatch-data-export-button.delete {
+	background: #e74c3c;
+}
+
+.wpmatch-data-export-button.delete:hover {
+	background: #c0392b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.wpmatch-consent-content {
+		flex-direction: column;
+		text-align: center;
+	}
+
+	.wpmatch-consent-actions {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.wpmatch-consent-modal-content {
+		margin: 20px;
+		max-height: calc(100vh - 40px);
+	}
+
+	.wpmatch-privacy-control {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.wpmatch-consent-modal-footer {
+		flex-direction: column;
+	}
+}
+
+/* Loading States */
+.wpmatch-consent-loading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* Accessibility */
+.wpmatch-consent-button:focus,
+.wpmatch-toggle:focus,
+.wpmatch-data-export-button:focus {
+	outline: 2px solid #3498db;
+	outline-offset: 2px;
+}

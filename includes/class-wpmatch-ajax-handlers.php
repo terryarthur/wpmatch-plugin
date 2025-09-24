@@ -579,16 +579,16 @@ class WPMatch_AJAX_Handlers {
 		);
 
 		$profile_data = array(
-			'user'         => array(
-				'ID'           => $user->ID,
-				'display_name' => $user->display_name,
-				'user_email'   => $user->user_email,
-				'user_login'   => $user->user_login,
+			'user'       => array(
+				'ID'              => $user->ID,
+				'display_name'    => $user->display_name,
+				'user_email'      => $user->user_email,
+				'user_login'      => $user->user_login,
 				'user_registered' => $user->user_registered,
 			),
-			'profile'      => $profile,
-			'photos'       => $photos,
-			'statistics'   => array(
+			'profile'    => $profile,
+			'photos'     => $photos,
+			'statistics' => array(
 				'matches'        => absint( $match_count ),
 				'total_swipes'   => absint( $swipe_stats->total_swipes ?? 0 ),
 				'likes_given'    => absint( $swipe_stats->likes_given ?? 0 ),
@@ -775,7 +775,7 @@ class WPMatch_AJAX_Handlers {
 			}
 
 			if ( $result ) {
-				$processed++;
+				++$processed;
 			}
 		}
 

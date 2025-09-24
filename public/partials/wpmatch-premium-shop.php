@@ -18,8 +18,8 @@ if ( ! $current_user->ID ) {
 }
 
 // Get user's current membership.
-$current_level = WPMatch_Membership_Manager::get_user_membership_level( $current_user->ID );
-$has_premium   = WPMatch_Membership_Manager::has_active_premium_membership( $current_user->ID );
+$current_level   = WPMatch_Membership_Manager::get_user_membership_level( $current_user->ID );
+$has_premium     = WPMatch_Membership_Manager::has_active_premium_membership( $current_user->ID );
 $membership_data = get_user_meta( $current_user->ID, '_wpmatch_membership_data', true );
 
 // Get membership products.
@@ -249,7 +249,7 @@ $filters_product     = WPMatch_WooCommerce_Integration::get_feature_product( 'pr
 			</div>
 			<div class="wpmatch-guarantee-text">
 				<h4><?php esc_html_e( '30-Day Money-Back Guarantee', 'wpmatch' ); ?></h4>
-				<p><?php esc_html_e( "Not satisfied? Get a full refund within 30 days, no questions asked.", 'wpmatch' ); ?></p>
+				<p><?php esc_html_e( 'Not satisfied? Get a full refund within 30 days, no questions asked.', 'wpmatch' ); ?></p>
 			</div>
 		</div>
 	</div>

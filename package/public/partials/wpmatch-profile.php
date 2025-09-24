@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $user_id = isset( $atts['user_id'] ) ? absint( $atts['user_id'] ) : get_current_user_id();
-$user = get_userdata( $user_id );
+$user    = get_userdata( $user_id );
 
 if ( ! $user ) {
 	echo '<p>' . esc_html__( 'User not found.', 'wpmatch' ) . '</p>';
@@ -32,10 +32,12 @@ if ( ! $user ) {
 					<?php
 					global $wpdb;
 					$table_name = $wpdb->prefix . 'wpmatch_user_profiles';
-					$profile = $wpdb->get_row( $wpdb->prepare(
-						"SELECT * FROM $table_name WHERE user_id = %d",
-						$user_id
-					) );
+					$profile    = $wpdb->get_row(
+						$wpdb->prepare(
+							"SELECT * FROM $table_name WHERE user_id = %d",
+							$user_id
+						)
+					);
 
 					if ( $profile ) {
 						if ( $profile->age ) {

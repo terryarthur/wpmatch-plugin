@@ -296,7 +296,7 @@ class WPMatch_Profile_Manager {
 		// Add LIMIT and OFFSET.
 		$query_params[] = absint( $args['limit'] );
 		$query_params[] = absint( $args['offset'] );
-		$base_sql .= ' LIMIT %d OFFSET %d';
+		$base_sql      .= ' LIMIT %d OFFSET %d';
 
 		// Prepare and execute the query.
 		$prepared_sql = $wpdb->prepare( $base_sql, $query_params );

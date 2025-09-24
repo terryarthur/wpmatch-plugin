@@ -48,7 +48,7 @@ class WPMatch_Location {
 
 		// User locations table.
 		$table_name = $wpdb->prefix . 'wpmatch_user_locations';
-		$sql = "CREATE TABLE $table_name (
+		$sql        = "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			latitude decimal(10,8) NOT NULL,
@@ -76,7 +76,7 @@ class WPMatch_Location {
 
 		// Location-based matches table.
 		$table_name = $wpdb->prefix . 'wpmatch_location_matches';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user1_id bigint(20) NOT NULL,
 			user2_id bigint(20) NOT NULL,
@@ -96,7 +96,7 @@ class WPMatch_Location {
 
 		// Location-based events table.
 		$table_name = $wpdb->prefix . 'wpmatch_location_events';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			event_id bigint(20) NOT NULL,
 			latitude decimal(10,8),
@@ -119,7 +119,7 @@ class WPMatch_Location {
 
 		// Location search history table.
 		$table_name = $wpdb->prefix . 'wpmatch_location_searches';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			search_latitude decimal(10,8) NOT NULL,
@@ -136,7 +136,7 @@ class WPMatch_Location {
 
 		// Location privacy settings table.
 		$table_name = $wpdb->prefix . 'wpmatch_location_privacy';
-		$sql .= "CREATE TABLE $table_name (
+		$sql       .= "CREATE TABLE $table_name (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			show_exact_location tinyint(1) DEFAULT 0,
@@ -164,100 +164,132 @@ class WPMatch_Location {
 	 */
 	public static function register_rest_routes() {
 		// Update user location.
-		register_rest_route( 'wpmatch/v1', '/location/update', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_update_location' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'latitude' => array( 'required' => true ),
-				'longitude' => array( 'required' => true ),
-				'accuracy' => array( 'required' => false ),
-				'location_type' => array( 'default' => 'current' ),
-				'privacy_level' => array( 'default' => 'approximate' ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/update',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_update_location' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'latitude'      => array( 'required' => true ),
+					'longitude'     => array( 'required' => true ),
+					'accuracy'      => array( 'required' => false ),
+					'location_type' => array( 'default' => 'current' ),
+					'privacy_level' => array( 'default' => 'approximate' ),
+				),
+			)
+		);
 
 		// Get nearby users.
-		register_rest_route( 'wpmatch/v1', '/location/nearby', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_nearby_users' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'radius' => array( 'default' => 50 ),
-				'limit' => array( 'default' => 20 ),
-				'min_age' => array( 'required' => false ),
-				'max_age' => array( 'required' => false ),
-				'gender' => array( 'required' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/nearby',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_nearby_users' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'radius'  => array( 'default' => 50 ),
+					'limit'   => array( 'default' => 20 ),
+					'min_age' => array( 'required' => false ),
+					'max_age' => array( 'required' => false ),
+					'gender'  => array( 'required' => false ),
+				),
+			)
+		);
 
 		// Search by location.
-		register_rest_route( 'wpmatch/v1', '/location/search', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_search_by_location' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'latitude' => array( 'required' => true ),
-				'longitude' => array( 'required' => true ),
-				'radius' => array( 'default' => 25 ),
-				'filters' => array( 'required' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/search',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_search_by_location' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'latitude'  => array( 'required' => true ),
+					'longitude' => array( 'required' => true ),
+					'radius'    => array( 'default' => 25 ),
+					'filters'   => array( 'required' => false ),
+				),
+			)
+		);
 
 		// Get location-based events.
-		register_rest_route( 'wpmatch/v1', '/location/events', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_location_events' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'latitude' => array( 'required' => false ),
-				'longitude' => array( 'required' => false ),
-				'radius' => array( 'default' => 50 ),
-				'limit' => array( 'default' => 10 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/events',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_location_events' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'latitude'  => array( 'required' => false ),
+					'longitude' => array( 'required' => false ),
+					'radius'    => array( 'default' => 50 ),
+					'limit'     => array( 'default' => 10 ),
+				),
+			)
+		);
 
 		// Get user's location settings.
-		register_rest_route( 'wpmatch/v1', '/location/settings', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_location_settings' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/settings',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_location_settings' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+			)
+		);
 
 		// Update location privacy settings.
-		register_rest_route( 'wpmatch/v1', '/location/privacy', array(
-			'methods' => 'POST',
-			'callback' => array( __CLASS__, 'api_update_privacy_settings' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'show_exact_location' => array( 'default' => false ),
-				'show_distance' => array( 'default' => true ),
-				'max_distance_km' => array( 'default' => 100 ),
-				'location_blur_radius_km' => array( 'default' => 5 ),
-				'hide_from_nearby' => array( 'default' => false ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/privacy',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_update_privacy_settings' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'show_exact_location'     => array( 'default' => false ),
+					'show_distance'           => array( 'default' => true ),
+					'max_distance_km'         => array( 'default' => 100 ),
+					'location_blur_radius_km' => array( 'default' => 5 ),
+					'hide_from_nearby'        => array( 'default' => false ),
+				),
+			)
+		);
 
 		// Get distance between users.
-		register_rest_route( 'wpmatch/v1', '/location/distance/(?P<user_id>\d+)', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_distance_to_user' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'user_id' => array( 'required' => true ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/distance/(?P<user_id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_distance_to_user' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'user_id' => array( 'required' => true ),
+				),
+			)
+		);
 
 		// Location-based matching.
-		register_rest_route( 'wpmatch/v1', '/location/matches', array(
-			'methods' => 'GET',
-			'callback' => array( __CLASS__, 'api_get_location_matches' ),
-			'permission_callback' => array( __CLASS__, 'check_user_permission' ),
-			'args' => array(
-				'max_distance' => array( 'default' => 50 ),
-				'limit' => array( 'default' => 10 ),
-			),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/location/matches',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_location_matches' ),
+				'permission_callback' => array( __CLASS__, 'check_user_permission' ),
+				'args'                => array(
+					'max_distance' => array( 'default' => 50 ),
+					'limit'        => array( 'default' => 10 ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -280,35 +312,39 @@ class WPMatch_Location {
 				WPMATCH_VERSION
 			);
 
-			wp_localize_script( 'wpmatch-location', 'wpMatchLocation', array(
-				'apiUrl' => rest_url( 'wpmatch/v1' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
-				'mapApiKey' => get_option( 'wpmatch_google_maps_api_key', '' ),
-				'defaultRadius' => apply_filters( 'wpmatch_default_search_radius', 50 ),
-				'maxRadius' => apply_filters( 'wpmatch_max_search_radius', 500 ),
-				'locationTimeout' => apply_filters( 'wpmatch_location_timeout', 15000 ),
-				'strings' => array(
-					'locationPermissionDenied' => __( 'Location permission denied.', 'wpmatch' ),
-					'locationNotSupported' => __( 'Geolocation not supported by this browser.', 'wpmatch' ),
-					'locationTimeout' => __( 'Location request timed out.', 'wpmatch' ),
-					'locationError' => __( 'Error getting your location.', 'wpmatch' ),
-					'locationUpdated' => __( 'Location updated successfully!', 'wpmatch' ),
-					'nearbyUsersLoaded' => __( 'Found nearby users!', 'wpmatch' ),
-					'noNearbyUsers' => __( 'No users found in your area.', 'wpmatch' ),
-					'distanceKm' => __( '%s km away', 'wpmatch' ),
-					'distanceMiles' => __( '%s miles away', 'wpmatch' ),
-					'currentLocation' => __( 'Current Location', 'wpmatch' ),
-					'homeLocation' => __( 'Home', 'wpmatch' ),
-					'workLocation' => __( 'Work', 'wpmatch' ),
-					'manualLocation' => __( 'Custom Location', 'wpmatch' ),
-					'privacyExact' => __( 'Show exact location', 'wpmatch' ),
-					'privacyApproximate' => __( 'Show approximate location', 'wpmatch' ),
-					'privacyCityOnly' => __( 'Show city only', 'wpmatch' ),
-					'privacyHidden' => __( 'Hide location', 'wpmatch' ),
-					'searchingNearby' => __( 'Searching for nearby users...', 'wpmatch' ),
-					'loadingEvents' => __( 'Loading nearby events...', 'wpmatch' ),
-				),
-			) );
+			wp_localize_script(
+				'wpmatch-location',
+				'wpMatchLocation',
+				array(
+					'apiUrl'          => rest_url( 'wpmatch/v1' ),
+					'nonce'           => wp_create_nonce( 'wp_rest' ),
+					'mapApiKey'       => get_option( 'wpmatch_google_maps_api_key', '' ),
+					'defaultRadius'   => apply_filters( 'wpmatch_default_search_radius', 50 ),
+					'maxRadius'       => apply_filters( 'wpmatch_max_search_radius', 500 ),
+					'locationTimeout' => apply_filters( 'wpmatch_location_timeout', 15000 ),
+					'strings'         => array(
+						'locationPermissionDenied' => __( 'Location permission denied.', 'wpmatch' ),
+						'locationNotSupported'     => __( 'Geolocation not supported by this browser.', 'wpmatch' ),
+						'locationTimeout'          => __( 'Location request timed out.', 'wpmatch' ),
+						'locationError'            => __( 'Error getting your location.', 'wpmatch' ),
+						'locationUpdated'          => __( 'Location updated successfully!', 'wpmatch' ),
+						'nearbyUsersLoaded'        => __( 'Found nearby users!', 'wpmatch' ),
+						'noNearbyUsers'            => __( 'No users found in your area.', 'wpmatch' ),
+						'distanceKm'               => __( '%s km away', 'wpmatch' ),
+						'distanceMiles'            => __( '%s miles away', 'wpmatch' ),
+						'currentLocation'          => __( 'Current Location', 'wpmatch' ),
+						'homeLocation'             => __( 'Home', 'wpmatch' ),
+						'workLocation'             => __( 'Work', 'wpmatch' ),
+						'manualLocation'           => __( 'Custom Location', 'wpmatch' ),
+						'privacyExact'             => __( 'Show exact location', 'wpmatch' ),
+						'privacyApproximate'       => __( 'Show approximate location', 'wpmatch' ),
+						'privacyCityOnly'          => __( 'Show city only', 'wpmatch' ),
+						'privacyHidden'            => __( 'Hide location', 'wpmatch' ),
+						'searchingNearby'          => __( 'Searching for nearby users...', 'wpmatch' ),
+						'loadingEvents'            => __( 'Loading nearby events...', 'wpmatch' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -316,10 +352,10 @@ class WPMatch_Location {
 	 * Update user location API endpoint.
 	 */
 	public static function api_update_location( $request ) {
-		$user_id = get_current_user_id();
-		$latitude = floatval( $request->get_param( 'latitude' ) );
-		$longitude = floatval( $request->get_param( 'longitude' ) );
-		$accuracy = $request->get_param( 'accuracy' ) ? floatval( $request->get_param( 'accuracy' ) ) : null;
+		$user_id       = get_current_user_id();
+		$latitude      = floatval( $request->get_param( 'latitude' ) );
+		$longitude     = floatval( $request->get_param( 'longitude' ) );
+		$accuracy      = $request->get_param( 'accuracy' ) ? floatval( $request->get_param( 'accuracy' ) ) : null;
 		$location_type = sanitize_text_field( $request->get_param( 'location_type' ) );
 		$privacy_level = sanitize_text_field( $request->get_param( 'privacy_level' ) );
 
@@ -338,19 +374,19 @@ class WPMatch_Location {
 		$result = $wpdb->replace(
 			$table_name,
 			array(
-				'user_id' => $user_id,
-				'latitude' => $latitude,
-				'longitude' => $longitude,
-				'accuracy' => $accuracy,
-				'address' => $location_details['address'],
-				'city' => $location_details['city'],
-				'state' => $location_details['state'],
-				'country' => $location_details['country'],
-				'postal_code' => $location_details['postal_code'],
-				'timezone' => $location_details['timezone'],
+				'user_id'       => $user_id,
+				'latitude'      => $latitude,
+				'longitude'     => $longitude,
+				'accuracy'      => $accuracy,
+				'address'       => $location_details['address'],
+				'city'          => $location_details['city'],
+				'state'         => $location_details['state'],
+				'country'       => $location_details['country'],
+				'postal_code'   => $location_details['postal_code'],
+				'timezone'      => $location_details['timezone'],
 				'location_type' => $location_type,
 				'privacy_level' => $privacy_level,
-				'is_active' => 1,
+				'is_active'     => 1,
 			),
 			array( '%d', '%f', '%f', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d' )
 		);
@@ -367,13 +403,15 @@ class WPMatch_Location {
 			WPMatch_Gamification::trigger_achievement( 'location_shared', array( 'user_id' => $user_id ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Location updated successfully!', 'wpmatch' ),
-				'location_details' => $location_details,
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message'          => __( 'Location updated successfully!', 'wpmatch' ),
+					'location_details' => $location_details,
+				),
+			)
+		);
 	}
 
 	/**
@@ -381,11 +419,11 @@ class WPMatch_Location {
 	 */
 	public static function api_get_nearby_users( $request ) {
 		$user_id = get_current_user_id();
-		$radius = floatval( $request->get_param( 'radius' ) );
-		$limit = absint( $request->get_param( 'limit' ) );
+		$radius  = floatval( $request->get_param( 'radius' ) );
+		$limit   = absint( $request->get_param( 'limit' ) );
 		$min_age = $request->get_param( 'min_age' ) ? absint( $request->get_param( 'min_age' ) ) : null;
 		$max_age = $request->get_param( 'max_age' ) ? absint( $request->get_param( 'max_age' ) ) : null;
-		$gender = $request->get_param( 'gender' ) ? sanitize_text_field( $request->get_param( 'gender' ) ) : null;
+		$gender  = $request->get_param( 'gender' ) ? sanitize_text_field( $request->get_param( 'gender' ) ) : null;
 
 		// Get user's current location.
 		$user_location = self::get_user_location( $user_id );
@@ -396,46 +434,55 @@ class WPMatch_Location {
 		// Check user's privacy settings.
 		$privacy_settings = self::get_user_privacy_settings( $user_id );
 		if ( $privacy_settings['hide_from_nearby'] ) {
-			return rest_ensure_response( array(
-				'success' => true,
-				'data' => array(),
-				'message' => __( 'Nearby search is disabled in your privacy settings.', 'wpmatch' ),
-			) );
+			return rest_ensure_response(
+				array(
+					'success' => true,
+					'data'    => array(),
+					'message' => __( 'Nearby search is disabled in your privacy settings.', 'wpmatch' ),
+				)
+			);
 		}
 
 		// Find nearby users.
-		$nearby_users = self::find_nearby_users( $user_location, $radius, $limit, array(
-			'min_age' => $min_age,
-			'max_age' => $max_age,
-			'gender' => $gender,
-			'exclude_user_id' => $user_id,
-		) );
+		$nearby_users = self::find_nearby_users(
+			$user_location,
+			$radius,
+			$limit,
+			array(
+				'min_age'         => $min_age,
+				'max_age'         => $max_age,
+				'gender'          => $gender,
+				'exclude_user_id' => $user_id,
+			)
+		);
 
 		// Log search for analytics.
 		self::log_location_search( $user_id, $user_location['latitude'], $user_location['longitude'], $radius, count( $nearby_users ) );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $nearby_users,
-			'meta' => array(
-				'search_radius' => $radius,
-				'user_location' => array(
-					'city' => $user_location['city'],
-					'state' => $user_location['state'],
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $nearby_users,
+				'meta'    => array(
+					'search_radius' => $radius,
+					'user_location' => array(
+						'city'  => $user_location['city'],
+						'state' => $user_location['state'],
+					),
 				),
-			),
-		) );
+			)
+		);
 	}
 
 	/**
 	 * Search by location API endpoint.
 	 */
 	public static function api_search_by_location( $request ) {
-		$user_id = get_current_user_id();
-		$latitude = floatval( $request->get_param( 'latitude' ) );
+		$user_id   = get_current_user_id();
+		$latitude  = floatval( $request->get_param( 'latitude' ) );
 		$longitude = floatval( $request->get_param( 'longitude' ) );
-		$radius = floatval( $request->get_param( 'radius' ) );
-		$filters = $request->get_param( 'filters' ) ? $request->get_param( 'filters' ) : array();
+		$radius    = floatval( $request->get_param( 'radius' ) );
+		$filters   = $request->get_param( 'filters' ) ? $request->get_param( 'filters' ) : array();
 
 		// Validate coordinates.
 		if ( $latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180 ) {
@@ -443,38 +490,48 @@ class WPMatch_Location {
 		}
 
 		$search_location = array(
-			'latitude' => $latitude,
+			'latitude'  => $latitude,
 			'longitude' => $longitude,
 		);
 
 		// Find users near the search location.
-		$nearby_users = self::find_nearby_users( $search_location, $radius, 50, array_merge( $filters, array(
-			'exclude_user_id' => $user_id,
-		) ) );
+		$nearby_users = self::find_nearby_users(
+			$search_location,
+			$radius,
+			50,
+			array_merge(
+				$filters,
+				array(
+					'exclude_user_id' => $user_id,
+				)
+			)
+		);
 
 		// Log search.
 		self::log_location_search( $user_id, $latitude, $longitude, $radius, count( $nearby_users ), $filters );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $nearby_users,
-			'meta' => array(
-				'search_location' => $search_location,
-				'search_radius' => $radius,
-				'filters_applied' => $filters,
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $nearby_users,
+				'meta'    => array(
+					'search_location' => $search_location,
+					'search_radius'   => $radius,
+					'filters_applied' => $filters,
+				),
+			)
+		);
 	}
 
 	/**
 	 * Get location-based events API endpoint.
 	 */
 	public static function api_get_location_events( $request ) {
-		$user_id = get_current_user_id();
-		$latitude = $request->get_param( 'latitude' );
+		$user_id   = get_current_user_id();
+		$latitude  = $request->get_param( 'latitude' );
 		$longitude = $request->get_param( 'longitude' );
-		$radius = floatval( $request->get_param( 'radius' ) );
-		$limit = absint( $request->get_param( 'limit' ) );
+		$radius    = floatval( $request->get_param( 'radius' ) );
+		$limit     = absint( $request->get_param( 'limit' ) );
 
 		// If no coordinates provided, use user's location.
 		if ( ! $latitude || ! $longitude ) {
@@ -482,24 +539,26 @@ class WPMatch_Location {
 			if ( ! $user_location ) {
 				return new WP_Error( 'no_location', __( 'Please provide coordinates or update your location.', 'wpmatch' ), array( 'status' => 400 ) );
 			}
-			$latitude = $user_location['latitude'];
+			$latitude  = $user_location['latitude'];
 			$longitude = $user_location['longitude'];
 		}
 
 		// Find nearby events.
 		$nearby_events = self::find_nearby_events( $latitude, $longitude, $radius, $limit );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $nearby_events,
-			'meta' => array(
-				'search_location' => array(
-					'latitude' => floatval( $latitude ),
-					'longitude' => floatval( $longitude ),
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $nearby_events,
+				'meta'    => array(
+					'search_location' => array(
+						'latitude'  => floatval( $latitude ),
+						'longitude' => floatval( $longitude ),
+					),
+					'search_radius'   => $radius,
 				),
-				'search_radius' => $radius,
-			),
-		) );
+			)
+		);
 	}
 
 	/**
@@ -508,28 +567,30 @@ class WPMatch_Location {
 	public static function api_get_location_settings( $request ) {
 		$user_id = get_current_user_id();
 
-		$user_location = self::get_user_location( $user_id );
+		$user_location    = self::get_user_location( $user_id );
 		$privacy_settings = self::get_user_privacy_settings( $user_id );
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'location' => $user_location,
-				'privacy' => $privacy_settings,
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'location' => $user_location,
+					'privacy'  => $privacy_settings,
+				),
+			)
+		);
 	}
 
 	/**
 	 * Update privacy settings API endpoint.
 	 */
 	public static function api_update_privacy_settings( $request ) {
-		$user_id = get_current_user_id();
-		$show_exact_location = $request->get_param( 'show_exact_location' ) ? 1 : 0;
-		$show_distance = $request->get_param( 'show_distance' ) ? 1 : 0;
-		$max_distance_km = floatval( $request->get_param( 'max_distance_km' ) );
+		$user_id                 = get_current_user_id();
+		$show_exact_location     = $request->get_param( 'show_exact_location' ) ? 1 : 0;
+		$show_distance           = $request->get_param( 'show_distance' ) ? 1 : 0;
+		$max_distance_km         = floatval( $request->get_param( 'max_distance_km' ) );
 		$location_blur_radius_km = floatval( $request->get_param( 'location_blur_radius_km' ) );
-		$hide_from_nearby = $request->get_param( 'hide_from_nearby' ) ? 1 : 0;
+		$hide_from_nearby        = $request->get_param( 'hide_from_nearby' ) ? 1 : 0;
 
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'wpmatch_location_privacy';
@@ -537,12 +598,12 @@ class WPMatch_Location {
 		$result = $wpdb->replace(
 			$table_name,
 			array(
-				'user_id' => $user_id,
-				'show_exact_location' => $show_exact_location,
-				'show_distance' => $show_distance,
-				'max_distance_km' => $max_distance_km,
+				'user_id'                 => $user_id,
+				'show_exact_location'     => $show_exact_location,
+				'show_distance'           => $show_distance,
+				'max_distance_km'         => $max_distance_km,
 				'location_blur_radius_km' => $location_blur_radius_km,
-				'hide_from_nearby' => $hide_from_nearby,
+				'hide_from_nearby'        => $hide_from_nearby,
 			),
 			array( '%d', '%d', '%d', '%f', '%f', '%d' )
 		);
@@ -551,12 +612,14 @@ class WPMatch_Location {
 			return new WP_Error( 'privacy_save_failed', __( 'Failed to save privacy settings.', 'wpmatch' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => array(
-				'message' => __( 'Privacy settings updated successfully!', 'wpmatch' ),
-			),
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'message' => __( 'Privacy settings updated successfully!', 'wpmatch' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -564,7 +627,7 @@ class WPMatch_Location {
 	 */
 	public static function api_get_distance_to_user( $request ) {
 		$current_user_id = get_current_user_id();
-		$target_user_id = absint( $request->get_param( 'user_id' ) );
+		$target_user_id  = absint( $request->get_param( 'user_id' ) );
 
 		if ( $current_user_id === $target_user_id ) {
 			return new WP_Error( 'same_user', __( 'Cannot calculate distance to yourself.', 'wpmatch' ), array( 'status' => 400 ) );
@@ -576,20 +639,24 @@ class WPMatch_Location {
 			return new WP_Error( 'distance_calculation_failed', __( 'Unable to calculate distance.', 'wpmatch' ), array( 'status' => 400 ) );
 		}
 
-		return rest_ensure_response( array(
-			'success' => true,
-			'data' => $distance_data,
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $distance_data,
+			)
+		);
 	}
 
 	/**
 	 * Get location matches API endpoint.
 	 */
 	public static function api_get_location_matches( $request ) {
-		return rest_ensure_response( array(
-			'success' => false,
-			'message' => 'Not implemented yet',
-		) );
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'message' => 'Not implemented yet',
+			)
+		);
 	}
 
 	/**
@@ -599,11 +666,14 @@ class WPMatch_Location {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpmatch_user_locations';
-		$location = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE user_id = %d AND location_type = %s AND is_active = 1 ORDER BY last_updated DESC LIMIT 1",
-			$user_id,
-			$location_type
-		), ARRAY_A );
+		$location   = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE user_id = %d AND location_type = %s AND is_active = 1 ORDER BY last_updated DESC LIMIT 1",
+				$user_id,
+				$location_type
+			),
+			ARRAY_A
+		);
 
 		return $location;
 	}
@@ -615,19 +685,22 @@ class WPMatch_Location {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpmatch_location_privacy';
-		$settings = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE user_id = %d",
-			$user_id
-		), ARRAY_A );
+		$settings   = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE user_id = %d",
+				$user_id
+			),
+			ARRAY_A
+		);
 
 		// Return default settings if none exist.
 		if ( ! $settings ) {
 			return array(
-				'show_exact_location' => 0,
-				'show_distance' => 1,
-				'max_distance_km' => 100.00,
+				'show_exact_location'     => 0,
+				'show_distance'           => 1,
+				'max_distance_km'         => 100.00,
 				'location_blur_radius_km' => 5.00,
-				'hide_from_nearby' => 0,
+				'hide_from_nearby'        => 0,
 			);
 		}
 
@@ -640,7 +713,7 @@ class WPMatch_Location {
 	public static function find_nearby_users( $location, $radius_km, $limit = 20, $filters = array() ) {
 		global $wpdb;
 
-		$latitude = $location['latitude'];
+		$latitude  = $location['latitude'];
 		$longitude = $location['longitude'];
 
 		// Build distance calculation using Haversine formula.
@@ -653,33 +726,33 @@ class WPMatch_Location {
 		";
 
 		$where_conditions = array(
-			"ul.is_active = 1",
+			'ul.is_active = 1',
 			"ul.privacy_level != 'hidden'",
 			"$distance_formula <= %f",
 		);
-		$where_values = array( $radius_km );
+		$where_values     = array( $radius_km );
 
 		// Add user exclusion.
 		if ( isset( $filters['exclude_user_id'] ) ) {
-			$where_conditions[] = "ul.user_id != %d";
-			$where_values[] = $filters['exclude_user_id'];
+			$where_conditions[] = 'ul.user_id != %d';
+			$where_values[]     = $filters['exclude_user_id'];
 		}
 
 		// Add age filters.
 		if ( isset( $filters['min_age'] ) ) {
-			$where_conditions[] = "TIMESTAMPDIFF(YEAR, um_age.meta_value, CURDATE()) >= %d";
-			$where_values[] = $filters['min_age'];
+			$where_conditions[] = 'TIMESTAMPDIFF(YEAR, um_age.meta_value, CURDATE()) >= %d';
+			$where_values[]     = $filters['min_age'];
 		}
 
 		if ( isset( $filters['max_age'] ) ) {
-			$where_conditions[] = "TIMESTAMPDIFF(YEAR, um_age.meta_value, CURDATE()) <= %d";
-			$where_values[] = $filters['max_age'];
+			$where_conditions[] = 'TIMESTAMPDIFF(YEAR, um_age.meta_value, CURDATE()) <= %d';
+			$where_values[]     = $filters['max_age'];
 		}
 
 		// Add gender filter.
 		if ( isset( $filters['gender'] ) ) {
-			$where_conditions[] = "um_gender.meta_value = %s";
-			$where_values[] = $filters['gender'];
+			$where_conditions[] = 'um_gender.meta_value = %s';
+			$where_values[]     = $filters['gender'];
 		}
 
 		$where_clause = implode( ' AND ', $where_conditions );
@@ -712,9 +785,9 @@ class WPMatch_Location {
 
 		// Process results and apply privacy filtering.
 		foreach ( $results as &$user ) {
-			$user = self::apply_location_privacy( $user );
+			$user                = self::apply_location_privacy( $user );
 			$user['distance_km'] = round( $user['distance_km'], 1 );
-			$user['age'] = $user['birth_date'] ? self::calculate_age( $user['birth_date'] ) : null;
+			$user['age']         = $user['birth_date'] ? self::calculate_age( $user['birth_date'] ) : null;
 			unset( $user['birth_date'] );
 		}
 
@@ -785,10 +858,10 @@ class WPMatch_Location {
 		);
 
 		return array(
-			'distance_km' => round( $distance_km, 1 ),
+			'distance_km'    => round( $distance_km, 1 ),
 			'distance_miles' => round( $distance_km * 0.621371, 1 ),
-			'user1_city' => $user1_location['city'],
-			'user2_city' => $user2_location['city'],
+			'user1_city'     => $user1_location['city'],
+			'user2_city'     => $user2_location['city'],
 		);
 	}
 
@@ -820,7 +893,7 @@ class WPMatch_Location {
 
 			case 'approximate':
 				// Blur coordinates by ~1-5km.
-				$user_data['latitude'] = self::blur_coordinate( $user_data['latitude'], 0.01 );
+				$user_data['latitude']  = self::blur_coordinate( $user_data['latitude'], 0.01 );
 				$user_data['longitude'] = self::blur_coordinate( $user_data['longitude'], 0.01 );
 				break;
 
@@ -866,12 +939,12 @@ class WPMatch_Location {
 		// Placeholder for geocoding service integration.
 		// This would integrate with Google Maps API, MapBox, or similar service.
 		return array(
-			'address' => 'Address not available',
-			'city' => 'Unknown City',
-			'state' => 'Unknown State',
-			'country' => 'Unknown Country',
+			'address'     => 'Address not available',
+			'city'        => 'Unknown City',
+			'state'       => 'Unknown State',
+			'country'     => 'Unknown Country',
 			'postal_code' => '',
-			'timezone' => 'UTC',
+			'timezone'    => 'UTC',
 		);
 	}
 
@@ -893,12 +966,12 @@ class WPMatch_Location {
 		$wpdb->insert(
 			$table_name,
 			array(
-				'user_id' => $user_id,
-				'search_latitude' => $latitude,
+				'user_id'          => $user_id,
+				'search_latitude'  => $latitude,
 				'search_longitude' => $longitude,
 				'search_radius_km' => $radius,
-				'results_count' => $results_count,
-				'search_filters' => wp_json_encode( $filters ),
+				'results_count'    => $results_count,
+				'search_filters'   => wp_json_encode( $filters ),
 			),
 			array( '%d', '%f', '%f', '%f', '%d', '%s' )
 		);
@@ -911,16 +984,20 @@ class WPMatch_Location {
 		global $wpdb;
 
 		// Remove location data older than 30 days.
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM {$wpdb->prefix}wpmatch_user_locations WHERE last_updated < %s",
-			date( 'Y-m-d H:i:s', strtotime( '-30 days' ) )
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wpmatch_user_locations WHERE last_updated < %s",
+				date( 'Y-m-d H:i:s', strtotime( '-30 days' ) )
+			)
+		);
 
 		// Remove old search logs.
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM {$wpdb->prefix}wpmatch_location_searches WHERE searched_at < %s",
-			date( 'Y-m-d H:i:s', strtotime( '-90 days' ) )
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wpmatch_location_searches WHERE searched_at < %s",
+				date( 'Y-m-d H:i:s', strtotime( '-90 days' ) )
+			)
+		);
 	}
 
 	/**

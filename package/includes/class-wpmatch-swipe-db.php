@@ -20,7 +20,7 @@ class WPMatch_Swipe_DB {
 
 		// Swipes table - tracks all swipe actions.
 		$table_swipes = $wpdb->prefix . 'wpmatch_swipes';
-		$sql_swipes = "CREATE TABLE IF NOT EXISTS $table_swipes (
+		$sql_swipes   = "CREATE TABLE IF NOT EXISTS $table_swipes (
 			swipe_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) UNSIGNED NOT NULL,
 			target_user_id bigint(20) UNSIGNED NOT NULL,
@@ -40,7 +40,7 @@ class WPMatch_Swipe_DB {
 
 		// Matches table - stores confirmed mutual matches.
 		$table_matches = $wpdb->prefix . 'wpmatch_matches';
-		$sql_matches = "CREATE TABLE IF NOT EXISTS $table_matches (
+		$sql_matches   = "CREATE TABLE IF NOT EXISTS $table_matches (
 			match_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user1_id bigint(20) UNSIGNED NOT NULL,
 			user2_id bigint(20) UNSIGNED NOT NULL,
@@ -62,7 +62,7 @@ class WPMatch_Swipe_DB {
 
 		// Match queue table - optimizes potential match discovery.
 		$table_queue = $wpdb->prefix . 'wpmatch_match_queue';
-		$sql_queue = "CREATE TABLE IF NOT EXISTS $table_queue (
+		$sql_queue   = "CREATE TABLE IF NOT EXISTS $table_queue (
 			queue_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) UNSIGNED NOT NULL,
 			potential_match_id bigint(20) UNSIGNED NOT NULL,
@@ -81,7 +81,7 @@ class WPMatch_Swipe_DB {
 
 		// Analytics table - stores aggregated swipe statistics.
 		$table_analytics = $wpdb->prefix . 'wpmatch_swipe_analytics';
-		$sql_analytics = "CREATE TABLE IF NOT EXISTS $table_analytics (
+		$sql_analytics   = "CREATE TABLE IF NOT EXISTS $table_analytics (
 			analytics_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			date_recorded date NOT NULL,
 			user_id bigint(20) UNSIGNED DEFAULT NULL,
@@ -190,10 +190,10 @@ class WPMatch_Swipe_DB {
 		global $wpdb;
 
 		// Validate inputs.
-		$user_id = absint( $user_id );
+		$user_id        = absint( $user_id );
 		$target_user_id = absint( $target_user_id );
-		$swipe_type = sanitize_text_field( $swipe_type );
-		$ip_address = sanitize_text_field( $ip_address );
+		$swipe_type     = sanitize_text_field( $swipe_type );
+		$ip_address     = sanitize_text_field( $ip_address );
 
 		if ( ! $user_id || ! $target_user_id || $user_id === $target_user_id ) {
 			return false;
@@ -205,12 +205,14 @@ class WPMatch_Swipe_DB {
 
 		// Check for existing active swipe.
 		$table_name = $wpdb->prefix . 'wpmatch_swipes';
-		$existing = $wpdb->get_var( $wpdb->prepare(
-			"SELECT swipe_id FROM $table_name
+		$existing   = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT swipe_id FROM $table_name
 			WHERE user_id = %d AND target_user_id = %d AND is_undo = 0",
-			$user_id,
-			$target_user_id
-		) );
+				$user_id,
+				$target_user_id
+			)
+		);
 
 		if ( $existing ) {
 			return false; // Duplicate swipe not allowed.
@@ -258,17 +260,19 @@ class WPMatch_Swipe_DB {
 	public static function check_mutual_match( $user_id, $target_user_id ) {
 		global $wpdb;
 
-		$swipes_table = $wpdb->prefix . 'wpmatch_swipes';
+		$swipes_table  = $wpdb->prefix . 'wpmatch_swipes';
 		$matches_table = $wpdb->prefix . 'wpmatch_matches';
 
 		// Check if target user has liked this user.
-		$mutual_like = $wpdb->get_var( $wpdb->prepare(
-			"SELECT swipe_id FROM $swipes_table
+		$mutual_like = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT swipe_id FROM $swipes_table
 			WHERE user_id = %d AND target_user_id = %d
 			AND swipe_type IN ('like', 'super_like') AND is_undo = 0",
-			$target_user_id,
-			$user_id
-		) );
+				$target_user_id,
+				$user_id
+			)
+		);
 
 		if ( ! $mutual_like ) {
 			return false;
@@ -279,12 +283,14 @@ class WPMatch_Swipe_DB {
 		$user2_id = max( $user_id, $target_user_id );
 
 		// Check if match already exists.
-		$existing_match = $wpdb->get_var( $wpdb->prepare(
-			"SELECT match_id FROM $matches_table
+		$existing_match = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT match_id FROM $matches_table
 			WHERE user1_id = %d AND user2_id = %d AND status = 'active'",
-			$user1_id,
-			$user2_id
-		) );
+				$user1_id,
+				$user2_id
+			)
+		);
 
 		if ( $existing_match ) {
 			return $existing_match;
@@ -338,12 +344,14 @@ class WPMatch_Swipe_DB {
 		$table_name = $wpdb->prefix . 'wpmatch_swipes';
 
 		// Get the last active swipe.
-		$last_swipe = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name
+		$last_swipe = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name
 			WHERE user_id = %d AND is_undo = 0
 			ORDER BY created_at DESC LIMIT 1",
-			$user_id
-		) );
+				$user_id
+			)
+		);
 
 		if ( ! $last_swipe ) {
 			return false;
@@ -389,22 +397,26 @@ class WPMatch_Swipe_DB {
 		$table_name = $wpdb->prefix . 'wpmatch_matches';
 
 		// Check if both users still have active likes for each other.
-		$swipes_table = $wpdb->prefix . 'wpmatch_swipes';
-		$user1_likes_user2 = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $swipes_table
+		$swipes_table      = $wpdb->prefix . 'wpmatch_swipes';
+		$user1_likes_user2 = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $swipes_table
 			WHERE user_id = %d AND target_user_id = %d
 			AND swipe_type IN ('like', 'super_like') AND is_undo = 0",
-			$user1_id,
-			$user2_id
-		) );
+				$user1_id,
+				$user2_id
+			)
+		);
 
-		$user2_likes_user1 = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $swipes_table
+		$user2_likes_user1 = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $swipes_table
 			WHERE user_id = %d AND target_user_id = %d
 			AND swipe_type IN ('like', 'super_like') AND is_undo = 0",
-			$user2_id,
-			$user1_id
-		) );
+				$user2_id,
+				$user1_id
+			)
+		);
 
 		// If either user no longer has an active like, remove the match.
 		if ( ! $user1_likes_user2 || ! $user2_likes_user1 ) {
@@ -434,27 +446,29 @@ class WPMatch_Swipe_DB {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpmatch_swipe_analytics';
-		$today = current_time( 'Y-m-d' );
+		$today      = current_time( 'Y-m-d' );
 
 		// Get or create today's analytics record.
-		$analytics = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $table_name WHERE user_id = %d AND date_recorded = %s",
-			$user_id,
-			$today
-		) );
+		$analytics = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM $table_name WHERE user_id = %d AND date_recorded = %s",
+				$user_id,
+				$today
+			)
+		);
 
 		$field_map = array(
-			'like_given'       => 'likes_given',
-			'like_received'    => 'likes_received',
-			'pass_given'       => 'passes_given',
-			'pass_received'    => 'passes_received',
-			'super_like_given' => 'super_likes_given',
+			'like_given'          => 'likes_given',
+			'like_received'       => 'likes_received',
+			'pass_given'          => 'passes_given',
+			'pass_received'       => 'passes_received',
+			'super_like_given'    => 'super_likes_given',
 			'super_like_received' => 'super_likes_received',
-			'match_created'    => 'matches_created',
+			'match_created'       => 'matches_created',
 		);
 
 		$field_key = $action_type . '_' . $direction;
-		$db_field = isset( $field_map[ $field_key ] ) ? $field_map[ $field_key ] : null;
+		$db_field  = isset( $field_map[ $field_key ] ) ? $field_map[ $field_key ] : null;
 
 		if ( ! $db_field ) {
 			return;
@@ -462,13 +476,15 @@ class WPMatch_Swipe_DB {
 
 		if ( $analytics ) {
 			// Update existing record.
-			$wpdb->query( $wpdb->prepare(
-				"UPDATE $table_name SET $db_field = $db_field + 1,
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE $table_name SET $db_field = $db_field + 1,
 				total_swipes = total_swipes + 1,
 				updated_at = NOW()
 				WHERE analytics_id = %d",
-				$analytics->analytics_id
-			) );
+					$analytics->analytics_id
+				)
+			);
 		} else {
 			// Create new record.
 			$data = array(
@@ -518,8 +534,8 @@ class WPMatch_Swipe_DB {
 		global $wpdb;
 
 		$user_id = absint( $user_id );
-		$limit = absint( $limit );
-		$offset = absint( $offset );
+		$limit   = absint( $limit );
+		$offset  = absint( $offset );
 
 		if ( ! $user_id ) {
 			return null;
@@ -527,15 +543,17 @@ class WPMatch_Swipe_DB {
 
 		$table_name = $wpdb->prefix . 'wpmatch_swipes';
 
-		$results = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM {$table_name}
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name}
 			WHERE user_id = %d AND is_undo = 0
 			ORDER BY created_at DESC
 			LIMIT %d OFFSET %d",
-			$user_id,
-			$limit,
-			$offset
-		) );
+				$user_id,
+				$limit,
+				$offset
+			)
+		);
 
 		return $results;
 	}
@@ -544,7 +562,7 @@ class WPMatch_Swipe_DB {
 	 * Get matches for a user.
 	 *
 	 * @since 1.0.0
-	 * @param int $user_id User ID.
+	 * @param int    $user_id User ID.
 	 * @param string $status Match status (active, unmatched).
 	 * @return array|null Array of match records or null on failure.
 	 */
@@ -552,7 +570,7 @@ class WPMatch_Swipe_DB {
 		global $wpdb;
 
 		$user_id = absint( $user_id );
-		$status = sanitize_text_field( $status );
+		$status  = sanitize_text_field( $status );
 
 		if ( ! $user_id ) {
 			return null;
@@ -560,14 +578,16 @@ class WPMatch_Swipe_DB {
 
 		$table_name = $wpdb->prefix . 'wpmatch_matches';
 
-		$results = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM {$table_name}
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name}
 			WHERE (user1_id = %d OR user2_id = %d) AND status = %s
 			ORDER BY matched_at DESC",
-			$user_id,
-			$user_id,
-			$status
-		) );
+				$user_id,
+				$user_id,
+				$status
+			)
+		);
 
 		return $results;
 	}
@@ -583,34 +603,37 @@ class WPMatch_Swipe_DB {
 	public static function build_match_queue( $user_id, $queue_size = 50 ) {
 		global $wpdb;
 
-		$user_id = absint( $user_id );
+		$user_id    = absint( $user_id );
 		$queue_size = absint( $queue_size );
 
 		if ( ! $user_id ) {
 			return 0;
 		}
 
-		$queue_table = $wpdb->prefix . 'wpmatch_match_queue';
-		$swipes_table = $wpdb->prefix . 'wpmatch_swipes';
-		$profiles_table = $wpdb->prefix . 'wpmatch_user_profiles';
+		$queue_table       = $wpdb->prefix . 'wpmatch_match_queue';
+		$swipes_table      = $wpdb->prefix . 'wpmatch_swipes';
+		$profiles_table    = $wpdb->prefix . 'wpmatch_user_profiles';
 		$preferences_table = $wpdb->prefix . 'wpmatch_user_preferences';
 
 		// Clear existing queue for user.
 		$wpdb->delete( $queue_table, array( 'user_id' => $user_id ), array( '%d' ) );
 
 		// Get user preferences.
-		$user_prefs = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$preferences_table} WHERE user_id = %d",
-			$user_id
-		) );
+		$user_prefs = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$preferences_table} WHERE user_id = %d",
+				$user_id
+			)
+		);
 
 		if ( ! $user_prefs ) {
 			return 0;
 		}
 
 		// Get potential matches based on preferences and excluding already swiped users.
-		$potential_matches = $wpdb->get_results( $wpdb->prepare(
-			"SELECT p.user_id, p.age, p.gender, p.latitude, p.longitude
+		$potential_matches = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.user_id, p.age, p.gender, p.latitude, p.longitude
 			FROM {$profiles_table} p
 			WHERE p.user_id != %d
 			AND p.age BETWEEN %d AND %d
@@ -621,14 +644,15 @@ class WPMatch_Swipe_DB {
 			)
 			ORDER BY p.last_active DESC
 			LIMIT %d",
-			$user_id,
-			$user_prefs->min_age,
-			$user_prefs->max_age,
-			$user_prefs->preferred_gender,
-			$user_prefs->preferred_gender,
-			$user_id,
-			$queue_size
-		) );
+				$user_id,
+				$user_prefs->min_age,
+				$user_prefs->max_age,
+				$user_prefs->preferred_gender,
+				$user_prefs->preferred_gender,
+				$user_id,
+				$queue_size
+			)
+		);
 
 		$queue_count = 0;
 
@@ -640,18 +664,18 @@ class WPMatch_Swipe_DB {
 			$result = $wpdb->insert(
 				$queue_table,
 				array(
-					'user_id' => $user_id,
-					'potential_match_id' => $match->user_id,
+					'user_id'             => $user_id,
+					'potential_match_id'  => $match->user_id,
 					'compatibility_score' => $compatibility_score,
-					'last_shown' => null,
-					'priority' => 0,
-					'created_at' => current_time( 'mysql' ),
+					'last_shown'          => null,
+					'priority'            => 0,
+					'created_at'          => current_time( 'mysql' ),
 				),
 				array( '%d', '%d', '%f', '%s', '%d', '%s' )
 			);
 
 			if ( $result ) {
-				$queue_count++;
+				++$queue_count;
 			}
 		}
 
@@ -662,7 +686,7 @@ class WPMatch_Swipe_DB {
 	 * Get swipe analytics for a user.
 	 *
 	 * @since 1.0.0
-	 * @param int $user_id User ID.
+	 * @param int    $user_id User ID.
 	 * @param string $period Time period (day, week, month, all).
 	 * @return array|null Analytics data or null on failure.
 	 */
@@ -670,7 +694,7 @@ class WPMatch_Swipe_DB {
 		global $wpdb;
 
 		$user_id = absint( $user_id );
-		$period = sanitize_text_field( $period );
+		$period  = sanitize_text_field( $period );
 
 		if ( ! $user_id ) {
 			return null;
@@ -682,20 +706,21 @@ class WPMatch_Swipe_DB {
 		$date_condition = '';
 		switch ( $period ) {
 			case 'day':
-				$date_condition = "AND DATE(created_at) = CURDATE()";
+				$date_condition = 'AND DATE(created_at) = CURDATE()';
 				break;
 			case 'week':
-				$date_condition = "AND YEARWEEK(created_at) = YEARWEEK(NOW())";
+				$date_condition = 'AND YEARWEEK(created_at) = YEARWEEK(NOW())';
 				break;
 			case 'month':
-				$date_condition = "AND YEAR(created_at) = YEAR(NOW()) AND MONTH(created_at) = MONTH(NOW())";
+				$date_condition = 'AND YEAR(created_at) = YEAR(NOW()) AND MONTH(created_at) = MONTH(NOW())';
 				break;
 			default:
 				$date_condition = '';
 		}
 
-		$analytics = $wpdb->get_row( $wpdb->prepare(
-			"SELECT
+		$analytics = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT
 				user_id,
 				SUM(total_swipes) as total_swipes,
 				SUM(likes_given) as likes_given,
@@ -709,22 +734,23 @@ class WPMatch_Swipe_DB {
 			FROM {$analytics_table}
 			WHERE user_id = %d {$date_condition}
 			GROUP BY user_id",
-			$user_id
-		) );
+				$user_id
+			)
+		);
 
 		if ( ! $analytics ) {
 			// Return empty analytics if no data found.
 			return array(
-				'user_id' => $user_id,
-				'total_swipes' => 0,
-				'likes_given' => 0,
-				'passes_given' => 0,
-				'super_likes_given' => 0,
-				'likes_received' => 0,
-				'passes_received' => 0,
+				'user_id'              => $user_id,
+				'total_swipes'         => 0,
+				'likes_given'          => 0,
+				'passes_given'         => 0,
+				'super_likes_given'    => 0,
+				'likes_received'       => 0,
+				'passes_received'      => 0,
 				'super_likes_received' => 0,
-				'matches_created' => 0,
-				'last_updated' => null,
+				'matches_created'      => 0,
+				'last_updated'         => null,
 			);
 		}
 
@@ -746,59 +772,67 @@ class WPMatch_Swipe_DB {
 		$user2_id = absint( $user2_id );
 
 		// Get user profiles.
-		$profiles_table = $wpdb->prefix . 'wpmatch_user_profiles';
+		$profiles_table  = $wpdb->prefix . 'wpmatch_user_profiles';
 		$interests_table = $wpdb->prefix . 'wpmatch_user_interests';
 
-		$user1_profile = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$profiles_table} WHERE user_id = %d",
-			$user1_id
-		) );
+		$user1_profile = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$profiles_table} WHERE user_id = %d",
+				$user1_id
+			)
+		);
 
-		$user2_profile = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$profiles_table} WHERE user_id = %d",
-			$user2_id
-		) );
+		$user2_profile = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$profiles_table} WHERE user_id = %d",
+				$user2_id
+			)
+		);
 
 		if ( ! $user1_profile || ! $user2_profile ) {
 			return 0.5; // Default compatibility.
 		}
 
-		$score = 0.0;
+		$score   = 0.0;
 		$factors = 0;
 
 		// Age compatibility (closer ages = higher score).
 		if ( $user1_profile->age && $user2_profile->age ) {
-			$age_diff = abs( $user1_profile->age - $user2_profile->age );
+			$age_diff  = abs( $user1_profile->age - $user2_profile->age );
 			$age_score = max( 0, 1 - ( $age_diff / 20 ) );
-			$score += $age_score;
-			$factors++;
+			$score    += $age_score;
+			++$factors;
 		}
 
 		// Location proximity (if both have coordinates).
 		if ( $user1_profile->latitude && $user1_profile->longitude &&
-			 $user2_profile->latitude && $user2_profile->longitude ) {
-			$distance = self::calculate_distance(
-				$user1_profile->latitude, $user1_profile->longitude,
-				$user2_profile->latitude, $user2_profile->longitude
+			$user2_profile->latitude && $user2_profile->longitude ) {
+			$distance       = self::calculate_distance(
+				$user1_profile->latitude,
+				$user1_profile->longitude,
+				$user2_profile->latitude,
+				$user2_profile->longitude
 			);
 			$distance_score = max( 0, 1 - ( $distance / 100 ) ); // 100 miles max distance.
-			$score += $distance_score;
-			$factors++;
+			$score         += $distance_score;
+			++$factors;
 		}
 
 		// Common interests.
-		$common_interests = $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM {$interests_table} i1
+		$common_interests = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$interests_table} i1
 			INNER JOIN {$interests_table} i2 ON i1.interest_name = i2.interest_name
 			WHERE i1.user_id = %d AND i2.user_id = %d",
-			$user1_id,
-			$user2_id
-		) );
+				$user1_id,
+				$user2_id
+			)
+		);
 
 		if ( $common_interests > 0 ) {
 			$interest_score = min( 1.0, $common_interests / 5 ); // Max score at 5 common interests.
-			$score += $interest_score;
-			$factors++;
+			$score         += $interest_score;
+			++$factors;
 		}
 
 		// Return average score or default.
@@ -827,8 +861,8 @@ class WPMatch_Swipe_DB {
 		$delta_lon = $lon2_rad - $lon1_rad;
 
 		$a = sin( $delta_lat / 2 ) * sin( $delta_lat / 2 ) +
-			 cos( $lat1_rad ) * cos( $lat2_rad ) *
-			 sin( $delta_lon / 2 ) * sin( $delta_lon / 2 );
+			cos( $lat1_rad ) * cos( $lat2_rad ) *
+			sin( $delta_lon / 2 ) * sin( $delta_lon / 2 );
 
 		$c = 2 * atan2( sqrt( $a ), sqrt( 1 - $a ) );
 

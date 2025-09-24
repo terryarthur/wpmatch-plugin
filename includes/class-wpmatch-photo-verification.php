@@ -25,10 +25,10 @@ class WPMatch_Photo_Verification {
 	/**
 	 * Verification constants.
 	 */
-	const MAX_UPLOAD_SIZE      = 5242880; // 5MB
-	const MIN_IMAGE_WIDTH      = 200;
-	const MIN_IMAGE_HEIGHT     = 200;
-	const MAX_VERIFICATION_AGE = 90; // days
+	const MAX_UPLOAD_SIZE       = 5242880; // 5MB
+	const MIN_IMAGE_WIDTH       = 200;
+	const MIN_IMAGE_HEIGHT      = 200;
+	const MAX_VERIFICATION_AGE  = 90; // days
 	const TRUST_SCORE_THRESHOLD = 70;
 
 	/**
@@ -74,55 +74,75 @@ class WPMatch_Photo_Verification {
 	 * Register REST API routes for photo verification.
 	 */
 	public static function register_api_routes() {
-		register_rest_route( 'wpmatch/v1', '/verification/upload', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'api_upload_photo' ),
-			'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/verification/upload',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_upload_photo' ),
+				'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/verification/submit', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'api_submit_verification' ),
-			'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/verification/submit',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_submit_verification' ),
+				'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/verification/status', array(
-			'methods'             => 'GET',
-			'callback'            => array( __CLASS__, 'api_get_status' ),
-			'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/verification/status',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_status' ),
+				'permission_callback' => array( __CLASS__, 'check_verification_permissions' ),
+			)
+		);
 
 		// Admin routes.
-		register_rest_route( 'wpmatch/v1', '/verification/pending', array(
-			'methods'             => 'GET',
-			'callback'            => array( __CLASS__, 'api_get_pending_verifications' ),
-			'permission_callback' => array( __CLASS__, 'check_admin_permissions' ),
-		) );
+		register_rest_route(
+			'wpmatch/v1',
+			'/verification/pending',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'api_get_pending_verifications' ),
+				'permission_callback' => array( __CLASS__, 'check_admin_permissions' ),
+			)
+		);
 
-		register_rest_route( 'wpmatch/v1', '/verification/moderate', array(
-			'methods'             => 'POST',
-			'callback'            => array( __CLASS__, 'api_moderate_verification' ),
-			'permission_callback' => array( __CLASS__, 'check_admin_permissions' ),
-			'args'                => array(
-				'verification_id' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return is_numeric( $param );
-					},
+		register_rest_route(
+			'wpmatch/v1',
+			'/verification/moderate',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'api_moderate_verification' ),
+				'permission_callback' => array( __CLASS__, 'check_admin_permissions' ),
+				'args'                => array(
+					'verification_id' => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return is_numeric( $param );
+						},
+					),
+					'action'          => array(
+						'required'          => true,
+						'validate_callback' => function ( $param ) {
+							return in_array( $param, array( 'approve', 'reject' ), true );
+						},
+					),
+					'reason'          => array(
+						'validate_callback' => function ( $param ) {
+							return is_string( $param );
+						},
+					),
 				),
-				'action' => array(
-					'required'          => true,
-					'validate_callback' => function( $param ) {
-						return in_array( $param, array( 'approve', 'reject' ), true );
-					},
-				),
-				'reason' => array(
-					'validate_callback' => function( $param ) {
-						return is_string( $param );
-					},
-				),
-			),
-		) );
+			)
+		);
 	}
 
 	/**
@@ -160,11 +180,14 @@ class WPMatch_Photo_Verification {
 			return $photo_data;
 		}
 
-		return new WP_REST_Response( array(
-			'success'  => true,
-			'photo_id' => $photo_data['photo_id'],
-			'message'  => 'Photo uploaded successfully. Please proceed with verification submission.',
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'success'  => true,
+				'photo_id' => $photo_data['photo_id'],
+				'message'  => 'Photo uploaded successfully. Please proceed with verification submission.',
+			),
+			200
+		);
 	}
 
 	/**
@@ -198,11 +221,14 @@ class WPMatch_Photo_Verification {
 		// Trigger hooks.
 		do_action( 'wpmatch_verification_submitted', $verification_id, $user_id );
 
-		return new WP_REST_Response( array(
-			'success'         => true,
-			'verification_id' => $verification_id,
-			'message'         => 'Verification request submitted successfully. You will be notified of the result.',
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'success'         => true,
+				'verification_id' => $verification_id,
+				'message'         => 'Verification request submitted successfully. You will be notified of the result.',
+			),
+			200
+		);
 	}
 
 	/**
@@ -216,13 +242,16 @@ class WPMatch_Photo_Verification {
 		$user_id = get_current_user_id();
 		$status  = self::get_user_verification_status( $user_id );
 
-		return new WP_REST_Response( array(
-			'status'            => $status['status'],
-			'verification_date' => $status['verification_date'],
-			'trust_score'       => $status['trust_score'],
-			'can_reverify'      => $status['can_reverify'],
-			'next_verification' => $status['next_verification'],
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'status'            => $status['status'],
+				'verification_date' => $status['verification_date'],
+				'trust_score'       => $status['trust_score'],
+				'can_reverify'      => $status['can_reverify'],
+				'next_verification' => $status['next_verification'],
+			),
+			200
+		);
 	}
 
 	/**
@@ -260,13 +289,16 @@ class WPMatch_Photo_Verification {
 			"SELECT COUNT(*) FROM {$verifications_table} WHERE status = 'pending'"
 		);
 
-		return new WP_REST_Response( array(
-			'verifications' => $verifications,
-			'total'         => (int) $total,
-			'page'          => $page,
-			'per_page'      => $per_page,
-			'total_pages'   => ceil( $total / $per_page ),
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'verifications' => $verifications,
+				'total'         => (int) $total,
+				'page'          => $page,
+				'per_page'      => $per_page,
+				'total_pages'   => ceil( $total / $per_page ),
+			),
+			200
+		);
 	}
 
 	/**
@@ -288,10 +320,13 @@ class WPMatch_Photo_Verification {
 			return $result;
 		}
 
-		return new WP_REST_Response( array(
-			'success' => true,
-			'message' => $action === 'approve' ? 'Verification approved successfully.' : 'Verification rejected.',
-		), 200 );
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => $action === 'approve' ? 'Verification approved successfully.' : 'Verification rejected.',
+			),
+			200
+		);
 	}
 
 	/**
@@ -346,7 +381,7 @@ class WPMatch_Photo_Verification {
 	 */
 	private static function process_verification_photo( $file, $user_id ) {
 		// Create upload directory.
-		$upload_dir = wp_upload_dir();
+		$upload_dir  = wp_upload_dir();
 		$wpmatch_dir = $upload_dir['basedir'] . '/wpmatch/verification/';
 
 		if ( ! file_exists( $wpmatch_dir ) ) {
@@ -480,7 +515,7 @@ class WPMatch_Photo_Verification {
 
 		// Brightness and contrast check (basic).
 		$brightness_score = self::analyze_image_brightness( $file_path );
-		$score += $brightness_score;
+		$score           += $brightness_score;
 
 		return min( 100, max( 0, $score ) );
 	}
@@ -523,7 +558,7 @@ class WPMatch_Photo_Verification {
 
 				// Simple skin tone detection.
 				if ( self::is_skin_tone( $r, $g, $b ) ) {
-					$skin_pixels++;
+					++$skin_pixels;
 				}
 			}
 		}
@@ -581,9 +616,9 @@ class WPMatch_Photo_Verification {
 				$b   = $rgb & 0xFF;
 
 				// Calculate perceived brightness.
-				$brightness = ( 0.299 * $r + 0.587 * $g + 0.114 * $b );
+				$brightness      = ( 0.299 * $r + 0.587 * $g + 0.114 * $b );
 				$brightness_sum += $brightness;
-				$pixel_count++;
+				++$pixel_count;
 			}
 		}
 
@@ -622,7 +657,7 @@ class WPMatch_Photo_Verification {
 		$width  = imagesx( $image );
 		$height = imagesy( $image );
 
-		$skin_pixels = 0;
+		$skin_pixels  = 0;
 		$total_pixels = 0;
 
 		// Sample pixels to detect skin tone percentage.
@@ -634,9 +669,9 @@ class WPMatch_Photo_Verification {
 				$b   = $rgb & 0xFF;
 
 				if ( self::is_skin_tone( $r, $g, $b ) ) {
-					$skin_pixels++;
+					++$skin_pixels;
 				}
-				$total_pixels++;
+				++$total_pixels;
 			}
 		}
 
@@ -663,7 +698,7 @@ class WPMatch_Photo_Verification {
 
 		// Check for missing camera information.
 		if ( empty( $exif['Make'] ) || empty( $exif['Model'] ) ) {
-			$fake_indicators++;
+			++$fake_indicators;
 		}
 
 		// Check for suspicious software.
@@ -684,7 +719,7 @@ class WPMatch_Photo_Verification {
 
 			// Significant time difference might indicate editing.
 			if ( abs( $datetime - $original ) > 3600 ) { // 1 hour difference.
-				$fake_indicators++;
+				++$fake_indicators;
 			}
 		}
 
@@ -744,26 +779,26 @@ class WPMatch_Photo_Verification {
 			return;
 		}
 
-		$ai_analysis = json_decode( $verification->ai_analysis, true );
+		$ai_analysis   = json_decode( $verification->ai_analysis, true );
 		$auto_decision = null;
-		$confidence = 0;
+		$confidence    = 0;
 
 		// Auto-reject if NSFW content detected.
 		if ( ! empty( $ai_analysis['is_nsfw'] ) && $ai_analysis['is_nsfw'] ) {
 			$auto_decision = 'rejected';
-			$confidence = 95;
+			$confidence    = 95;
 		}
 
 		// Auto-reject if fake image detected with high confidence.
 		if ( ! empty( $ai_analysis['is_fake'] ) && $ai_analysis['is_fake'] ) {
 			$auto_decision = 'rejected';
-			$confidence = 85;
+			$confidence    = 85;
 		}
 
 		// Auto-reject if no face detected.
 		if ( empty( $ai_analysis['face_detected'] ) || ! $ai_analysis['face_detected'] ) {
 			$auto_decision = 'rejected';
-			$confidence = 90;
+			$confidence    = 90;
 		}
 
 		// Auto-approve if high quality and high confidence face detection.
@@ -774,7 +809,7 @@ class WPMatch_Photo_Verification {
 			$ai_analysis['confidence_score'] > 0.8 &&
 			$ai_analysis['quality_score'] > 75 ) {
 			$auto_decision = 'approved';
-			$confidence = 80;
+			$confidence    = 80;
 		}
 
 		// Store automated analysis results.
@@ -865,7 +900,7 @@ class WPMatch_Photo_Verification {
 	 * @return array Verification status data.
 	 */
 	public static function get_user_verification_status( $user_id ) {
-		$verified = get_user_meta( $user_id, 'wpmatch_verified', true );
+		$verified          = get_user_meta( $user_id, 'wpmatch_verified', true );
 		$verification_date = get_user_meta( $user_id, 'wpmatch_verification_date', true );
 
 		global $wpdb;
@@ -974,7 +1009,7 @@ class WPMatch_Photo_Verification {
 
 		// Verification photos table.
 		$photos_table = $wpdb->prefix . 'wpmatch_verification_photos';
-		$sql_photos = "CREATE TABLE $photos_table (
+		$sql_photos   = "CREATE TABLE $photos_table (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			file_path varchar(255) NOT NULL,
@@ -989,7 +1024,7 @@ class WPMatch_Photo_Verification {
 
 		// Photo verifications table.
 		$verifications_table = $wpdb->prefix . 'wpmatch_photo_verifications';
-		$sql_verifications = "CREATE TABLE $verifications_table (
+		$sql_verifications   = "CREATE TABLE $verifications_table (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			user_id bigint(20) NOT NULL,
 			photo_id bigint(20) NOT NULL,
@@ -1097,7 +1132,7 @@ class WPMatch_Photo_Verification {
 		}
 
 		$admin_email = get_option( 'admin_email' );
-		$subject = sprintf( '[%s] New Photo Verification Submission', get_bloginfo( 'name' ) );
+		$subject     = sprintf( '[%s] New Photo Verification Submission', get_bloginfo( 'name' ) );
 
 		$message = sprintf(
 			"A new photo verification has been submitted:\n\n" .
@@ -1188,7 +1223,7 @@ class WPMatch_Photo_Verification {
 		);
 
 		// Clean up physical files for deleted records.
-		$upload_dir = wp_upload_dir();
+		$upload_dir       = wp_upload_dir();
 		$verification_dir = $upload_dir['basedir'] . '/wpmatch/verification/';
 
 		if ( is_dir( $verification_dir ) ) {
@@ -1199,7 +1234,7 @@ class WPMatch_Photo_Verification {
 				}
 
 				$file_path = $verification_dir . $file;
-				$file_age = time() - filemtime( $file_path );
+				$file_age  = time() - filemtime( $file_path );
 
 				// Check if file exists in database.
 				$exists = $wpdb->get_var(
@@ -1232,7 +1267,7 @@ class WPMatch_Photo_Verification {
 		}
 
 		$user_id = get_current_user_id();
-		$file = $_FILES['verification_photo'];
+		$file    = $_FILES['verification_photo'];
 
 		$validation_result = self::validate_photo_file( $file );
 		if ( is_wp_error( $validation_result ) ) {
@@ -1244,10 +1279,12 @@ class WPMatch_Photo_Verification {
 			wp_send_json_error( $photo_data->get_error_message() );
 		}
 
-		wp_send_json_success( array(
-			'photo_id' => $photo_data['photo_id'],
-			'message'  => 'Photo uploaded successfully.',
-		) );
+		wp_send_json_success(
+			array(
+				'photo_id' => $photo_data['photo_id'],
+				'message'  => 'Photo uploaded successfully.',
+			)
+		);
 	}
 
 	/**
@@ -1256,9 +1293,9 @@ class WPMatch_Photo_Verification {
 	public static function handle_verification_submission() {
 		check_ajax_referer( 'wpmatch_verification', 'nonce' );
 
-		$user_id = get_current_user_id();
-		$photo_id = (int) $_POST['photo_id'];
-		$pose_type = sanitize_text_field( $_POST['pose_type'] );
+		$user_id         = get_current_user_id();
+		$photo_id        = (int) $_POST['photo_id'];
+		$pose_type       = sanitize_text_field( $_POST['pose_type'] );
 		$additional_info = sanitize_textarea_field( $_POST['additional_info'] );
 
 		if ( ! self::user_owns_photo( $user_id, $photo_id ) ) {
@@ -1274,10 +1311,12 @@ class WPMatch_Photo_Verification {
 		self::run_automated_verification_checks( $verification_id );
 		do_action( 'wpmatch_verification_submitted', $verification_id, $user_id );
 
-		wp_send_json_success( array(
-			'verification_id' => $verification_id,
-			'message'         => 'Verification submitted successfully.',
-		) );
+		wp_send_json_success(
+			array(
+				'verification_id' => $verification_id,
+				'message'         => 'Verification submitted successfully.',
+			)
+		);
 	}
 
 	/**
@@ -1287,7 +1326,7 @@ class WPMatch_Photo_Verification {
 		check_ajax_referer( 'wpmatch_verification', 'nonce' );
 
 		$user_id = get_current_user_id();
-		$status = self::get_user_verification_status( $user_id );
+		$status  = self::get_user_verification_status( $user_id );
 
 		wp_send_json_success( $status );
 	}
@@ -1303,9 +1342,9 @@ class WPMatch_Photo_Verification {
 		}
 
 		$verification_id = (int) $_POST['verification_id'];
-		$action = sanitize_text_field( $_POST['action'] );
-		$reason = sanitize_textarea_field( $_POST['reason'] );
-		$moderator_id = get_current_user_id();
+		$action          = sanitize_text_field( $_POST['action'] );
+		$reason          = sanitize_textarea_field( $_POST['reason'] );
+		$moderator_id    = get_current_user_id();
 
 		$result = self::moderate_verification( $verification_id, $action, $moderator_id, $reason );
 
@@ -1313,9 +1352,11 @@ class WPMatch_Photo_Verification {
 			wp_send_json_error( $result->get_error_message() );
 		}
 
-		wp_send_json_success( array(
-			'message' => $action === 'approve' ? 'Verification approved.' : 'Verification rejected.',
-		) );
+		wp_send_json_success(
+			array(
+				'message' => $action === 'approve' ? 'Verification approved.' : 'Verification rejected.',
+			)
+		);
 	}
 
 	/**
@@ -1329,26 +1370,28 @@ class WPMatch_Photo_Verification {
 		}
 
 		$verification_ids = array_map( 'intval', $_POST['verification_ids'] );
-		$action = sanitize_text_field( $_POST['action'] );
-		$reason = sanitize_textarea_field( $_POST['reason'] );
-		$moderator_id = get_current_user_id();
+		$action           = sanitize_text_field( $_POST['action'] );
+		$reason           = sanitize_textarea_field( $_POST['reason'] );
+		$moderator_id     = get_current_user_id();
 
 		$processed = 0;
-		$errors = 0;
+		$errors    = 0;
 
 		foreach ( $verification_ids as $verification_id ) {
 			$result = self::moderate_verification( $verification_id, $action, $moderator_id, $reason );
 			if ( is_wp_error( $result ) ) {
-				$errors++;
+				++$errors;
 			} else {
-				$processed++;
+				++$processed;
 			}
 		}
 
-		wp_send_json_success( array(
-			'processed' => $processed,
-			'errors'    => $errors,
-			'message'   => sprintf( '%d verifications processed, %d errors.', $processed, $errors ),
-		) );
+		wp_send_json_success(
+			array(
+				'processed' => $processed,
+				'errors'    => $errors,
+				'message'   => sprintf( '%d verifications processed, %d errors.', $processed, $errors ),
+			)
+		);
 	}
 }

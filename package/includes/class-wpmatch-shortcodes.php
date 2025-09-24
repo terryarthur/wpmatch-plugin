@@ -980,6 +980,16 @@ class WPMatch_Shortcodes {
 				'restUrl' => rest_url( 'wpmatch/v1/' ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
 				'userId'  => get_current_user_id(),
+				'strings' => array(
+					'pleaseSetFilters'      => __( 'Please set some filters before saving', 'wpmatch' ),
+					'enterSearchName'       => __( 'Enter a name for this search:', 'wpmatch' ),
+					'searchSavedSuccess'    => __( 'Search saved successfully!', 'wpmatch' ),
+					'searchSaveFailed'      => __( 'Failed to save search:', 'wpmatch' ),
+					'unknownError'          => __( 'Unknown error', 'wpmatch' ),
+					'networkError'          => __( 'Network error. Could not save search.', 'wpmatch' ),
+					'failedToLikeUser'      => __( 'Failed to like user:', 'wpmatch' ),
+					'networkErrorTryAgain'  => __( 'Network error. Please try again.', 'wpmatch' ),
+				),
 			)
 		);
 	}

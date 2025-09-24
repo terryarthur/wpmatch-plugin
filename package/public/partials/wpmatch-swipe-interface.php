@@ -20,18 +20,22 @@ $current_user_id = get_current_user_id();
 
 // Get user's preferences
 global $wpdb;
-$preferences = $wpdb->get_row( $wpdb->prepare(
-	"SELECT * FROM {$wpdb->prefix}wpmatch_user_preferences WHERE user_id = %d",
-	$current_user_id
-) );
+$preferences = $wpdb->get_row(
+	$wpdb->prepare(
+		"SELECT * FROM {$wpdb->prefix}wpmatch_user_preferences WHERE user_id = %d",
+		$current_user_id
+	)
+);
 
 // Get user's current profile
-$current_profile = $wpdb->get_row( $wpdb->prepare(
-	"SELECT * FROM {$wpdb->prefix}wpmatch_user_profiles WHERE user_id = %d",
-	$current_user_id
-) );
+$current_profile = $wpdb->get_row(
+	$wpdb->prepare(
+		"SELECT * FROM {$wpdb->prefix}wpmatch_user_profiles WHERE user_id = %d",
+		$current_user_id
+	)
+);
 
-$settings = get_option( 'wpmatch_settings', array() );
+$settings          = get_option( 'wpmatch_settings', array() );
 $daily_suggestions = isset( $settings['daily_match_suggestions'] ) ? $settings['daily_match_suggestions'] : 5;
 ?>
 
@@ -170,7 +174,7 @@ $daily_suggestions = isset( $settings['daily_match_suggestions'] ) ? $settings['
 						<span class="dashicons dashicons-search"></span>
 					</div>
 					<h3><?php esc_html_e( "You've seen everyone!", 'wpmatch' ); ?></h3>
-					<p><?php esc_html_e( "Check back later for new profiles, or expand your preferences to see more people.", 'wpmatch' ); ?></p>
+					<p><?php esc_html_e( 'Check back later for new profiles, or expand your preferences to see more people.', 'wpmatch' ); ?></p>
 					<button class="btn btn-primary" id="expand-preferences">
 						<?php esc_html_e( 'Expand Preferences', 'wpmatch' ); ?>
 					</button>

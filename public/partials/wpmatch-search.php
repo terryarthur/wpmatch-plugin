@@ -21,7 +21,7 @@ if ( ! $current_user->ID ) {
 $search_preferences = WPMatch_Search_Manager::get_search_preferences( $current_user->ID );
 
 // Handle search form submission.
-$search_results = array();
+$search_results   = array();
 $search_performed = false;
 
 if ( isset( $_GET['wpmatch_search'] ) && isset( $_GET['search_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['search_nonce'] ) ), 'wpmatch_search' ) ) {
@@ -35,7 +35,7 @@ if ( isset( $_GET['wpmatch_search'] ) && isset( $_GET['search_nonce'] ) && wp_ve
 		'limit'        => 20,
 	);
 
-	$search_results = WPMatch_Search_Manager::search_matches( $current_user->ID, $search_criteria );
+	$search_results   = WPMatch_Search_Manager::search_matches( $current_user->ID, $search_criteria );
 	$search_performed = true;
 }
 

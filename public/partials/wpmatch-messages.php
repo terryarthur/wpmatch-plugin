@@ -19,7 +19,7 @@ if ( ! $current_user->ID ) {
 
 // Get conversations
 $conversations = WPMatch_Message_Manager::get_conversations( $current_user->ID );
-$total_unread = WPMatch_Message_Manager::get_unread_count( $current_user->ID );
+$total_unread  = WPMatch_Message_Manager::get_unread_count( $current_user->ID );
 
 // Get current conversation
 $current_conversation = '';
@@ -52,8 +52,8 @@ if ( isset( $_GET['conversation'] ) ) {
 				<?php else : ?>
 					<?php foreach ( $conversations as $conversation ) : ?>
 						<?php
-						$is_active = ( $current_conversation === $conversation->conversation_id );
-						$unread_class = $conversation->unread_count > 0 ? 'unread' : '';
+						$is_active        = ( $current_conversation === $conversation->conversation_id );
+						$unread_class     = $conversation->unread_count > 0 ? 'unread' : '';
 						$conversation_url = add_query_arg( 'conversation', $conversation->conversation_id );
 						?>
 						<div class="wpmatch-conversation-item <?php echo esc_attr( $unread_class ); ?> <?php echo $is_active ? 'active' : ''; ?>">
@@ -105,7 +105,7 @@ if ( isset( $_GET['conversation'] ) ) {
 				if ( $conversation_info ) :
 					// Mark conversation as read
 					WPMatch_Message_Manager::mark_conversation_as_read( $current_conversation, $current_user->ID );
-				?>
+					?>
 
 					<!-- Message Header -->
 					<div class="wpmatch-message-header">
@@ -131,9 +131,9 @@ if ( isset( $_GET['conversation'] ) ) {
 							// Reverse messages to show oldest first
 							$messages = array_reverse( $messages );
 							foreach ( $messages as $message ) :
-								$is_sender = ( $message->sender_id == $current_user->ID );
+								$is_sender     = ( $message->sender_id == $current_user->ID );
 								$message_class = $is_sender ? 'sent' : 'received';
-							?>
+								?>
 								<div class="wpmatch-message <?php echo esc_attr( $message_class ); ?>" data-message-id="<?php echo esc_attr( $message->message_id ); ?>">
 									<div class="wpmatch-message-content">
 										<p><?php echo esc_html( $message->message_content ); ?></p>

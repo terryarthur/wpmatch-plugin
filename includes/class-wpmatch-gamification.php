@@ -926,7 +926,19 @@ class WPMatch_Gamification {
 	 * @param string $action Achievement trigger action.
 	 * @param array  $data Additional data.
 	 */
-	public function trigger_achievement( $action, $data = array() ) {
+	public static function trigger_achievement( $action, $data = array() ) {
+		// Create instance to access achievement data and methods
+		$instance = new self( 'wpmatch', WPMATCH_VERSION );
+		$instance->trigger_achievement_instance( $action, $data );
+	}
+
+	/**
+	 * Instance method to trigger achievement check.
+	 *
+	 * @param string $action Achievement trigger action.
+	 * @param array  $data Additional data.
+	 */
+	public function trigger_achievement_instance( $action, $data = array() ) {
 		$user_id = isset( $data['user_id'] ) ? $data['user_id'] : get_current_user_id();
 
 		if ( ! $user_id ) {
@@ -1002,7 +1014,7 @@ class WPMatch_Gamification {
 
 		// Get current progress.
 		$achievements_table = $wpdb->prefix . 'wpmatch_achievements';
-		$user_achievement = $wpdb->get_row(
+		$user_achievement   = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}wpmatch_user_achievements WHERE user_id = %d AND achievement_id = (
 					SELECT id FROM {$wpdb->prefix}wpmatch_achievements WHERE achievement_key = %s

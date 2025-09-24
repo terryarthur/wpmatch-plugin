@@ -437,10 +437,347 @@ $settings = get_option( 'wpmatch_settings', array() );
 
 		<!-- Save Button (Fixed Position) -->
 		<div class="wpmatch-settings-footer">
-			<?php submit_button( __( 'Save All Settings', 'wpmatch' ), 'primary wpmatch-button', 'submit', false ); ?>
+			<button type="submit" name="submit" class="wpmatch-button primary">
+				<span class="dashicons dashicons-saved"></span>
+				<?php esc_html_e( 'Save All Settings', 'wpmatch' ); ?>
+			</button>
 			<button type="button" class="wpmatch-button secondary" id="wpmatch-reset-settings">
 				<?php esc_html_e( 'Reset to Defaults', 'wpmatch' ); ?>
 			</button>
 		</div>
 	</form>
+
+	<!-- Settings Import/Export -->
+	<div class="card wpmatch-import-export">
+		<h2>
+			<span class="dashicons dashicons-database-import"></span>
+			<?php esc_html_e( 'Import/Export Settings', 'wpmatch' ); ?>
+		</h2>
+		<p><?php esc_html_e( 'Backup your settings or transfer them to another site.', 'wpmatch' ); ?></p>
+
+		<div class="import-export-actions">
+			<div class="export-section">
+				<h3><?php esc_html_e( 'Export Settings', 'wpmatch' ); ?></h3>
+				<p><?php esc_html_e( 'Download a backup of your current settings.', 'wpmatch' ); ?></p>
+				<button type="button" class="wpmatch-button secondary" id="export-settings">
+					<span class="dashicons dashicons-download"></span>
+					<?php esc_html_e( 'Export Settings', 'wpmatch' ); ?>
+				</button>
+			</div>
+
+			<div class="import-section">
+				<h3><?php esc_html_e( 'Import Settings', 'wpmatch' ); ?></h3>
+				<p><?php esc_html_e( 'Upload a settings file to restore configuration.', 'wpmatch' ); ?></p>
+				<input type="file" id="import-file" accept=".json" style="margin-bottom: 10px;">
+				<button type="button" class="wpmatch-button" id="import-settings" disabled>
+					<span class="dashicons dashicons-upload"></span>
+					<?php esc_html_e( 'Import Settings', 'wpmatch' ); ?>
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	// Tab Navigation
+	$('.wpmatch-tab').on('click', function() {
+		var targetTab = $(this).data('tab');
+
+		// Update tab buttons
+		$('.wpmatch-tab').removeClass('active').attr('aria-selected', 'false');
+		$(this).addClass('active').attr('aria-selected', 'true');
+
+		// Update tab panels
+		$('.wpmatch-tab-panel').removeClass('active');
+		$('#tab-' + targetTab).addClass('active');
+
+		// Save current tab to localStorage
+		localStorage.setItem('wpmatch_current_tab', targetTab);
+	});
+
+	// Restore last active tab
+	var lastTab = localStorage.getItem('wpmatch_current_tab');
+	if (lastTab) {
+		$('.wpmatch-tab[data-tab="' + lastTab + '"]').click();
+	}
+
+	// Range slider updates
+	$('.wpmatch-range').on('input', function() {
+		var value = $(this).val();
+		$(this).next('.wpmatch-range-value').text(value + '%');
+	});
+
+	// Initialize range values
+	$('.wpmatch-range').each(function() {
+		var value = $(this).val();
+		$(this).next('.wpmatch-range-value').text(value + '%');
+	});
+
+	// Settings form validation
+	$('#wpmatch-settings-form').on('submit', function(e) {
+		var isValid = true;
+		var errorMessages = [];
+
+		// Validate minimum age
+		var minAge = parseInt($('input[name="wpmatch_settings[min_age]"]').val());
+		if (minAge < 18) {
+			errorMessages.push('<?php esc_html_e( 'Minimum age must be at least 18 years.', 'wpmatch' ); ?>');
+			isValid = false;
+		}
+
+		// Validate matching weights (should total around 100%)
+		var ageWeight = parseInt($('input[name="wpmatch_settings[age_weight]"]').val());
+		var locationWeight = parseInt($('input[name="wpmatch_settings[location_weight]"]').val());
+		var interestsWeight = parseInt($('input[name="wpmatch_settings[interests_weight]"]').val());
+		var totalWeight = ageWeight + locationWeight + interestsWeight;
+
+		if (Math.abs(totalWeight - 100) > 10) {
+			errorMessages.push('<?php esc_html_e( 'Matching algorithm weights should total approximately 100%.', 'wpmatch' ); ?>');
+		}
+
+		if (!isValid) {
+			e.preventDefault();
+			alert('<?php esc_html_e( 'Please fix the following errors:', 'wpmatch' ); ?>\n\n' + errorMessages.join('\n'));
+		} else {
+			// Show loading state
+			$(this).find('input[type="submit"]').prop('disabled', true).val('<?php esc_html_e( 'Saving...', 'wpmatch' ); ?>');
+		}
+	});
+
+	// Reset settings confirmation
+	$('#wpmatch-reset-settings').on('click', function() {
+		if (confirm('<?php esc_html_e( 'Are you sure you want to reset all settings to their default values? This action cannot be undone.', 'wpmatch' ); ?>')) {
+			// AJAX request to reset settings
+			$.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'wpmatch_reset_settings',
+					nonce: '<?php echo esc_js( wp_create_nonce( 'wpmatch_admin_nonce' ) ); ?>'
+				},
+				success: function(response) {
+					if (response.success) {
+						alert('<?php esc_html_e( 'Settings have been reset to defaults.', 'wpmatch' ); ?>');
+						location.reload();
+					} else {
+						alert('<?php esc_html_e( 'Error resetting settings. Please try again.', 'wpmatch' ); ?>');
+					}
+				},
+				error: function() {
+					alert('<?php esc_html_e( 'Error resetting settings. Please try again.', 'wpmatch' ); ?>');
+				}
+			});
+		}
+	});
+
+	// Export settings
+	$('#export-settings').on('click', function() {
+		var button = $(this);
+		var originalText = button.html();
+
+		button.prop('disabled', true).html('<span class="dashicons dashicons-update-alt"></span> <?php esc_html_e( 'Exporting...', 'wpmatch' ); ?>');
+
+		$.ajax({
+			url: ajaxurl,
+			type: 'POST',
+			data: {
+				action: 'wpmatch_export_settings',
+				nonce: '<?php echo esc_js( wp_create_nonce( 'wpmatch_admin_nonce' ) ); ?>'
+			},
+			success: function(response) {
+				if (response.success) {
+					// Create and download file
+					var blob = new Blob([JSON.stringify(response.data, null, 2)], {type: 'application/json'});
+					var url = window.URL.createObjectURL(blob);
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = 'wpmatch-settings-' + new Date().toISOString().split('T')[0] + '.json';
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+				} else {
+					alert('<?php esc_html_e( 'Error exporting settings.', 'wpmatch' ); ?>');
+				}
+				button.prop('disabled', false).html(originalText);
+			},
+			error: function() {
+				alert('<?php esc_html_e( 'Error exporting settings.', 'wpmatch' ); ?>');
+				button.prop('disabled', false).html(originalText);
+			}
+		});
+	});
+
+	// Import file selection
+	$('#import-file').on('change', function() {
+		var file = this.files[0];
+		$('#import-settings').prop('disabled', !file);
+	});
+
+	// Import settings
+	$('#import-settings').on('click', function() {
+		var fileInput = $('#import-file')[0];
+		var file = fileInput.files[0];
+
+		if (!file) {
+			alert('<?php esc_html_e( 'Please select a file to import.', 'wpmatch' ); ?>');
+			return;
+		}
+
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			try {
+				var settings = JSON.parse(e.target.result);
+
+				if (confirm('<?php esc_html_e( 'Are you sure you want to import these settings? This will overwrite your current configuration.', 'wpmatch' ); ?>')) {
+					$.ajax({
+						url: ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'wpmatch_import_settings',
+							settings: JSON.stringify(settings),
+							nonce: '<?php echo esc_js( wp_create_nonce( 'wpmatch_admin_nonce' ) ); ?>'
+						},
+						success: function(response) {
+							if (response.success) {
+								alert('<?php esc_html_e( 'Settings imported successfully.', 'wpmatch' ); ?>');
+								location.reload();
+							} else {
+								alert('<?php esc_html_e( 'Error importing settings: ', 'wpmatch' ); ?>' + response.data);
+							}
+						},
+						error: function() {
+							alert('<?php esc_html_e( 'Error importing settings.', 'wpmatch' ); ?>');
+						}
+					});
+				}
+			} catch (error) {
+				alert('<?php esc_html_e( 'Invalid settings file format.', 'wpmatch' ); ?>');
+			}
+		};
+		reader.readAsText(file);
+	});
+
+	// Auto-save settings every 30 seconds if changes detected
+	var settingsChanged = false;
+	var autoSaveInterval;
+
+	$('#wpmatch-settings-form input, #wpmatch-settings-form textarea, #wpmatch-settings-form select').on('change', function() {
+		settingsChanged = true;
+		if (!autoSaveInterval) {
+			autoSaveInterval = setInterval(function() {
+				if (settingsChanged) {
+					autoSaveSettings();
+				}
+			}, 30000);
+		}
+	});
+
+	function autoSaveSettings() {
+		var formData = $('#wpmatch-settings-form').serialize();
+
+		$.ajax({
+			url: ajaxurl,
+			type: 'POST',
+			data: formData + '&action=wpmatch_auto_save_settings&nonce=<?php echo esc_js( wp_create_nonce( 'wpmatch_admin_nonce' ) ); ?>',
+			success: function(response) {
+				if (response.success) {
+					settingsChanged = false;
+					showNotification('<?php esc_html_e( 'Settings auto-saved', 'wpmatch' ); ?>', 'success');
+				}
+			}
+		});
+	}
+
+	function showNotification(message, type) {
+		var notification = $('<div class="wpmatch-notification ' + type + '">' + message + '</div>');
+		$('body').append(notification);
+
+		setTimeout(function() {
+			notification.addClass('show');
+		}, 100);
+
+		setTimeout(function() {
+			notification.removeClass('show');
+			setTimeout(function() {
+				notification.remove();
+			}, 300);
+		}, 3000);
+	}
+
+	// Keyboard shortcuts
+	$(document).on('keydown', function(e) {
+		if (e.ctrlKey || e.metaKey) {
+			switch(e.keyCode) {
+				case 83: // Ctrl+S - Save
+					e.preventDefault();
+					$('#wpmatch-settings-form').submit();
+					break;
+				case 49: case 50: case 51: case 52: case 53: case 54: // Ctrl+1-6 - Switch tabs
+					e.preventDefault();
+					var tabIndex = e.keyCode - 49;
+					$('.wpmatch-tab').eq(tabIndex).click();
+					break;
+			}
+		}
+	});
+});
+</script>
+
+<style>
+.wpmatch-import-export {
+	margin-top: 20px;
+	padding: 20px;
+}
+
+.import-export-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+	margin-top: 20px;
+}
+
+.export-section, .import-section {
+	padding: 20px;
+	border: 1px solid #e1e1e1;
+	border-radius: 8px;
+	background: #fafafa;
+}
+
+.export-section h3, .import-section h3 {
+	margin-top: 0;
+	color: #2c3e50;
+}
+
+.wpmatch-notification {
+	position: fixed;
+	top: 32px;
+	right: 20px;
+	z-index: 9999;
+	padding: 12px 20px;
+	border-radius: 6px;
+	color: white;
+	font-weight: 600;
+	transform: translateX(100%);
+	transition: transform 0.3s ease;
+}
+
+.wpmatch-notification.show {
+	transform: translateX(0);
+}
+
+.wpmatch-notification.success {
+	background: #28a745;
+}
+
+.wpmatch-notification.error {
+	background: #dc3545;
+}
+
+@media (max-width: 768px) {
+	.import-export-actions {
+		grid-template-columns: 1fr;
+	}
+}
+</style>
