@@ -40,12 +40,12 @@ $current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['t
 				<p><?php esc_html_e( 'Create subscription plans to monetize your dating platform. Offer different membership tiers with exclusive features like unlimited likes, advanced search, and priority support.', 'wpmatch' ); ?></p>
 
 				<!-- Getting Started Guide -->
-				<div class="wpmatch-getting-started" style="background: rgba(102, 126, 234, 0.05); border: 1px solid rgba(102, 126, 234, 0.1); border-radius: 8px; padding: 15px; margin-top: 15px;">
-					<div style="display: flex; align-items: flex-start; gap: 10px;">
-						<span class="dashicons dashicons-info" style="color: var(--wpmatch-primary); margin-top: 2px;"></span>
+				<div class="wpmatch-getting-started">
+					<div class="wpmatch-flex-row">
+						<span class="dashicons dashicons-info wpmatch-info-icon"></span>
 						<div>
-							<strong style="color: var(--wpmatch-dark);"><?php esc_html_e( 'Getting Started:', 'wpmatch' ); ?></strong>
-							<ol style="margin: 8px 0 0 0; padding-left: 20px; color: #666;">
+							<strong class="wpmatch-strong-text"><?php esc_html_e( 'Getting Started:', 'wpmatch' ); ?></strong>
+							<ol class="wpmatch-info-list">
 								<li><?php esc_html_e( 'Use "Quick Setup" to create 3 ready-made plans (Basic, Gold, Platinum)', 'wpmatch' ); ?></li>
 								<li><?php esc_html_e( 'Or create a "Custom Plan" with your own features and pricing', 'wpmatch' ); ?></li>
 								<li><?php esc_html_e( 'Plans automatically become available for purchase on your site', 'wpmatch' ); ?></li>
@@ -114,9 +114,9 @@ $current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['t
 					<?php esc_html_e( '3 Ready-Made Plans', 'wpmatch' ); ?>
 				</h2>
 
-				<div style="background: #e8f5e8; border-left: 4px solid #28a745; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-					<p style="margin: 0; color: #155724;"><strong><?php esc_html_e( 'What happens when you click "Create Membership Plans":', 'wpmatch' ); ?></strong></p>
-					<ul style="margin: 10px 0 0 0; padding-left: 20px; color: #155724;">
+				<div class="wpmatch-success-alert">
+					<p class="wpmatch-success-text"><strong><?php esc_html_e( 'What happens when you click "Create Membership Plans":', 'wpmatch' ); ?></strong></p>
+					<ul class="wpmatch-success-list">
 						<li><?php esc_html_e( 'Creates 3 WooCommerce subscription products automatically', 'wpmatch' ); ?></li>
 						<li><?php esc_html_e( 'Users can buy memberships from your site immediately', 'wpmatch' ); ?></li>
 						<li><?php esc_html_e( 'Members get exclusive features based on their plan', 'wpmatch' ); ?></li>
@@ -134,7 +134,7 @@ $current_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['t
 							<tr>
 								<th scope="row">
 									<label>
-										<input type="checkbox" name="create_basic" value="1" checked style="margin-right: 8px;">
+										<input type="checkbox" name="create_basic" value="1" checked class="wpmatch-checkbox-input">
 										<strong><?php esc_html_e( 'Basic Membership', 'wpmatch' ); ?></strong>
 									</label>
 								</th>

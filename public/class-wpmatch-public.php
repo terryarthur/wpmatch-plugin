@@ -247,6 +247,13 @@ class WPMatch_Public {
 					$this->version,
 					true
 				);
+
+				wp_localize_script( 'wpmatch-gamification', 'wpmatch_gamification', array(
+					'rest_url' => esc_url_raw( rest_url() ),
+					'nonce' => wp_create_nonce( 'wp_rest' ),
+					'user_id' => get_current_user_id(),
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+				));
 			}
 
 			// Enqueue events script on events page
@@ -280,6 +287,12 @@ class WPMatch_Public {
 					$this->version,
 					true
 				);
+
+				wp_localize_script( 'wpmatch-location', 'wpmatch_location', array(
+					'rest_url' => esc_url_raw( rest_url() ),
+					'nonce' => wp_create_nonce( 'wp_rest' ),
+					'user_id' => get_current_user_id(),
+				));
 			}
 		}
 	}
@@ -668,7 +681,7 @@ class WPMatch_Public {
 
 		$user_id = get_current_user_id();
 
-		// Check if file was uploaded
+		// Check if file was uploaded.
 		if ( ! isset( $_FILES['photo'] ) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK ) {
 			wp_send_json_error( array( 'message' => __( 'No file uploaded or upload error', 'wpmatch' ) ) );
 		}
@@ -1238,27 +1251,6 @@ class WPMatch_Public {
 		return ob_get_clean();
 	}
 
-	/**
-	 * Registration form shortcode.
-	 */
-	public function registration_shortcode( $atts ) {
-		// Don't show registration form if user is logged in
-		if ( is_user_logged_in() ) {
-			return '<p>' . esc_html__( 'You are already logged in.', 'wpmatch' ) . '</p>';
-		}
-
-		$atts = shortcode_atts(
-			array(
-				'redirect_url' => home_url( '/wpmatch/dashboard' ),
-			),
-			$atts,
-			'wpmatch_registration'
-		);
-
-		ob_start();
-		require WPMATCH_PLUGIN_DIR . 'public/partials/wpmatch-registration.php';
-		return ob_get_clean();
-	}
 
 	/**
 	 * Initialize registration AJAX handlers.
@@ -1299,7 +1291,7 @@ class WPMatch_Public {
 	 */
 	public function ajax_register_user() {
 		// Verify nonce
-		if ( ! wp_verify_nonce( $_POST['wpmatch_registration_nonce'], 'wpmatch_registration' ) ) {
+		if ( ! isset( $_POST['wpmatch_registration_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['wpmatch_registration_nonce'] ), 'wpmatch_registration' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'wpmatch' ) ) );
 		}
 
@@ -1310,18 +1302,18 @@ class WPMatch_Public {
 		}
 
 		// Sanitize and validate input
-		$first_name    = sanitize_text_field( $_POST['first_name'] );
-		$last_name     = sanitize_text_field( $_POST['last_name'] );
-		$email         = sanitize_email( $_POST['email'] );
-		$password      = $_POST['password']; // Don't sanitize password
-		$birth_date    = sanitize_text_field( $_POST['birth_date'] );
-		$gender        = sanitize_text_field( $_POST['gender'] );
-		$location      = sanitize_text_field( $_POST['location'] );
-		$occupation    = sanitize_text_field( $_POST['occupation'] );
-		$education     = sanitize_text_field( $_POST['education'] );
-		$about_me      = sanitize_textarea_field( $_POST['about_me'] );
-		$interested_in = sanitize_text_field( $_POST['interested_in'] );
-		$looking_for   = sanitize_text_field( $_POST['looking_for'] );
+		$first_name    = isset( $_POST['first_name'] ) ? sanitize_text_field( wp_unslash( $_POST['first_name'] ) ) : '';
+		$last_name     = isset( $_POST['last_name'] ) ? sanitize_text_field( wp_unslash( $_POST['last_name'] ) ) : '';
+		$email         = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+		$password      = isset( $_POST['password'] ) ? wp_unslash( $_POST['password'] ) : ''; // Don't sanitize password
+		$birth_date    = isset( $_POST['birth_date'] ) ? sanitize_text_field( wp_unslash( $_POST['birth_date'] ) ) : '';
+		$gender        = isset( $_POST['gender'] ) ? sanitize_text_field( wp_unslash( $_POST['gender'] ) ) : '';
+		$location      = isset( $_POST['location'] ) ? sanitize_text_field( wp_unslash( $_POST['location'] ) ) : '';
+		$occupation    = isset( $_POST['occupation'] ) ? sanitize_text_field( wp_unslash( $_POST['occupation'] ) ) : '';
+		$education     = isset( $_POST['education'] ) ? sanitize_text_field( wp_unslash( $_POST['education'] ) ) : '';
+		$about_me      = isset( $_POST['about_me'] ) ? sanitize_textarea_field( wp_unslash( $_POST['about_me'] ) ) : '';
+		$interested_in = isset( $_POST['interested_in'] ) ? sanitize_text_field( wp_unslash( $_POST['interested_in'] ) ) : '';
+		$looking_for   = isset( $_POST['looking_for'] ) ? sanitize_text_field( wp_unslash( $_POST['looking_for'] ) ) : '';
 
 		// Validate required fields
 		$errors = array();
@@ -1830,9 +1822,9 @@ class WPMatch_Public {
 	}
 
 	/**
-	 * Get new messages since last check.
+	 * Get new messages since last check helper.
 	 */
-	private function get_new_messages( $conversation_id, $last_message_id ) {
+	private function get_messages_since( $conversation_id, $last_message_id ) {
 		// For demo purposes, return empty array
 		// In a real implementation, this would query for messages newer than $last_message_id
 		return array();

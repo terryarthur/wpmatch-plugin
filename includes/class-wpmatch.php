@@ -183,9 +183,29 @@ class WPMatch {
 		// Load WooCommerce integration.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-woocommerce-integration.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-membership-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-admin-license-manager.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-subscription-manager.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-order-processing.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-feature-restrictions.php';
+
+		// Load security and compliance classes.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-security-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-security-logger.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-gdpr-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-encryption-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-consent-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-privacy-manager.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-two-factor.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-security-hardening.php';
+
+		// Load advanced features classes.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-ml-matching.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-realtime-chat.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-notification-system.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-social-oauth.php';
+
+		// Load security initializer.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-security-init.php';
 
 		// Create the loader instance.
 		$this->loader = new WPMatch_Loader();
@@ -220,7 +240,7 @@ class WPMatch {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 		// Admin menu.
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu', 5 );
 
 		// Admin notices.
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'admin_notices' );
@@ -238,7 +258,7 @@ class WPMatch {
 		$this->loader->add_action( 'wp_ajax_wpmatch_create_demo_pages', $plugin_admin, 'create_demo_pages' );
 		$this->loader->add_action( 'wp_ajax_wpmatch_cleanup_demo_data', $plugin_admin, 'cleanup_demo_data' );
 
-		// User management AJAX handlers
+		// User management AJAX handlers.
 		$plugin_admin->register_ajax_handlers();
 	}
 
@@ -448,6 +468,10 @@ class WPMatch {
 	 * Run the loader to execute all of the hooks with WordPress.
 	 */
 	public function run() {
+		// Initialize security and compliance features.
+		WPMatch_Security_Init::init();
+
+		// Initialize the loader.
 		$this->loader->run();
 	}
 
@@ -540,5 +564,40 @@ class WPMatch {
 		$settings         = $this->get_settings();
 		$settings[ $key ] = $value;
 		return update_option( 'wpmatch_settings', $settings );
+	}
+
+	/**
+	 * Initialize security and compliance features.
+	 */
+	private function init_security_features() {
+		// Initialize GDPR Manager.
+		if ( class_exists( 'WPMatch_GDPR_Manager' ) ) {
+			new WPMatch_GDPR_Manager();
+		}
+
+		// Initialize Consent Manager.
+		if ( class_exists( 'WPMatch_Consent_Manager' ) ) {
+			new WPMatch_Consent_Manager();
+		}
+
+		// Initialize Security Manager.
+		if ( class_exists( 'WPMatch_Security_Manager' ) ) {
+			new WPMatch_Security_Manager();
+		}
+
+		// Initialize Security Hardening.
+		if ( class_exists( 'WPMatch_Security_Hardening' ) ) {
+			new WPMatch_Security_Hardening();
+		}
+
+		// Initialize Two Factor Authentication.
+		if ( class_exists( 'WPMatch_Two_Factor' ) ) {
+			new WPMatch_Two_Factor();
+		}
+
+		// Initialize Social OAuth.
+		if ( class_exists( 'WPMatch_Social_OAuth' ) ) {
+			new WPMatch_Social_OAuth();
+		}
 	}
 }
