@@ -33,20 +33,21 @@ class WPMatch_Freemius_Integration {
 	 * @var array
 	 */
 	private static $config = array(
-		'id'                  => 0, // Replace with actual Freemius plugin ID.
+		'id'                  => 20883,
 		'slug'                => 'wpmatch',
 		'type'                => 'plugin',
-		'public_key'          => '', // Replace with actual public key.
+		'public_key'          => 'pk_bc32a4e9257fddba6170d8467d55c',
 		'is_premium'          => false,
 		'premium_suffix'      => 'Pro',
 		'has_addons'          => true,
 		'has_paid_plans'      => true,
 		'menu'                => array(
-			'slug'       => 'wpmatch-admin',
+			'slug'       => 'wpmatch',
 			'override_exact' => true,
 			'contact'    => false,
 			'support'    => false,
 		),
+		'secret_key'          => 'sk_pGqbds;%6:yi&1{5*VL}IYBv2~=pZ',
 	);
 
 	/**

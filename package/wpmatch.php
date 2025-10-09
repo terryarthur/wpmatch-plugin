@@ -63,16 +63,19 @@ function wpmatch_check_requirements() {
 
 	// Display errors if any.
 	if ( ! empty( $errors ) ) {
-		add_action( 'admin_notices', function() use ( $errors ) {
-			?>
+		add_action(
+			'admin_notices',
+			function () use ( $errors ) {
+				?>
 			<div class="notice notice-error">
 				<p><strong><?php esc_html_e( 'WPMatch Plugin Error', 'wpmatch' ); ?></strong></p>
 				<?php foreach ( $errors as $error ) : ?>
 					<p><?php echo esc_html( $error ); ?></p>
 				<?php endforeach; ?>
 			</div>
-			<?php
-		} );
+				<?php
+			}
+		);
 		return false;
 	}
 
@@ -92,20 +95,65 @@ WPMatch_Autoloader::init();
 require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-activator.php';
 require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-deactivator.php';
 
-// Register activation hook.
-register_activation_hook( __FILE__, 'wpmatch_activate' );
+/**
+ * Fired during plugin activation.
+ *
+ * @since 1.0.0
+ */
 function wpmatch_activate() {
 	WPMatch_Activator::activate();
 }
 
-// Register deactivation hook.
-register_deactivation_hook( __FILE__, 'wpmatch_deactivate' );
+/**
+ * Fired during plugin deactivation.
+ *
+ * @since 1.0.0
+ */
 function wpmatch_deactivate() {
 	WPMatch_Deactivator::deactivate();
 }
 
+// Register activation hook.
+register_activation_hook( __FILE__, 'wpmatch_activate' );
+
+// Register deactivation hook.
+register_deactivation_hook( __FILE__, 'wpmatch_deactivate' );
+
 // Register uninstall hook (defined in uninstall.php).
 // This is handled via uninstall.php file.
+
+/**
+ * Initialize Freemius integration.
+ */
+function wpmatch_init_freemius() {
+	global $wpmatch_fs;
+
+	if ( ! isset( $wpmatch_fs ) ) {
+		// Include Freemius SDK.
+		if ( ! class_exists( 'Freemius' ) ) {
+			require_once WPMATCH_PLUGIN_DIR . 'freemius/start.php';
+		}
+
+		$wpmatch_fs = fs_dynamic_init( array(
+			'id'                  => '20883',
+			'slug'                => 'wpmatch',
+			'type'                => 'plugin',
+			'public_key'          => 'pk_bc32a4e9257fddba6170d8467d55c',
+			'is_premium'          => false,
+			'premium_suffix'      => 'Pro',
+			'has_addons'          => true,
+			'has_paid_plans'      => true,
+			'menu'                => array(
+				'slug'        => 'wpmatch',
+				'override_exact' => true,
+				'contact'     => false,
+				'support'     => false,
+			),
+		) );
+	}
+
+	return $wpmatch_fs;
+}
 
 /**
  * Initialize the plugin.
@@ -113,6 +161,9 @@ function wpmatch_deactivate() {
 function wpmatch_init() {
 	// Load text domain for translations.
 	load_plugin_textdomain( 'wpmatch', false, dirname( WPMATCH_PLUGIN_BASENAME ) . '/languages' );
+
+	// Initialize Freemius integration.
+	wpmatch_init_freemius();
 
 	// Load main plugin class.
 	require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch.php';
@@ -132,9 +183,13 @@ function wpmatch() {
 	return WPMatch::get_instance();
 }
 
-// For testing purposes - function for uninstall.
+/**
+ * For testing purposes - function for uninstall.
+ *
+ * @since 1.0.0
+ */
 function wpmatch_uninstall() {
-	// This would normally be in uninstall.php
+	// This would normally be in uninstall.php.
 	if ( class_exists( 'WPMatch_Uninstaller' ) ) {
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-uninstaller.php';
 		WPMatch_Uninstaller::uninstall();

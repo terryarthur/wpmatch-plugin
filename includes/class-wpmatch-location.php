@@ -651,10 +651,39 @@ class WPMatch_Location {
 	 * Get location matches API endpoint.
 	 */
 	public static function api_get_location_matches( $request ) {
+		$user_id       = get_current_user_id();
+		$max_distance  = floatval( $request->get_param( 'max_distance' ) );
+		$limit         = absint( $request->get_param( 'limit' ) );
+
+		// Get user's location.
+		$user_location = self::get_user_location( $user_id );
+		if ( ! $user_location ) {
+			return new WP_Error( 'no_location', __( 'Please update your location first.', 'wpmatch' ), array( 'status' => 400 ) );
+		}
+
+		// Get user's preferences.
+		$preferences = self::get_user_matching_preferences( $user_id );
+
+		// Find location-based matches.
+		$location_matches = self::find_location_matches( $user_id, $user_location, $max_distance, $limit, $preferences );
+
+		// Calculate and update match scores.
+		foreach ( $location_matches as &$match ) {
+			$match['match_score'] = self::calculate_location_match_score( $user_id, $match['user_id'], $match['distance_km'] );
+		}
+
 		return rest_ensure_response(
 			array(
-				'success' => false,
-				'message' => 'Not implemented yet',
+				'success' => true,
+				'data'    => $location_matches,
+				'meta'    => array(
+					'user_location'  => array(
+						'city'  => $user_location['city'],
+						'state' => $user_location['state'],
+					),
+					'search_radius'  => $max_distance,
+					'total_matches'  => count( $location_matches ),
+				),
 			)
 		);
 	}
@@ -952,8 +981,217 @@ class WPMatch_Location {
 	 * Update location-based matches for a user.
 	 */
 	private static function update_location_matches( $user_id ) {
-		// Placeholder for updating location-based matching algorithms.
-		// This would calculate compatibility based on distance and other factors.
+		global $wpdb;
+
+		// Get user's location.
+		$user_location = self::get_user_location( $user_id );
+		if ( ! $user_location ) {
+			return;
+		}
+
+		// Get user's preferences.
+		$preferences = self::get_user_matching_preferences( $user_id );
+		$max_distance = $preferences['max_distance_km'] ?? 100;
+
+		// Find potential matches within distance.
+		$potential_matches = self::find_nearby_users(
+			$user_location,
+			$max_distance,
+			100,
+			array(
+				'exclude_user_id' => $user_id,
+				'min_age'         => $preferences['min_age'] ?? null,
+				'max_age'         => $preferences['max_age'] ?? null,
+				'gender'          => $preferences['preferred_gender'] ?? null,
+			)
+		);
+
+		// Update location matches table.
+		$table_name = $wpdb->prefix . 'wpmatch_location_matches';
+
+		// Clear existing matches for this user.
+		$wpdb->delete( $table_name, array( 'user1_id' => $user_id ), array( '%d' ) );
+
+		// Insert new matches.
+		foreach ( $potential_matches as $match ) {
+			$match_score = self::calculate_location_match_score( $user_id, $match['user_id'], $match['distance_km'] );
+			$location_compatibility = self::calculate_location_compatibility( $user_location, $match );
+
+			$wpdb->insert(
+				$table_name,
+				array(
+					'user1_id'               => $user_id,
+					'user2_id'               => $match['user_id'],
+					'distance_km'            => $match['distance_km'],
+					'match_score'            => $match_score,
+					'is_nearby_match'        => $match['distance_km'] <= 25 ? 1 : 0,
+					'location_compatibility' => $location_compatibility,
+				),
+				array( '%d', '%d', '%f', '%f', '%d', '%f' )
+			);
+		}
+	}
+
+	/**
+	 * Find location-based matches for a user.
+	 */
+	private static function find_location_matches( $user_id, $user_location, $max_distance, $limit, $preferences ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'wpmatch_location_matches';
+
+		// First try to get from cached matches.
+		$matches = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT lm.*, u.display_name, u.user_email
+				FROM $table_name lm
+				INNER JOIN {$wpdb->users} u ON lm.user2_id = u.ID
+				WHERE lm.user1_id = %d
+				AND lm.distance_km <= %f
+				ORDER BY lm.match_score DESC, lm.distance_km ASC
+				LIMIT %d",
+				$user_id,
+				$max_distance,
+				$limit
+			),
+			ARRAY_A
+		);
+
+		// If no cached matches or not enough, find fresh ones.
+		if ( count( $matches ) < $limit ) {
+			$fresh_matches = self::find_nearby_users(
+				$user_location,
+				$max_distance,
+				$limit,
+				array_merge(
+					$preferences,
+					array( 'exclude_user_id' => $user_id )
+				)
+			);
+
+			// Merge with cached matches.
+			$user_ids_cached = array_column( $matches, 'user2_id' );
+			foreach ( $fresh_matches as $fresh_match ) {
+				if ( ! in_array( $fresh_match['user_id'], $user_ids_cached, true ) ) {
+					$matches[] = array_merge( $fresh_match, array( 'user2_id' => $fresh_match['user_id'] ) );
+				}
+			}
+
+			$matches = array_slice( $matches, 0, $limit );
+		}
+
+		return $matches;
+	}
+
+	/**
+	 * Calculate location-based match score.
+	 */
+	private static function calculate_location_match_score( $user1_id, $user2_id, $distance_km ) {
+		// Base score starts at 100 and decreases with distance.
+		$base_score = 100;
+
+		// Distance penalty (closer = higher score).
+		$distance_penalty = min( $distance_km * 0.5, 50 ); // Max penalty of 50 points.
+		$distance_score = max( 0, $base_score - $distance_penalty );
+
+		// Activity bonus (if both users are in the same area frequently).
+		$activity_bonus = self::calculate_activity_bonus( $user1_id, $user2_id );
+
+		// Common places bonus.
+		$common_places_bonus = self::calculate_common_places_bonus( $user1_id, $user2_id );
+
+		$total_score = $distance_score + $activity_bonus + $common_places_bonus;
+
+		return min( 100, max( 0, $total_score ) );
+	}
+
+	/**
+	 * Calculate location compatibility between two users.
+	 */
+	private static function calculate_location_compatibility( $user1_location, $user2_data ) {
+		$compatibility = 1.0; // Perfect compatibility by default.
+
+		// Same city bonus.
+		if ( $user1_location['city'] === $user2_data['city'] ) {
+			$compatibility += 0.2;
+		}
+
+		// Same state bonus.
+		if ( $user1_location['state'] === $user2_data['state'] ) {
+			$compatibility += 0.1;
+		}
+
+		// Distance penalty.
+		$distance_km = $user2_data['distance_km'];
+		if ( $distance_km > 50 ) {
+			$compatibility -= ( $distance_km - 50 ) * 0.01;
+		}
+
+		return min( 1.0, max( 0.0, $compatibility ) );
+	}
+
+	/**
+	 * Get user's matching preferences.
+	 */
+	private static function get_user_matching_preferences( $user_id ) {
+		global $wpdb;
+
+		// Get from user preferences table.
+		$preferences = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}wpmatch_user_preferences WHERE user_id = %d",
+				$user_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $preferences ) {
+			// Default preferences.
+			return array(
+				'min_age'         => 18,
+				'max_age'         => 99,
+				'max_distance_km' => 50,
+				'preferred_gender' => null,
+			);
+		}
+
+		return array(
+			'min_age'          => $preferences['min_age'],
+			'max_age'          => $preferences['max_age'],
+			'max_distance_km'  => $preferences['max_distance'],
+			'preferred_gender' => $preferences['preferred_gender'],
+		);
+	}
+
+	/**
+	 * Calculate activity bonus based on location patterns.
+	 */
+	private static function calculate_activity_bonus( $user1_id, $user2_id ) {
+		// Placeholder for activity pattern analysis.
+		// This could analyze common locations visited, timing patterns, etc.
+		return 0;
+	}
+
+	/**
+	 * Calculate bonus for common places/areas.
+	 */
+	private static function calculate_common_places_bonus( $user1_id, $user2_id ) {
+		global $wpdb;
+
+		// Check for common cities in location history.
+		$common_cities = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT ul1.city)
+				FROM {$wpdb->prefix}wpmatch_user_locations ul1
+				INNER JOIN {$wpdb->prefix}wpmatch_user_locations ul2 ON ul1.city = ul2.city
+				WHERE ul1.user_id = %d AND ul2.user_id = %d
+				AND ul1.city IS NOT NULL AND ul1.city != ''",
+				$user1_id,
+				$user2_id
+			)
+		);
+
+		return $common_cities * 5; // 5 points per common city.
 	}
 
 	/**

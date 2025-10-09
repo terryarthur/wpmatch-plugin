@@ -25,7 +25,7 @@ $active_users = $wpdb->get_var(
 		FROM {$wpdb->usermeta}
 		WHERE meta_key = 'wpmatch_last_active'
 		AND meta_value > %s",
-		date( 'Y-m-d H:i:s', strtotime( '-30 days' ) )
+		gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) )
 	)
 );
 
@@ -53,7 +53,7 @@ $daily_active = $wpdb->get_var(
 		FROM {$wpdb->usermeta}
 		WHERE meta_key = 'wpmatch_last_active'
 		AND meta_value > %s",
-		date( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
+		gmdate( 'Y-m-d H:i:s', strtotime( '-24 hours' ) )
 	)
 );
 
@@ -62,7 +62,7 @@ $recent_registrations = $wpdb->get_var(
 	$wpdb->prepare(
 		"SELECT COUNT(*) FROM {$wpdb->users}
 		WHERE user_registered > %s",
-		date( 'Y-m-d H:i:s', strtotime( '-7 days' ) )
+		gmdate( 'Y-m-d H:i:s', strtotime( '-7 days' ) )
 	)
 );
 
@@ -127,10 +127,13 @@ $verification_requests = $wpdb->get_var(
 				<span class="dashicons dashicons-groups"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Total Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_users ? $total_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-arrow-up-alt"></span>
-				<?php printf( esc_html__( '+%d this week', 'wpmatch' ), $recent_registrations ?: 0 ); ?>
+				<?php
+				// translators: %d is the number of new registrations this week.
+				printf( esc_html__( '+%d this week', 'wpmatch' ), esc_html( $recent_registrations ? $recent_registrations : 0 ) );
+				?>
 			</div>
 		</div>
 
@@ -139,10 +142,13 @@ $verification_requests = $wpdb->get_var(
 				<span class="dashicons dashicons-clock"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Active Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $active_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $active_users ? $active_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change">
 				<span class="dashicons dashicons-visibility"></span>
-				<?php printf( esc_html__( '%d online today', 'wpmatch' ), $daily_active ?: 0 ); ?>
+				<?php
+				// translators: %d is the number of users online today.
+				printf( esc_html__( '%d online today', 'wpmatch' ), esc_html( $daily_active ? $daily_active : 0 ) );
+				?>
 			</div>
 		</div>
 
@@ -151,7 +157,7 @@ $verification_requests = $wpdb->get_var(
 				<span class="dashicons dashicons-heart"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Total Matches', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_matches ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_matches ? $total_matches : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-arrow-up-alt"></span>
 				<?php esc_html_e( 'Connecting hearts', 'wpmatch' ); ?>
@@ -163,7 +169,7 @@ $verification_requests = $wpdb->get_var(
 				<span class="dashicons dashicons-email-alt"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Messages Sent', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_messages ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_messages ? $total_messages : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-format-chat"></span>
 				<?php esc_html_e( 'Conversations flowing', 'wpmatch' ); ?>
@@ -188,9 +194,9 @@ $verification_requests = $wpdb->get_var(
 							<?php foreach ( $recent_matches as $match ) : ?>
 								<div class="wpmatch-match-item">
 									<div class="wpmatch-match-users">
-										<span class="wpmatch-user-name"><?php echo esc_html( $match->user1_name ?: 'Unknown User' ); ?></span>
+										<span class="wpmatch-user-name"><?php echo esc_html( $match->user1_name ? $match->user1_name : 'Unknown User' ); ?></span>
 										<span class="wpmatch-match-icon">💕</span>
-										<span class="wpmatch-user-name"><?php echo esc_html( $match->user2_name ?: 'Unknown User' ); ?></span>
+										<span class="wpmatch-user-name"><?php echo esc_html( $match->user2_name ? $match->user2_name : 'Unknown User' ); ?></span>
 									</div>
 									<div class="wpmatch-match-time">
 										<?php echo esc_html( human_time_diff( strtotime( $match->matched_at ) ) . ' ago' ); ?>
@@ -241,7 +247,7 @@ $verification_requests = $wpdb->get_var(
 							<div class="wpmatch-health-bar">
 								<?php
 								$match_rate = $total_users > 1 ? round( ( $total_matches / ( $total_users / 2 ) ) * 100 ) : 0;
-								$match_rate = min( $match_rate, 100 ); // Cap at 100%
+								$match_rate = min( $match_rate, 100 ); // Cap at 100%.
 								?>
 								<div class="wpmatch-health-fill" style="width: <?php echo esc_attr( $match_rate ); ?>%"></div>
 							</div>
@@ -324,7 +330,7 @@ $verification_requests = $wpdb->get_var(
 							<div class="wpmatch-revenue-label"><?php esc_html_e( 'This Month', 'wpmatch' ); ?></div>
 						</div>
 						<div class="wpmatch-revenue-item">
-							<div class="wpmatch-revenue-value"><?php echo esc_html( $premium_members ?: 0 ); ?></div>
+							<div class="wpmatch-revenue-value"><?php echo esc_html( $premium_members ? $premium_members : 0 ); ?></div>
 							<div class="wpmatch-revenue-label"><?php esc_html_e( 'Premium Members', 'wpmatch' ); ?></div>
 						</div>
 					</div>

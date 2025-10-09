@@ -10,87 +10,86 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Get user statistics
+// Get user statistics.
 global $wpdb;
 
-// Get total users with profiles
+// Get total users with profiles.
 $profile_table = $wpdb->prefix . 'wpmatch_user_profiles';
-$total_users = $wpdb->get_var( "SELECT COUNT(*) FROM $profile_table" );
+$total_users   = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles" );
 
-// Get users by status
-$active_users = $wpdb->get_var( "SELECT COUNT(*) FROM $profile_table WHERE status = 'active'" );
-$pending_users = $wpdb->get_var( "SELECT COUNT(*) FROM $profile_table WHERE status = 'pending'" );
-$blocked_users = $wpdb->get_var( "SELECT COUNT(*) FROM $profile_table WHERE status = 'blocked'" );
+// Get users by status.
+$active_users  = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles WHERE status = %s", 'active' ) );
+$pending_users = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles WHERE status = %s", 'pending' ) );
+$blocked_users = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles WHERE status = %s", 'blocked' ) );
 
-// Get recent registrations (last 7 days)
-$recent_users = $wpdb->get_var( $wpdb->prepare(
-	"SELECT COUNT(*) FROM $profile_table WHERE created_at >= %s",
-	date( 'Y-m-d H:i:s', strtotime( '-7 days' ) )
-) );
+// Get recent registrations (last 7 days).
+$recent_users = $wpdb->get_var(
+	$wpdb->prepare(
+		"SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles WHERE created_at >= %s",
+		gmdate( 'Y-m-d H:i:s', strtotime( '-7 days' ) )
+	)
+);
 
-// Get verified users
-$verified_users = $wpdb->get_var( "SELECT COUNT(*) FROM $profile_table WHERE is_verified = 1" );
+// Get verified users.
+$verified_users = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wpmatch_user_profiles WHERE is_verified = %d", 1 ) );
 
-// Handle filters and pagination
-$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
-$search_query = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
-$per_page = 20;
-$current_page = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
-$offset = ( $current_page - 1 ) * $per_page;
+// Handle filters and pagination.
+$status_filter  = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+$search_query   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+$items_per_page = 20;
+$current_page   = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+$offset         = ( $current_page - 1 ) * $items_per_page;
 
-// Build query
+// Build query.
 $where_conditions = array( '1=1' );
-$query_params = array();
+$query_params     = array();
 
 if ( $status_filter ) {
 	$where_conditions[] = 'p.status = %s';
-	$query_params[] = $status_filter;
+	$query_params[]     = $status_filter;
 }
 
 if ( $search_query ) {
 	$where_conditions[] = '(u.display_name LIKE %s OR u.user_email LIKE %s OR p.location LIKE %s)';
-	$query_params[] = '%' . $wpdb->esc_like( $search_query ) . '%';
-	$query_params[] = '%' . $wpdb->esc_like( $search_query ) . '%';
-	$query_params[] = '%' . $wpdb->esc_like( $search_query ) . '%';
+	$query_params[]     = '%' . $wpdb->esc_like( $search_query ) . '%';
+	$query_params[]     = '%' . $wpdb->esc_like( $search_query ) . '%';
+	$query_params[]     = '%' . $wpdb->esc_like( $search_query ) . '%';
 }
 
 $where_clause = implode( ' AND ', $where_conditions );
 
-// Get users for current page
+// Get users for current page.
 $users_query = "
 	SELECT p.*, u.display_name, u.user_email, u.user_registered
-	FROM $profile_table p
+	FROM {$wpdb->prefix}wpmatch_user_profiles p
 	LEFT JOIN {$wpdb->users} u ON p.user_id = u.ID
-	WHERE $where_clause
+	WHERE {$where_clause}
 	ORDER BY p.created_at DESC
 	LIMIT %d OFFSET %d
 ";
 
-$query_params[] = $per_page;
+$query_params[] = $items_per_page;
 $query_params[] = $offset;
 
-if ( ! empty( $query_params ) ) {
-	$users = $wpdb->get_results( $wpdb->prepare( $users_query, ...$query_params ) );
-} else {
-	$users = $wpdb->get_results( $users_query );
-}
+$users = $wpdb->get_results( $wpdb->prepare( $users_query, ...$query_params ) );
 
-// Get total count for pagination
+// Get total count for pagination.
 $count_query = "
 	SELECT COUNT(*)
-	FROM $profile_table p
+	FROM {$wpdb->prefix}wpmatch_user_profiles p
 	LEFT JOIN {$wpdb->users} u ON p.user_id = u.ID
-	WHERE $where_clause
+	WHERE {$where_clause}
 ";
 
-if ( count( $query_params ) > 2 ) { // Remove limit and offset params
-	$count_params = array_slice( $query_params, 0, -2 );
+// Remove limit and offset params for count query.
+if ( count( $query_params ) > 2 ) {
+	$count_params   = array_slice( $query_params, 0, -2 );
 	$total_filtered = $wpdb->get_var( $wpdb->prepare( $count_query, ...$count_params ) );
 } else {
 	$total_filtered = $wpdb->get_var( $count_query );
 }
 
-$total_pages = ceil( $total_filtered / $per_page );
+$total_pages = ceil( $total_filtered / $items_per_page );
 ?>
 
 <div class="wrap wpmatch-admin">
@@ -134,7 +133,7 @@ $total_pages = ceil( $total_filtered / $per_page );
 				<span class="dashicons dashicons-admin-users"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Total Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $total_users ? $total_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change">
 				<span class="dashicons dashicons-admin-users"></span>
 				<?php esc_html_e( 'All registered users', 'wpmatch' ); ?>
@@ -146,7 +145,7 @@ $total_pages = ceil( $total_filtered / $per_page );
 				<span class="dashicons dashicons-yes-alt"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Active Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $active_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $active_users ? $active_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-arrow-up-alt"></span>
 				<?php esc_html_e( 'Currently active', 'wpmatch' ); ?>
@@ -158,7 +157,7 @@ $total_pages = ceil( $total_filtered / $per_page );
 				<span class="dashicons dashicons-awards"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'Verified Users', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $verified_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $verified_users ? $verified_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-yes"></span>
 				<?php esc_html_e( 'Identity confirmed', 'wpmatch' ); ?>
@@ -170,7 +169,7 @@ $total_pages = ceil( $total_filtered / $per_page );
 				<span class="dashicons dashicons-calendar-alt"></span>
 				<span class="wpmatch-stat-label"><?php esc_html_e( 'New This Week', 'wpmatch' ); ?></span>
 			</div>
-			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $recent_users ?: 0 ) ); ?></div>
+			<div class="wpmatch-stat-number"><?php echo esc_html( number_format( $recent_users ? $recent_users : 0 ) ); ?></div>
 			<div class="wpmatch-stat-change positive">
 				<span class="dashicons dashicons-arrow-up-alt"></span>
 				<?php esc_html_e( 'Recent signups', 'wpmatch' ); ?>
@@ -208,16 +207,16 @@ $total_pages = ceil( $total_filtered / $per_page );
 					printf(
 						/* translators: 1: first result number, 2: last result number, 3: total results */
 						esc_html__( 'Showing %1$d-%2$d of %3$d users', 'wpmatch' ),
-						( ( $current_page - 1 ) * $per_page ) + 1,
-						min( $current_page * $per_page, $total_filtered ),
-						$total_filtered
+						esc_html( ( ( $current_page - 1 ) * $items_per_page ) + 1 ),
+						esc_html( min( $current_page * $items_per_page, $total_filtered ) ),
+						esc_html( $total_filtered )
 					);
 					?>
 				</div>
 				<div class="wpmatch-search-box-inline">
 					<form method="get" action="">
 						<?php foreach ( $_GET as $key => $value ) : ?>
-							<?php if ( $key !== 's' ) : ?>
+							<?php if ( 's' !== $key ) : ?>
 								<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>">
 							<?php endif; ?>
 						<?php endforeach; ?>
@@ -256,10 +255,11 @@ $total_pages = ceil( $total_filtered / $per_page );
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach ( $users as $user ) :
-						$avatar_url = $user->profile_picture ? esc_url( $user->profile_picture ) : get_avatar_url( $user->user_id, array( 'size' => 50 ) );
+					<?php foreach ( $users as $user ) : ?>
+						<?php
+						$avatar_url     = $user->profile_picture ? esc_url( $user->profile_picture ) : get_avatar_url( $user->user_id, array( 'size' => 50 ) );
 						$user_wordpress = get_user_by( 'ID', $user->user_id );
-						$joined_date = human_time_diff( strtotime( $user->user_registered ) );
+						$joined_date    = human_time_diff( strtotime( $user->user_registered ) );
 						?>
 						<tr data-user-id="<?php echo esc_attr( $user->user_id ); ?>">
 							<th class="check-column">
@@ -558,7 +558,7 @@ $total_pages = ceil( $total_filtered / $per_page );
 <script>
 // Setup admin variables
 var wpmatchAdmin = {
-	nonce: '<?php echo wp_create_nonce( 'wpmatch_admin_nonce' ); ?>'
+	nonce: '<?php echo esc_js( wp_create_nonce( 'wpmatch_admin_nonce' ) ); ?>'
 };
 document.addEventListener('DOMContentLoaded', function() {
 	// Select all functionality

@@ -2,7 +2,7 @@
 /**
  * WPMatch Feature Restrictions
  *
- * Handles feature restrictions based on membership levels.
+ * Handles admin-level feature restriction enforcement based on Freemius licensing.
  *
  * @package WPMatch
  * @since   1.0.0
@@ -16,31 +16,220 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WPMatch Feature Restrictions Class
  *
- * Implements feature restrictions and access control.
+ * Manages admin-level feature access control based on Freemius licenses.
  */
 class WPMatch_Feature_Restrictions {
 
 	/**
-	 * Initialize feature restrictions.
+	 * Premium features and their requirements.
+	 *
+	 * @var array
+	 */
+	private static $premium_features = array(
+		'video_chat'          => array(
+			'freemius_id'   => 'video_chat',
+			'name'          => 'Video Chat System',
+			'description'   => 'WebRTC-powered video calling',
+			'required_plan' => 'pro',
+		),
+		'ai_matching'         => array(
+			'freemius_id'   => 'ai_matching',
+			'name'          => 'AI Matching Engine',
+			'description'   => 'Machine learning compatibility matching',
+			'required_plan' => 'pro',
+		),
+		'advanced_analytics'  => array(
+			'freemius_id'   => 'advanced_analytics',
+			'name'          => 'Advanced Analytics',
+			'description'   => 'Detailed reporting and insights',
+			'required_plan' => 'basic',
+		),
+		'subscription_system' => array(
+			'freemius_id'   => 'subscription_system',
+			'name'          => 'Lightweight Subscriptions',
+			'description'   => 'Alternative to WooCommerce',
+			'required_plan' => 'basic',
+		),
+		'payment_stripe'      => array(
+			'freemius_id'   => 'payment_stripe',
+			'name'          => 'Stripe Payment Gateway',
+			'description'   => 'Accept payments via Stripe',
+			'required_plan' => 'basic',
+		),
+		'payment_paypal'      => array(
+			'freemius_id'   => 'payment_paypal',
+			'name'          => 'PayPal Payment Gateway',
+			'description'   => 'Accept payments via PayPal',
+			'required_plan' => 'basic',
+		),
+		'mobile_api'          => array(
+			'freemius_id'   => 'mobile_api',
+			'name'          => 'Mobile App API',
+			'description'   => 'REST API for mobile apps',
+			'required_plan' => 'pro',
+		),
+	);
+
+	/**
+	 * Initialize the feature restriction system.
 	 */
 	public static function init() {
-		// Restrict swipe actions.
+		add_action( 'admin_notices', array( __CLASS__, 'show_upgrade_notices' ) );
+		add_filter( 'wpmatch_feature_enabled', array( __CLASS__, 'check_feature_access' ), 10, 2 );
+		add_action( 'wp_ajax_wpmatch_get_feature_info', array( __CLASS__, 'ajax_get_feature_info' ) );
+		add_action( 'wp_ajax_wpmatch_dismiss_upgrade_notice', array( __CLASS__, 'ajax_dismiss_upgrade_notice' ) );
+
+		// User-level restrictions (preserved from original).
 		add_filter( 'wpmatch_can_perform_swipe', array( __CLASS__, 'restrict_swipe_actions' ), 10, 3 );
-
-		// Restrict super likes.
 		add_filter( 'wpmatch_can_use_super_like', array( __CLASS__, 'restrict_super_likes' ), 10, 2 );
-
-		// Restrict messaging.
 		add_filter( 'wpmatch_can_send_message', array( __CLASS__, 'restrict_messaging' ), 10, 3 );
+	}
 
-		// Restrict profile visibility.
-		add_filter( 'wpmatch_can_see_who_liked', array( __CLASS__, 'restrict_who_liked_visibility' ), 10, 2 );
+	/**
+	 * Check if a premium feature is available.
+	 *
+	 * @param string $feature_slug Feature identifier.
+	 * @return bool Whether feature is accessible.
+	 */
+	public static function is_feature_enabled( $feature_slug ) {
+		// Free features are always enabled.
+		if ( ! isset( self::$premium_features[ $feature_slug ] ) ) {
+			return true;
+		}
 
-		// Restrict advanced search.
-		add_filter( 'wpmatch_can_use_advanced_search', array( __CLASS__, 'restrict_advanced_search' ), 10, 2 );
+		// Check Freemius license.
+		global $wpmatch_fs;
 
-		// Restrict profile boost.
-		add_filter( 'wpmatch_can_boost_profile', array( __CLASS__, 'restrict_profile_boost' ), 10, 2 );
+		if ( ! isset( $wpmatch_fs ) || ! $wpmatch_fs->is_registered() ) {
+			return false;
+		}
+
+		$feature = self::$premium_features[ $feature_slug ];
+
+		// Check if user has required plan.
+		if ( ! $wpmatch_fs->is_plan_or_trial( $feature['required_plan'] ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Filter hook for feature access checking.
+	 *
+	 * @param bool   $enabled Current enabled status.
+	 * @param string $feature_slug Feature identifier.
+	 * @return bool Whether feature is enabled.
+	 */
+	public static function check_feature_access( $enabled, $feature_slug ) {
+		return self::is_feature_enabled( $feature_slug );
+	}
+
+	/**
+	 * Get premium feature information.
+	 *
+	 * @param string $feature_slug Feature identifier.
+	 * @return array|false Feature data or false if not found.
+	 */
+	public static function get_feature_info( $feature_slug ) {
+		if ( ! isset( self::$premium_features[ $feature_slug ] ) ) {
+			return false;
+		}
+
+		$feature = self::$premium_features[ $feature_slug ];
+		$feature['enabled'] = self::is_feature_enabled( $feature_slug );
+		$feature['slug'] = $feature_slug;
+
+		return $feature;
+	}
+
+	/**
+	 * Show upgrade notices for restricted features.
+	 */
+	public static function show_upgrade_notices() {
+		global $wpmatch_fs;
+
+		// Only show on WPMatch admin pages.
+		$screen = get_current_screen();
+		if ( ! $screen || strpos( $screen->id, 'wpmatch' ) === false ) {
+			return;
+		}
+
+		// Don't show if already have pro plan.
+		if ( isset( $wpmatch_fs ) && $wpmatch_fs->is_plan_or_trial( 'pro' ) ) {
+			return;
+		}
+
+		// Check if user recently dismissed notice.
+		if ( get_transient( 'wpmatch_upgrade_notice_dismissed' ) ) {
+			return;
+		}
+
+		?>
+		<div class="notice notice-info is-dismissible wpmatch-upgrade-notice">
+			<p>
+				<strong><?php esc_html_e( 'Unlock Premium Features!', 'wpmatch' ); ?></strong>
+				<?php esc_html_e( 'Get advanced analytics, video chat, AI matching, and more with WPMatch Pro.', 'wpmatch' ); ?>
+				<a href="<?php echo esc_url( isset( $wpmatch_fs ) ? $wpmatch_fs->get_upgrade_url() : admin_url( 'admin.php?page=wpmatch-pricing' ) ); ?>" class="button button-primary" style="margin-left: 10px;">
+					<?php esc_html_e( 'Upgrade Now', 'wpmatch' ); ?>
+				</a>
+			</p>
+		</div>
+		<script>
+		jQuery(document).on('click', '.wpmatch-upgrade-notice .notice-dismiss', function() {
+			jQuery.post(ajaxurl, {
+				action: 'wpmatch_dismiss_upgrade_notice',
+				nonce: '<?php echo esc_js( wp_create_nonce( 'wpmatch_dismiss_notice' ) ); ?>'
+			});
+		});
+		</script>
+		<?php
+	}
+
+	/**
+	 * AJAX handler for dismissing upgrade notice.
+	 */
+	public static function ajax_dismiss_upgrade_notice() {
+		check_ajax_referer( 'wpmatch_dismiss_notice', 'nonce' );
+
+		set_transient( 'wpmatch_upgrade_notice_dismissed', true, DAY_IN_SECONDS * 7 );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * Create feature restriction notice HTML.
+	 *
+	 * @param string $feature_slug Feature identifier.
+	 * @param string $context Where the notice is shown.
+	 * @return string HTML content.
+	 */
+	public static function get_restriction_notice( $feature_slug, $context = 'general' ) {
+		$feature = self::get_feature_info( $feature_slug );
+
+		if ( ! $feature ) {
+			return '';
+		}
+
+		global $wpmatch_fs;
+		$upgrade_url = isset( $wpmatch_fs ) ? $wpmatch_fs->get_upgrade_url() : admin_url( 'admin.php?page=wpmatch-pricing' );
+
+		ob_start();
+		?>
+		<div class="wpmatch-feature-restricted">
+			<div class="wpmatch-restriction-notice">
+				<h3><?php echo esc_html( $feature['name'] ); ?> <span class="wpmatch-pro-badge"><?php esc_html_e( 'PRO', 'wpmatch' ); ?></span></h3>
+				<p><?php echo esc_html( $feature['description'] ); ?></p>
+				<p class="wpmatch-restriction-message">
+					<?php esc_html_e( 'This premium feature requires an active license.', 'wpmatch' ); ?>
+				</p>
+				<a href="<?php echo esc_url( $upgrade_url ); ?>" class="button button-primary wpmatch-upgrade-btn">
+					<?php esc_html_e( 'Upgrade to Pro', 'wpmatch' ); ?>
+				</a>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**

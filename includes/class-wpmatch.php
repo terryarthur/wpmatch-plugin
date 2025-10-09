@@ -150,6 +150,9 @@ class WPMatch {
 		// Load photo verification.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-photo-verification.php';
 
+		// Load user media management.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-user-media.php';
+
 		// Load mobile API.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-mobile-api.php';
 

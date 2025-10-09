@@ -123,11 +123,47 @@ register_deactivation_hook( __FILE__, 'wpmatch_deactivate' );
 // This is handled via uninstall.php file.
 
 /**
+ * Initialize Freemius integration.
+ */
+function wpmatch_init_freemius() {
+	global $wpmatch_fs;
+
+	if ( ! isset( $wpmatch_fs ) ) {
+		// Include Freemius SDK.
+		if ( ! class_exists( 'Freemius' ) ) {
+			require_once WPMATCH_PLUGIN_DIR . 'freemius/start.php';
+		}
+
+		$wpmatch_fs = fs_dynamic_init( array(
+			'id'                  => '20883',
+			'slug'                => 'wpmatch',
+			'type'                => 'plugin',
+			'public_key'          => 'pk_bc32a4e9257fddba6170d8467d55c',
+			'is_premium'          => false,
+			'premium_suffix'      => 'Pro',
+			'has_addons'          => true,
+			'has_paid_plans'      => true,
+			'menu'                => array(
+				'slug'        => 'wpmatch',
+				'override_exact' => true,
+				'contact'     => false,
+				'support'     => false,
+			),
+		) );
+	}
+
+	return $wpmatch_fs;
+}
+
+/**
  * Initialize the plugin.
  */
 function wpmatch_init() {
 	// Load text domain for translations.
 	load_plugin_textdomain( 'wpmatch', false, dirname( WPMATCH_PLUGIN_BASENAME ) . '/languages' );
+
+	// Initialize Freemius integration.
+	wpmatch_init_freemius();
 
 	// Load main plugin class.
 	require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch.php';

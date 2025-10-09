@@ -165,6 +165,122 @@
 .wpmatch-match-distance {
     color: #999;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.wpmatch-match-distance::before {
+    content: "📍";
+    font-size: 12px;
+}
+
+/* Enhanced Distance Badges */
+.distance-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.distance-badge.close {
+    background: rgba(76, 175, 80, 0.9);
+}
+
+.distance-badge.moderate {
+    background: rgba(255, 193, 7, 0.9);
+}
+
+.distance-badge.far {
+    background: rgba(156, 39, 176, 0.9);
+}
+
+/* Location Indicator Styles */
+.location-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.location-indicator .location-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4caf50;
+    position: relative;
+}
+
+.location-indicator .location-icon.approximate {
+    background: #ff9800;
+}
+
+.location-indicator .location-icon.city-only {
+    background: #2196f3;
+}
+
+.location-indicator .location-icon.hidden {
+    background: #666;
+}
+
+/* Distance Range Filters */
+.distance-filter-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.distance-chip {
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.distance-chip:hover,
+.distance-chip.active {
+    background: #e91e63;
+    color: white;
+    border-color: #e91e63;
+}
+
+.distance-chip .chip-icon {
+    font-size: 10px;
+}
+
+/* Travel Mode Badge */
+.travel-mode-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.travel-mode-badge::before {
+    content: "✈️";
+    font-size: 10px;
 }
 
 .wpmatch-match-compatibility {
