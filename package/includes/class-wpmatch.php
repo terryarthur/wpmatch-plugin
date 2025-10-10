@@ -132,6 +132,11 @@ class WPMatch {
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-realtime-manager.php';
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-job-queue.php';
 
+		// Load REST API controllers.
+		require_once WPMATCH_PLUGIN_DIR . 'includes/rest-api/class-wpmatch-membership-rest-controller.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/rest-api/class-wpmatch-credits-rest-controller.php';
+		require_once WPMATCH_PLUGIN_DIR . 'includes/rest-api/class-wpmatch-admin-payment-rest-controller.php';
+
 		// Load AJAX handlers.
 		require_once WPMATCH_PLUGIN_DIR . 'includes/class-wpmatch-ajax-handlers.php';
 
@@ -319,6 +324,30 @@ class WPMatch {
 
 		// REST API permissions.
 		$this->loader->add_filter( 'rest_pre_dispatch', $plugin_api, 'check_permissions', 10, 3 );
+
+		// Register payment-related REST API controllers.
+		$this->loader->add_action( 'rest_api_init', $this, 'register_payment_rest_routes' );
+	}
+
+	/**
+	 * Register payment-related REST API routes.
+	 *
+	 * Instantiates and registers the payment, membership, and credit REST API controllers.
+	 *
+	 * @since 1.8.0
+	 */
+	public function register_payment_rest_routes() {
+		// Register membership management endpoints.
+		$membership_controller = new WPMatch_Membership_REST_Controller();
+		$membership_controller->register_routes();
+
+		// Register credit system endpoints.
+		$credits_controller = new WPMatch_Credits_REST_Controller();
+		$credits_controller->register_routes();
+
+		// Register admin payment/analytics endpoints.
+		$admin_controller = new WPMatch_Admin_Payment_REST_Controller();
+		$admin_controller->register_routes();
 	}
 
 	/**
